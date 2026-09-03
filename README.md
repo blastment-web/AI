@@ -6,11 +6,21 @@
 ## 파일 구성
 
 ```
-index.html    화면 전체 (HTML + CSS + JS 단일 파일, 외부 의존성 없음)
+index.html                화면 전체 (HTML + CSS + JS 단일 파일)
+run.sh                    백엔드 실행 (가상환경 생성부터 기동까지)
+server/
+  main.py                 FastAPI 라우트 + 정적 화면 서빙
+  bq.py                   BigQuery 쿼리 조립 · dry-run 비용 가드
+  cache.py                결과 캐시 · 레이트리미터
+  config.py               환경변수 설정
+  .env.example            설정 템플릿 (복사해서 .env 로)
+data/tree.sample.json     /api/tree 응답 계약 예시
+tests/test_sql.py         SQL 조립 검증 (GCP 없이 실행 가능)
 ```
 
-브라우저에서 `index.html`을 그대로 열면 동작합니다. 현재는 `USE_API=false` 상태라
-내장 목업(`TREE_MOCK`)으로 렌더링되며, 화면 우상단에 **MOCK** 배지가 표시됩니다.
+`index.html` 은 백엔드 없이 그대로 열어도 동작합니다. `USE_API=false` 상태에서는
+내장 목업(`TREE_MOCK`)으로 렌더링되며 화면 우상단에 **MOCK** 배지가 표시됩니다.
+백엔드가 필요한 것은 특허 검색뿐입니다.
 
 ## 화면 구성
 
@@ -69,35 +79,104 @@ index.html    화면 전체 (HTML + CSS + JS 단일 파일, 외부 의존성 없
 
 ## 백엔드 연결
 
-파이프라인이 준비되면 `index.html` 상단의 스위치 **두 줄만** 바꾸면 됩니다.
+브라우저에서 BigQuery 를 직접 부르면 서비스 계정 키가 프런트엔드로 노출됩니다.
+그래서 사이에 로컬 서버를 한 겹 둡니다. **키는 서버 프로세스 안에만 있고 브라우저로 나가지 않습니다.**
 
-```js
-const API_BASE = "";        // 같은 오리진이면 빈 문자열
-const USE_API  = false;     // true 로 변경
+```
+[HTML 화면]  ──fetch(검색어)──▶  [FastAPI 로컬 서버]  ──서비스 계정 키──▶  [BigQuery]
+ 사용자 브라우저                   키 보관 · SQL 조립 · 비용 가드            patents-public-data
+             ◀──JSON(카드 데이터)──                  ◀──조회 결과──
 ```
 
-`USE_API=true`이면 `API_BASE + "/api/tree"` 를 호출하고, 실패 시 목업으로 자동 폴백하며
-화면에 실패 사유를 표시합니다. `adaptApi()`가 백엔드의 flat node 응답을 화면 내부 구조로 변환합니다.
+### 실행
 
-**응답 스키마 요약**
-
-```jsonc
-{
-  "collected_at": "2026-08-13 09:00 KST",
-  "sources": [{ "name": "특허", "total": 4128, "new_24h": 37 }],
-  "nodes": [{
-    "l1": "전극", "l1_en": "Electrode", "l2": "믹싱",
-    "name": "무용매 PTFE 파이브릴화", "name_en": "Solvent-free PTFE fibrillation",
-    "desc": "…", "why": "…", "est_trl": 8,
-    "self":   { "status": "none", "patents": 0, "line": 0, "talks": 0, "project": "없음", "note": "…" },
-    "rivals": { "TESLA": { "status": "have" }, "CATL": { "status": "part" } },
-    "lag":    { "gap": "약 3.5년", "rival_milestone": "…", "self_state": "미착수" },
-    "evidence": [{ "type": "capex", "company": "TESLA", "date": "2026-02-27",
-                   "ref": "Texas 4680 라인 증설", "summary": "…", "url": "…", "grade": "verified" }],
-    "limit": "…"
-  }]
-}
+```bash
+cd AI
+cp server/.env.example .env      # 키 경로와 GCP_PROJECT 를 채운다
+./run.sh                         # 가상환경 생성 → 의존성 설치 → 서버 기동
 ```
+
+브라우저에서 **http://127.0.0.1:8000** 을 엽니다. 화면은 서버가 함께 서빙하므로
+같은 오리진이 되어 CORS 문제가 없습니다.
+
+`.env` 없이도 서버와 화면은 뜹니다. 특허 검색 영역만 `BQ 미설정` 배지가 뜨고,
+검색을 누르면 무엇을 설정해야 하는지 화면에 안내가 나옵니다.
+
+### GCP 준비
+
+1. GCP 콘솔에서 프로젝트를 만들고 **BigQuery API** 를 사용 설정합니다.
+2. 서비스 계정을 만들고 역할은 최소 권한으로 둡니다 —
+   `roles/bigquery.jobUser`(쿼리 실행) + `roles/bigquery.dataViewer`(조회).
+   `patents-public-data` 는 공개 데이터셋이라 별도 권한이 필요 없습니다.
+3. JSON 키를 발급받아 **저장소 밖**(예: `~/.gcp/cti-key.json`)에 둡니다.
+   저장소 안에 두더라도 `key.json` 이름은 `.gitignore` 에 걸려 있습니다.
+4. `.env` 에 경로와 프로젝트 ID를 씁니다.
+
+```
+GOOGLE_APPLICATION_CREDENTIALS=/home/me/.gcp/cti-key.json
+GCP_PROJECT=my-project-id      # 쿼리 비용이 청구될 '내' 프로젝트
+```
+
+> `GCP_PROJECT` 는 조회 대상(`patents-public-data`)이 아니라 **과금 주체**인 내 프로젝트입니다.
+
+### 엔드포인트
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET` | `/api/health` | BigQuery 연결 상태, 가드 설정값, 스냅샷 유무 |
+| `GET` | `/api/patents/search` | 특허 검색. `q` 필수, `mode`·`cpc`·`assignee`·`country`·`date_from`·`date_to`·`limit` 선택 |
+| `GET` | `/api/patents/estimate` | dry-run 견적만. **과금 없음** |
+| `GET` | `/api/tree` | `data/tree.json` 스냅샷. 없으면 503 → 화면이 목업으로 폴백 |
+| `DELETE` | `/api/cache` | 로컬 결과 캐시 비우기 |
+
+대화형 문서는 `/api/docs` 에 있습니다.
+`data/tree.sample.json` 이 `/api/tree` 응답 계약의 실제 예시입니다 —
+`data/tree.json` 으로 복사하면 화면의 `USE_API=true` 경로를 바로 시험할 수 있습니다.
+
+### 비용 가드
+
+BigQuery 는 **스캔한 바이트만큼** 과금됩니다(월 1TB 무료 구간). 특허 테이블은 수 TB 규모라
+검색어 하나로 요금이 크게 나올 수 있어, 서버가 네 겹으로 막습니다.
+
+| 가드 | 동작 |
+|------|------|
+| **컬럼 가지치기** | `제목만` 모드는 초록 컬럼을 아예 SELECT 하지 않습니다. 이 한 줄이 비용의 대부분을 좌우합니다. |
+| **dry-run 선견적** | 실행 전 스캔량을 재고, `MAX_SCAN_GB`(기본 20GB)를 넘으면 **실행하지 않고** 거절합니다. |
+| **하드 캡** | 실제 쿼리에도 `maximum_bytes_billed` 를 걸어 예측이 빗나가도 초과 과금이 나지 않습니다. |
+| **캐시 · 레이트리밋** | 같은 검색은 로컬 캐시(기본 24h)로 돌려주고, 분당 쿼리 수를 `MAX_QUERIES_PER_MIN`(기본 10)으로 제한합니다. |
+
+화면의 **비용 견적** 버튼을 먼저 누르면 실제 조회 없이 스캔 예상량만 확인할 수 있습니다.
+검색 결과 위에는 매번 `스캔 n GB / 청구 n GB` 가 표시됩니다.
+
+스캔량을 줄이는 순서: **공개연도 범위 → CPC 접두어(전지는 `H01M`) → 국가 → 제목만 모드**.
+
+### 화면에서 쓰는 법
+
+1. 기술 트리에서 노드를 고르고 상세 패널의 **이 기술로 특허 검색** 을 누르면
+   그 기술의 영문 명칭이 검색어로 채워집니다(특허 원문은 영문이라 영어가 유리합니다).
+2. **비용 견적** 으로 스캔량을 확인합니다.
+3. **검색** 을 누르면 결과가 카드로 렌더링됩니다. 카드의 `원문 ↗` 은 Google Patents 로 연결됩니다.
+
+검색어는 공백으로 나누면 **모두 포함**(AND), `"큰따옴표"` 로 묶으면 구문 검색입니다.
+
+### 보안
+
+- 서비스 계정 키는 서버 프로세스에만 있고 응답 어디에도 실리지 않습니다.
+- 클라이언트 입력은 **전량 쿼리 파라미터**로 바인딩합니다. SQL 문자열 결합이 없습니다
+  (`tests/test_sql.py` 가 사용자 문자열이 SQL 본문에 나타나지 않음을 검증합니다).
+- 기본 바인드 주소는 `127.0.0.1` 입니다. 이 서버는 **로컬 개발용**이며 외부 노출을 전제로
+  만들지 않았습니다(인증이 없습니다). 공유가 필요하면 앞단에 인증을 두십시오.
+- 오류 응답에는 예외 타입만 싣고 스택 트레이스나 키 경로를 노출하지 않습니다.
+
+### 테스트
+
+GCP 자격증명 없이 돌아갑니다.
+
+```bash
+.venv/bin/python tests/test_sql.py
+```
+
+SQL 조립, 파라미터 바인딩, 제목 모드의 초록 컬럼 배제, 한도 절삭을 검증합니다.
 
 ## 로드맵
 
@@ -108,7 +187,7 @@ const USE_API  = false;     // true 로 변경
 
 ## 남은 작업
 
-- `/api/tree` 백엔드 파이프라인 구현 후 `USE_API=true` 전환
+- `/api/tree` 수집 파이프라인 구현 후 `USE_API=true` 전환 (특허 검색은 이미 연결됨)
 - 자사 4채널(특허·라인·발표·내부과제) 값의 사내 시스템 연동 — 현재는 공정기술팀 확인값 수기 입력
 - 스냅샷 도구(`APP_VERSION` 자동 치환) 및 `versions/` 보관본 체계
 - 판정 기준선 합의 — 예: 크랙 검사의 '검출만' vs '폐루프 보정 연동'을 어디서 가를 것인가

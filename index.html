@@ -173,7 +173,7 @@ h2 small{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.
 .ev .ttl{font-size:12.5px;line-height:1.5}
 .ev .meta{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
 .limits{margin-top:12px;padding:12px 14px;background:#FBFBFC;border:1px solid var(--rule-soft);font-size:12px;line-height:1.65;color:var(--ink2)}
-.lin{border:1px solid var(--rule-soft)}
+.lin{border:1px solid var(--rule-soft);overflow-x:auto}
 .lin table{min-width:0;width:100%}
 .lin th{font-size:8.5px;padding:8px 10px;letter-spacing:.1em}
 .lin td{padding:9px 10px;font-size:11.5px;vertical-align:top;line-height:1.45}
@@ -215,6 +215,40 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .vchip{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;
   padding:2px 6px;margin-right:8px;background:var(--ink);color:#fff}
 .vchip.frozen{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+/* ── 특허 원문 검색 (BigQuery) ── */
+.bqstate{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;padding:3px 7px;text-transform:uppercase}
+.bqstate.on{background:#EAF3EE;color:#1B5E43;box-shadow:inset 0 0 0 1px #A9CDBA}
+.bqstate.off{background:var(--mark-soft);color:var(--mark);box-shadow:inset 0 0 0 1px var(--mark)}
+.bqstate.wait{background:#EDF0F1;color:var(--muted)}
+.searchbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;border:1px solid var(--rule);background:var(--panel);padding:12px 14px}
+.searchbar input{border:1px solid var(--rule);background:#fff;padding:7px 10px;font-size:12px;font-family:inherit}
+.searchbar input#pq{flex:1 1 300px;min-width:200px}
+.searchbar input.mini{width:104px;font-family:var(--mono);font-size:11px}
+.searchbar input.yr{width:64px;font-family:var(--mono);font-size:11px}
+.searchbar .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.searchbar .btn[disabled]{opacity:.45;cursor:progress}
+.pmeta{margin-top:10px;padding:10px 13px;border:1px solid var(--rule-soft);background:#F7F8F9;font-size:12px;line-height:1.65;display:none}
+.pmeta.on{display:block}
+.pmeta b{font-family:var(--mono);font-weight:700}
+.pmeta.bad{background:var(--mark-soft);border-color:var(--mark)}
+.pmeta code{font-family:var(--mono);font-size:11px;background:#fff;padding:1px 5px;box-shadow:inset 0 0 0 1px var(--rule)}
+.pmeta .hint{display:block;margin-top:6px;color:var(--muted);font-size:11.5px}
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:14px}
+.pcards:empty{display:none;border:0}
+.pcard{background:var(--panel);padding:13px 15px 14px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.pc-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pc-no{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:-.01em}
+.pc-flag{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;padding:2px 5px;white-space:nowrap}
+.pc-flag.granted{background:var(--graphite);color:#fff}
+.pc-flag.pub{background:#EDF0F1;color:var(--muted)}
+.pc-t{margin:0;font-size:13px;font-weight:700;line-height:1.4;letter-spacing:-.01em}
+.pc-a{margin:0;font-size:11.5px;line-height:1.55;color:var(--ink2)}
+.pc-asg{font-size:11px;color:var(--ink);font-weight:600;line-height:1.4}
+.pc-cpc{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:.02em;line-height:1.4}
+.pc-f{margin-top:auto;padding-top:9px;border-top:1px solid var(--rule-soft);display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+.pc-f a{color:var(--mark);text-decoration:none;font-weight:700}
+.pc-f a:hover{text-decoration:underline}
+.detact{margin-top:12px}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 @media (max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.wrap{padding:0 16px 56px}
   .verdict3{grid-template-columns:1fr}.selfgrid{grid-template-columns:repeat(2,1fr)}.rung{flex-wrap:wrap}.rung .desc{flex:1 1 100%}}
@@ -287,6 +321,31 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
       <th style="width:96px">시간 격차</th><th style="width:130px">시급도</th></tr></thead>
     <tbody id="tbody"></tbody>
   </table></div>
+</section>
+
+<section class="rail-block" id="patentSec">
+  <div class="block-head">
+    <h2>특허 원문 검색<small>BigQuery · patents-public-data</small></h2>
+    <div class="ctrl"><span class="bqstate wait" id="bqState">확인중</span></div>
+  </div>
+  <div class="searchbar">
+    <input type="search" id="pq" placeholder='검색어 — 예: dry electrode  또는  "solvent free" PTFE' aria-label="특허 검색어">
+    <div class="seg" id="pmode">
+      <button aria-pressed="true" data-m="title">제목만 · 저비용</button>
+      <button aria-pressed="false" data-m="full">초록 포함 · 고비용</button>
+    </div>
+    <input class="mini" id="pcpc" placeholder="CPC H01M" aria-label="CPC 접두어">
+    <input class="mini" id="pasg" placeholder="출원인" aria-label="출원인">
+    <input class="mini" id="pcc" placeholder="국가 US,KR" aria-label="국가코드">
+    <span class="lbl">공개연도</span>
+    <input class="yr" id="pfrom" placeholder="2020" inputmode="numeric" aria-label="시작 연도">
+    <input class="yr" id="pto" placeholder="2026" inputmode="numeric" aria-label="종료 연도">
+    <input class="yr" id="plimit" value="20" inputmode="numeric" aria-label="결과 수">
+    <button class="btn ghost" id="pest">비용 견적</button>
+    <button class="btn" id="pgo">검색</button>
+  </div>
+  <div class="pmeta" id="pmeta"></div>
+  <div class="pcards" id="pcards"></div>
 </section>
 
 <footer><span><span id="ver" class="vchip"></span> LG ENERGY SOLUTION · 기술전략 / 내부 검토용 프로토타입</span><span id="foot"></span></footer>
@@ -939,6 +998,7 @@ function renderDetail(){
   $("#detail").innerHTML=`
   <div class="crumb">${it.stage} / ${it.grp}</div>
   <h3>${esc(it.n)}</h3><div class="en2">${esc(it.en)}</div>
+  <div class="detact"><button class="btn ghost" id="searchThis">이 기술로 특허 검색 ↓</button></div>
 
   <div class="explain">
     <div class="lbl">이 기술은</div>
@@ -989,6 +1049,7 @@ function renderDetail(){
       ${new Set(it.ev.map(e=>e.t)).size<2&&it.ev.length?`<li>단일 소스 근거입니다. 다른 소스에서 교차 확인되기 전까지 TRL 추정은 상한 7로 봅니다.</li>`:""}
     </ul>
   </div>`;
+  const sb=$("#searchThis"); if(sb) sb.onclick=()=>seedPatentSearch(it);
 }
 function renderTable(){
   let rows=filter==="gap"?GAPS:filter==="part"?PARTS:[...GAPS,...PARTS,...SEQ.filter(i=>i.status==="ok")];
@@ -1027,6 +1088,134 @@ $("#csv").onclick=()=>{
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
   a.download="tech_gap_backlog_20260813.csv";a.click();
 };
+/* ============ 특허 원문 검색 (백엔드 /api/patents/*) =====================
+   브라우저는 검색어만 보낸다. 서비스 계정 키와 SQL 은 서버 쪽에만 있다.
+   비용이 붙는 호출이므로 (1) 견적 먼저 (2) 서버가 상한 초과 시 실행 거절
+   (3) 같은 검색은 서버 캐시에서 되돌려준다.
+======================================================================= */
+const PS={mode:"title", busy:false};
+
+function pMeta(html,bad){
+  const el=$("#pmeta"); if(!el)return;
+  el.className="pmeta on"+(bad?" bad":""); el.innerHTML=html;
+}
+function pBusy(on){
+  PS.busy=on;
+  ["#pgo","#pest"].forEach(id=>{const b=$(id); if(b)b.disabled=on;});
+}
+function pQS(){
+  const u=new URLSearchParams();
+  u.set("q",($("#pq").value||"").trim());
+  u.set("mode",PS.mode);
+  const put=(id,key,tf)=>{const v=($(id).value||"").trim(); if(v)u.set(key,tf?tf(v):v);};
+  put("#pcpc","cpc"); put("#pasg","assignee"); put("#pcc","country");
+  const yr=(id,key,suffix)=>{const v=($(id).value||"").trim();
+    if(/^\d{4}$/.test(v))u.set(key,v+suffix);};
+  yr("#pfrom","date_from","0101"); yr("#pto","date_to","1231");
+  const lim=parseInt($("#plimit").value,10);
+  u.set("limit",String(Number.isFinite(lim)?Math.max(1,Math.min(lim,100)):20));
+  return u.toString();
+}
+async function pFetch(path){
+  let res;
+  try{ res=await fetch(API_BASE+path,{headers:{Accept:"application/json"}}); }
+  catch(e){ throw Object.assign(new Error("백엔드에 연결하지 못했습니다."),{code:"offline"}); }
+  let j={};
+  try{ j=await res.json(); }
+  catch(e){ throw Object.assign(new Error("응답을 해석할 수 없습니다 (HTTP "+res.status+")"),{code:"bad_json"}); }
+  if(!res.ok) throw Object.assign(new Error(j.message||("HTTP "+res.status)),{code:j.error||"http_"+res.status,detail:j});
+  return j;
+}
+function pErr(e){
+  if(e.code==="offline")
+    return pMeta("백엔드에 연결하지 못했습니다. 터미널에서 서버를 먼저 띄우십시오."+
+      "<span class='hint'><code>cd AI &amp;&amp; ./run.sh</code> 실행 후 <code>http://127.0.0.1:8000</code> 로 접속</span>",1);
+  if(e.code==="bigquery_unconfigured")
+    return pMeta("서버는 떠 있으나 BigQuery 자격증명이 없습니다. — "+esc(e.message)+
+      "<span class='hint'><code>server/.env.example</code> 를 <code>.env</code> 로 복사해 키 경로와 프로젝트 ID를 채우십시오.</span>",1);
+  if(e.code==="scan_too_large")
+    return pMeta(esc(e.message)+"<span class='hint'>기간(공개연도)·국가·CPC 를 좁히거나 '제목만' 모드로 바꾸면 스캔량이 크게 줄어듭니다.</span>",1);
+  if(e.code==="tree_snapshot_missing") return;
+  pMeta(esc(e.message||"알 수 없는 오류"),1);
+}
+function pCard(r){
+  return `<article class="pcard">
+    <div class="pc-h"><span class="pc-no">${esc(r.publication_number)}</span>
+      <span class="pc-flag ${r.granted?"granted":"pub"}">${r.granted?"등록":"공개"}</span></div>
+    <h4 class="pc-t">${esc(r.title||"(제목 없음)")}</h4>
+    ${r.abstract?`<p class="pc-a">${esc(r.abstract)}…</p>`:""}
+    ${r.assignees?`<div class="pc-asg">${esc(r.assignees)}</div>`:""}
+    ${r.cpc?`<div class="pc-cpc">${esc(r.cpc)}</div>`:""}
+    <div class="pc-f"><span>${r.granted?"등록":"공개"} ${esc(r.publication_date||"—")}${r.filing_date?" · 출원 "+esc(r.filing_date):""}</span>
+      ${r.url?`<a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">원문 ↗</a>`:""}</div>
+  </article>`;
+}
+async function pSearch(){
+  if(PS.busy)return;
+  const q=($("#pq").value||"").trim();
+  if(!q){ pMeta("검색어를 입력하십시오.",1); return; }
+  pBusy(1); pMeta("조회 중…"); $("#pcards").innerHTML="";
+  try{
+    const j=await pFetch("/api/patents/search?"+pQS());
+    $("#pcards").innerHTML=j.results.map(pCard).join("");
+    const c=j.cost||{};
+    pMeta(`<b>${j.count}</b>건 · 검색어 <b>${esc((j.terms||[]).join(" + "))}</b> · `+
+      `${j.mode==="full"?"초록 포함":"제목만"} 모드`+
+      (j.cached?" · <b>로컬 캐시</b> (BigQuery 재조회 없음)"
+              :` · 스캔 <b>${c.estimated_gb}GB</b> / 청구 <b>${c.billed_gb}GB</b>`+
+                (c.bq_cache_hit?" (BigQuery 캐시)":""))+
+      (j.count===0?"<span class='hint'>결과가 없습니다. 특허 제목은 영문이므로 영어 검색어가 유리합니다.</span>":""));
+  }catch(e){ pErr(e); }
+  finally{ pBusy(0); }
+}
+async function pEstimate(){
+  if(PS.busy)return;
+  const q=($("#pq").value||"").trim();
+  if(!q){ pMeta("검색어를 입력하십시오.",1); return; }
+  pBusy(1); pMeta("견적 계산 중…");
+  try{
+    const j=await pFetch("/api/patents/estimate?"+pQS());
+    pMeta(`스캔 예상 <b>${j.estimated_gb}GB</b> / 상한 <b>${j.cap_gb}GB</b> — `+
+      (j.within_cap?"실행 가능합니다.":"<b>상한 초과</b>로 실행되지 않습니다.")+
+      "<span class='hint'>dry-run 이라 이 견적 자체에는 과금되지 않습니다. "+
+      "BigQuery 는 스캔한 바이트만큼 과금되며 월 1TB 무료 구간이 있습니다.</span>", !j.within_cap);
+  }catch(e){ pErr(e); }
+  finally{ pBusy(0); }
+}
+function seedPatentSearch(it){
+  $("#pq").value = it.en || it.n;
+  $("#patentSec").scrollIntoView({behavior:"smooth",block:"start"});
+  $("#pq").focus();
+  pMeta(`<b>${esc(it.n)}</b> 의 영문 명칭을 검색어로 넣었습니다. `+
+    "검색을 누르면 BigQuery 를 조회합니다."+
+    "<span class='hint'>비용이 걱정되면 먼저 '비용 견적'으로 스캔량을 확인하십시오. "+
+    "CPC 에 <code>H01M</code>(전지) 을 넣으면 스캔량과 노이즈가 함께 줄어듭니다.</span>");
+}
+async function pHealth(){
+  const el=$("#bqState"); if(!el)return;
+  try{
+    const j=await pFetch("/api/health");
+    if(j.bigquery==="ready"){ el.className="bqstate on"; el.textContent="BQ 연결됨"; }
+    else{ el.className="bqstate off"; el.textContent="BQ 미설정";
+          el.title=j.reason||""; }
+  }catch(e){ el.className="bqstate off"; el.textContent="서버 꺼짐";
+             el.title="./run.sh 로 백엔드를 실행하십시오."; }
+}
+function wirePatentSearch(){
+  if(!$("#patentSec"))return;
+  $("#pgo").onclick=pSearch;
+  $("#pest").onclick=pEstimate;
+  $("#pq").addEventListener("keydown",e=>{if(e.key==="Enter")pSearch();});
+  $("#pmode").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    PS.mode=b.dataset.m;
+    $("#pmode").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    if(PS.mode==="full")pMeta("초록까지 스캔합니다. 같은 조건에서 제목만 모드보다 스캔량이 크게 늘어납니다."+
+      "<span class='hint'>먼저 '비용 견적'으로 확인하는 것을 권합니다.</span>");
+  });
+  pHealth();
+}
+wirePatentSearch();
+
 boot();
 </script>
 </body>

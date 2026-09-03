@@ -1,0 +1,25 @@
+# ── 절대 커밋 금지: 서비스 계정 키 ──────────────────────────────
+key.json
+*-key.json
+*.pem
+.env
+.env.local
+credentials/
+
+# 로컬 캐시 · 스냅샷 산출물
+.cache/
+data/tree.json
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# OS / 편집기
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/

@@ -1,0 +1,64 @@
+{
+  "collected_at": "2026-08-13 09:00 KST",
+  "sources": [
+    { "name": "특허", "total": 4128, "new_24h": 37 },
+    { "name": "설비투자", "total": 312, "new_24h": 5 },
+    { "name": "컨퍼런스", "total": 486, "new_24h": 18 }
+  ],
+  "nodes": [
+    {
+      "l1": "전극", "l1_en": "Electrode", "l2": "믹싱",
+      "name": "무용매 PTFE 파이브릴화",
+      "name_en": "Solvent-free PTFE fibrillation",
+      "desc": "용매 없이 PTFE 바인더에 전단력을 가해 섬유 형태로 늘린 뒤 활물질 분말을 그물처럼 붙잡게 하는 건식 전극 전처리 공정.",
+      "why": "건식 전극 전체 공정의 성패가 이 한 단계에서 갈린다.",
+      "est_trl": 8,
+      "self": { "status": "none", "patents": 0, "line": 0, "talks": 0,
+                "project": "없음", "note": "4개 채널 모두 0" },
+      "rivals": { "TESLA": { "status": "have" }, "SAMSUNG SDI": { "status": "have" },
+                  "CATL": { "status": "part" } },
+      "lag": { "gap": "약 3.5년", "rival_milestone": "TESLA 2022-Q3 파일럿 → 2024-Q4 양산 음극",
+               "self_state": "미착수" },
+      "evidence": [
+        { "type": "capex", "company": "TESLA", "date": "2026-02-27",
+          "ref": "Texas 4680 라인 증설", "summary": "건식 음극 전용 라인 추가 투자",
+          "url": "https://www.sec.gov/", "grade": "verified" },
+        { "type": "patent", "company": "TESLA", "date": "2026-03-18",
+          "ref": "US 2026/0098231 A1", "summary": "PTFE 전단 파이브릴화 후 분말 정전 부착",
+          "url": "https://patents.google.com/", "grade": "weak" }
+      ],
+      "limit": "TESLA 양산은 음극 한정. 양극 적용 여부는 확인되지 않음."
+    },
+    {
+      "l1": "전극", "l1_en": "Electrode", "l2": "믹싱",
+      "name": "CNT 도전재 고분산",
+      "name_en": "CNT conductive dispersion",
+      "desc": "뭉치기 쉬운 탄소나노튜브를 슬러리 안에 고르게 풀어내는 분산 공정.",
+      "why": "도전재를 줄인 만큼 활물질을 더 넣을 수 있어 에너지밀도에 직접 기여한다.",
+      "est_trl": 9,
+      "self": { "status": "have", "patents": 22, "line": "양산 전 라인", "talks": 5,
+                "project": "완료(2022)", "note": "업계 선도 수준" },
+      "rivals": { "CATL": { "status": "have" }, "BYD": { "status": "have" } },
+      "evidence": [],
+      "limit": ""
+    },
+    {
+      "l1": "조립", "l1_en": "Assembly", "l2": "DNC",
+      "name": "스택 정렬 실시간 비전 보정",
+      "name_en": "Closed-loop stack alignment",
+      "desc": "적층 중 매 장의 전극 위치 편차를 측정해 다음 장 투입 위치를 즉시 되돌리는 폐루프 정렬.",
+      "why": "적층 정렬 편차는 국부 리튬 석출과 내부 단락의 직접 원인이다.",
+      "est_trl": 8,
+      "self": { "status": "none", "patents": 2, "line": "사후 검사만", "talks": 0,
+                "project": "기초검토", "note": "투입 위치 되먹임 없음" },
+      "rivals": { "CATL": { "status": "have" }, "SAMSUNG SDI": { "status": "have" } },
+      "lag": { "gap": "약 2년", "rival_milestone": "CATL 정렬 편차 ±0.1mm 라인 공개",
+               "self_state": "사후 검사" },
+      "evidence": [
+        { "type": "conf", "company": "CATL", "date": "2026-06-11", "ref": "CIBF 2026",
+          "summary": "폐루프 적층 라인 기술세션 공개", "url": "", "grade": "strong" }
+      ],
+      "limit": "전 라인 실적인지 대표 라인 값인지 불명."
+    }
+  ]
+}
