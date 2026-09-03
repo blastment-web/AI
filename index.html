@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 기반 경쟁기술 인텔리전스 · 배터리 제조</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{
+  --paper:#EFF1F2; --panel:#FFFFFF; --ink:#14181C; --ink2:#414A52; --muted:#79838C;
+  --rule:#D6DBDF; --rule-soft:#E6E9EB; --graphite:#262D34;
+  --mark:#E5007D; --mark-soft:#FDE8F3; --amber:#B9821A; --amber-soft:#FBF2DF; --foil:#DCE1E4;
+  --g4:#123D31; --g3:#2C6B52; --g2:#6B6A3A; --g1:#8A929A;
+  --sans:"Pretendard Variable",Pretendard,"Segoe UI","Malgun Gothic","맑은 고딕",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  --mono:"JetBrains Mono","Cascadia Mono",Consolas,D2Coding,ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1480px;margin:0 auto;padding:0 28px 72px}
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+
+.masthead{border-bottom:1px solid var(--ink);padding:26px 0 18px;display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap}
+h1{font-size:clamp(26px,3.4vw,42px);font-weight:800;letter-spacing:-.035em;line-height:1.05;margin:6px 0 0}
+h1 .en{display:block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.22em;color:var(--muted);margin-top:10px}
+.deck{max-width:520px;color:var(--ink2);font-size:13px;margin:12px 0 0}
+.sources{display:flex;border:1px solid var(--rule);background:var(--panel);flex-wrap:wrap}
+.src{padding:9px 13px;border-right:1px solid var(--rule-soft);min-width:96px}
+.src:last-child{border-right:0}
+.src b{display:block;font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:-.02em}
+.src span{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.src.flag b{font-size:12px;letter-spacing:.1em}
+.src.flag{background:#EAF3EE;border-right:1px solid var(--rule)}
+.src.flag.warn{background:var(--mark-soft)}
+.src.flag.warn b{color:var(--mark)}
+.src.pending{background:repeating-linear-gradient(135deg,#fff,#fff 6px,#F6F7F8 6px,#F6F7F8 12px)}
+.src.pending b{color:var(--muted);font-weight:500}
+.stamp{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px;text-align:right;letter-spacing:.04em}
+
+.tabs{display:flex;border-bottom:1px solid var(--rule)}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:14px 18px 12px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab[disabled]{cursor:not-allowed;opacity:.55}
+.tab .ph{font-family:var(--mono);font-size:9px;letter-spacing:.14em;margin-left:8px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:28px}
+.kpi{background:var(--panel);padding:16px 18px 18px}
+.kpi .v{font-family:var(--mono);font-size:34px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-top:10px}
+.kpi.alert .v{color:var(--mark)}
+.kpi .sub{font-size:11px;color:var(--muted);margin-top:8px}
+
+.rail-block{margin-top:36px}
+.block-head{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:12px}
+h2{font-size:16px;font-weight:700;letter-spacing:-.02em;margin:0}
+h2 small{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.14em;color:var(--muted);margin-left:10px;text-transform:uppercase}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--ink2);align-items:center}
+.legend i{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px}
+.sw-have{background:var(--graphite)}
+.sw-part{background:var(--amber-soft);border:1px solid var(--amber)}
+.sw-gap{background:var(--panel);border:1.5px solid var(--mark)}
+.web{border:1px solid var(--rule);background:var(--panel);overflow-x:auto}
+.web-edge{height:10px;background:var(--foil);background-image:repeating-linear-gradient(90deg,transparent,transparent 14px,#C6CCD0 14px,#C6CCD0 15px)}
+.rail{display:flex;min-width:940px}
+.stage{border-right:1px solid var(--rule-soft);padding:14px 12px 16px;flex:1 1 0}
+.stage:last-child{border-right:0}
+.stage-h{display:flex;align-items:baseline;justify-content:space-between}
+.stage-h b{font-size:12.5px;font-weight:700}
+.stage-h em{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--mark);font-weight:700}
+.stage-h em.zero{color:var(--muted);font-weight:400}
+.stage-en{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin:2px 0 10px}
+.grp{margin-bottom:11px}
+.grp-n{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--ink2);margin-bottom:5px;text-transform:uppercase}
+.cells{display:flex;flex-wrap:wrap;gap:4px}
+.cell{width:17px;height:17px;border:0;padding:0;cursor:pointer;position:relative;background:var(--graphite);transition:transform .12s ease}
+.cell:hover{transform:scale(1.28);z-index:3}
+.cell.part{background:var(--amber-soft);box-shadow:inset 0 0 0 1.5px var(--amber)}
+.cell.gap{background:#fff;box-shadow:inset 0 0 0 1.5px var(--mark)}
+.cell.gap::after{content:"";position:absolute;inset:5px;background:var(--mark)}
+.cell.sel{outline:2px solid var(--ink);outline-offset:2px}
+.cell.dim{opacity:.22}
+
+.grid{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(460px,1.6fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:34px}
+.pane{background:var(--panel);min-width:0}
+.pane-h{padding:13px 18px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.pane-b{padding:6px 8px 18px;max-height:900px;overflow:auto}
+.node{border:0;background:none;width:100%;text-align:left;cursor:pointer;padding:8px 10px;display:flex;align-items:center;gap:8px}
+.node:hover{background:#F4F6F7}
+.node .tw{font-family:var(--mono);font-size:10px;color:var(--muted);width:9px}
+.lv1{font-weight:700;font-size:13.5px;border-top:1px solid var(--rule-soft)}
+.lv1:first-child{border-top:0}
+.lv2{padding-left:26px;font-size:12.5px;color:var(--ink2);font-weight:600}
+.lv3{padding-left:46px;font-size:12.5px}
+.node .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{font-family:var(--mono);font-size:9.5px;font-weight:700;padding:2px 5px;white-space:nowrap}
+.b-gap{background:var(--mark);color:#fff}
+.b-part{background:var(--amber-soft);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
+.b-cnt{background:#EDF0F1;color:var(--muted)}
+.dot{width:8px;height:8px;flex:0 0 8px;background:var(--graphite)}
+.dot.part{background:var(--amber-soft);box-shadow:inset 0 0 0 1.5px var(--amber)}
+.dot.gap{background:var(--mark)}
+.node.active{background:#F0F2F3;box-shadow:inset 3px 0 0 var(--ink)}
+
+.det{padding:22px 24px 30px}
+.crumb{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.det h3{font-size:21px;font-weight:800;letter-spacing:-.03em;margin:8px 0 4px;line-height:1.22}
+.det .en2{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+.explain{margin-top:18px;padding:15px 17px;background:#F7F8F9;border:1px solid var(--rule-soft)}
+.explain .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.explain p{margin:0;font-size:13px;line-height:1.65;color:var(--ink)}
+.explain .why{margin-top:11px;padding-top:11px;border-top:1px dashed var(--rule);font-size:12.5px;color:var(--ink2);line-height:1.6}
+.explain .why b{font-weight:700;color:var(--ink)}
+
+.verdict3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule-soft);border:1px solid var(--rule-soft);margin-top:18px}
+.v3{background:var(--panel);padding:13px 14px 15px}
+.v3 .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.v3 .m{font-size:16px;font-weight:800;letter-spacing:-.02em;margin-top:8px;line-height:1.2}
+.v3 .n{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45}
+.v3.bad{background:var(--mark-soft)} .v3.bad .m{color:var(--mark)}
+.v3.mid{background:var(--amber-soft)} .v3.mid .m{color:var(--amber)}
+
+.sec-t{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.sec-t span{text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:11px}
+
+.matrix{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--rule-soft);border:1px solid var(--rule-soft)}
+.mcol{background:var(--panel);padding:9px 5px 10px;text-align:center}
+.mcol .co{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;color:var(--muted);height:20px;display:flex;align-items:center;justify-content:center}
+.mcol .st{height:22px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700}
+.st.have{background:var(--graphite);color:#fff}
+.st.part{background:var(--amber-soft);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
+.st.none{background:#fff;color:#C3C9CD;box-shadow:inset 0 0 0 1px var(--rule)}
+.mcol .gr{font-family:var(--mono);font-size:8px;letter-spacing:.04em;color:var(--muted);margin-top:5px;line-height:1.3}
+.mcol.self{background:#F7F8F9}
+.mcol.self .co{color:var(--ink);font-weight:700}
+.st.none.self{box-shadow:inset 0 0 0 1.5px var(--mark);color:var(--mark)}
+
+.ladder{border:1px solid var(--rule-soft)}
+.rung{display:flex;gap:12px;padding:10px 13px;border-bottom:1px solid var(--rule-soft);align-items:flex-start}
+.rung:last-child{border-bottom:0}
+.rung.off{background:#FAFBFB}
+.rung .lv{flex:0 0 96px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;padding-top:2px}
+.rung .lv i{display:inline-block;width:7px;height:7px;margin-right:6px;vertical-align:1px}
+.rung.off .lv{color:#B6BDC3;font-weight:500}
+.rung .desc{flex:0 0 150px;font-size:11px;color:var(--muted);line-height:1.45;padding-top:1px}
+.rung .hits{flex:1;min-width:0;font-size:12px;line-height:1.6}
+.rung .hits .who{font-family:var(--mono);font-size:10px;font-weight:700;margin-right:6px}
+.rung.off .hits{color:#B6BDC3;font-size:11.5px}
+.rule-note{margin-top:10px;padding:10px 12px;background:#F7F8F9;border-left:3px solid var(--graphite);font-size:12px;line-height:1.6}
+.rule-note b{font-weight:700}
+
+.selfgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule-soft);border:1px solid var(--rule-soft)}
+.sg{background:var(--panel);padding:11px 12px 13px}
+.sg .k{font-size:11px;color:var(--muted)}
+.sg .v{font-family:var(--mono);font-size:20px;font-weight:700;margin-top:6px;letter-spacing:-.03em}
+.sg.zero .v{color:var(--mark)}
+.selfnote{margin-top:10px;font-size:12px;line-height:1.6;color:var(--ink2);padding:10px 12px;border:1px dashed var(--rule)}
+.selfnote b{color:var(--ink)}
+
+.ev{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--rule-soft);align-items:flex-start}
+.ev:last-child{border-bottom:0}
+.tag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;padding:3px 6px;flex:0 0 auto;margin-top:1px}
+.t-pat{background:#E7EBEE;color:#2E3940}
+.t-cap{background:#E4EFE9;color:#256B4A}
+.t-conf{background:#EDE8F3;color:#5B4A80}
+.gbadge{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;padding:2px 5px;color:#fff;flex:0 0 auto;margin-top:2px}
+.ev .body{min-width:0}
+.ev .ttl{font-size:12.5px;line-height:1.5}
+.ev .meta{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.limits{margin-top:12px;padding:12px 14px;background:#FBFBFC;border:1px solid var(--rule-soft);font-size:12px;line-height:1.65;color:var(--ink2)}
+.lin{border:1px solid var(--rule-soft)}
+.lin table{min-width:0;width:100%}
+.lin th{font-size:8.5px;padding:8px 10px;letter-spacing:.1em}
+.lin td{padding:9px 10px;font-size:11.5px;vertical-align:top;line-height:1.45}
+.lin td.arrow{color:#C3C9CD;padding:9px 2px;text-align:center;font-family:var(--mono)}
+.okind{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;padding:2px 5px;white-space:nowrap}
+.k-api{background:#E4EFE9;color:#1B5E43}
+.k-parse{background:#F3EDE4;color:#7A5A28}
+.linsum{margin-top:10px;padding:10px 12px;background:#F7F8F9;border-left:3px solid var(--graphite);font-size:12px;line-height:1.6}
+.limits li{margin-bottom:5px}
+.limits ul{margin:6px 0 0;padding-left:17px}
+
+.tbl-wrap{border:1px solid var(--rule);background:var(--panel);margin-top:34px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:980px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule);font-weight:500;white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--rule-soft);font-size:12.5px}
+tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:#F6F7F8}
+.rank{font-family:var(--mono);font-weight:700;color:var(--muted)}
+.chips{display:flex;gap:3px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 4px;background:var(--graphite);color:#fff}
+.chip.p{background:var(--amber-soft);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
+.score{display:flex;align-items:center;gap:8px}
+.score-bar{width:64px;height:5px;background:#EDF0F1;position:relative;flex:0 0 64px}
+.score-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--mark)}
+.score b{font-family:var(--mono);font-size:11px}
+
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--rule)}
+.seg button{background:#fff;border:0;border-right:1px solid var(--rule);padding:6px 11px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.rivalsel{display:flex;gap:4px;flex-wrap:wrap}
+.rivalsel button{border:1px solid var(--rule);background:#fff;padding:5px 8px;font-family:var(--mono);font-size:9.5px;font-weight:700;cursor:pointer;color:var(--muted)}
+.rivalsel button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.btn{border:1px solid var(--ink);background:var(--ink);color:#fff;padding:7px 13px;font-size:11.5px;font-weight:600;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--ink)}
+input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px;font-size:12px;width:170px;font-family:inherit}
+.vchip{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;
+  padding:2px 6px;margin-right:8px;background:var(--ink);color:#fff}
+.vchip.frozen{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+@media (max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.wrap{padding:0 16px 56px}
+  .verdict3{grid-template-columns:1fr}.selfgrid{grid-template-columns:repeat(2,1fr)}.rung{flex-wrap:wrap}.rung .desc{flex:1 1 100%}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div>
+    <div class="eyebrow">Competitive Technology Intelligence · Battery Manufacturing</div>
+    <h1>AI 기반 경쟁기술 인텔리전스<span class="en">Patents · Capex · Conferences → Technology Gap Radar</span></h1>
+    <p class="deck">경쟁사 특허·설비투자·컨퍼런스 발표를 상시 수집·분석해, 공정별 기술 트리 위에서 <b>자사에 없는 기술</b>을 근거와 함께 매일 드러냅니다.</p>
+  </div>
+  <div>
+    <div class="sources" id="sources"></div>
+    <div class="stamp" id="stamp"></div>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab" role="tab" aria-selected="true">GAP 진단<span class="ph">PHASE 1</span></button>
+  <button class="tab" role="tab" aria-selected="false" disabled>로드맵 대조 · TRL 격차<span class="ph">PHASE 2</span></button>
+</nav>
+
+<section class="kpis" id="kpis"></section>
+
+<section class="rail-block">
+  <div class="block-head">
+    <h2>공정 레인 GAP 맵<small>Process Lane · 1 cell = 1 세부기술</small></h2>
+    <div class="legend">
+      <span><i class="sw-have"></i>자사 보유</span>
+      <span><i class="sw-part"></i>일부·검토 단계</span>
+      <span><i class="sw-gap"></i>미보유 (경쟁사 보유)</span>
+    </div>
+  </div>
+  <div class="web"><div class="web-edge"></div><div class="rail" id="rail"></div><div class="web-edge"></div></div>
+</section>
+
+<section class="grid">
+  <div class="pane">
+    <div class="pane-h"><h2>기술 트리<small id="treeCount"></small></h2>
+      <div class="ctrl"><input type="search" id="q" placeholder="기술 검색" aria-label="기술 검색"></div></div>
+    <div class="pane-b" id="tree"></div>
+  </div>
+  <div class="pane">
+    <div class="pane-h"><h2>기술 상세<small>What it is · Why it matters · Evidence</small></h2>
+      <div class="ctrl"><button class="btn ghost" id="prevBtn">◀</button><button class="btn ghost" id="nextBtn">▶</button></div></div>
+    <div id="detail" class="det"></div>
+  </div>
+</section>
+
+<section>
+  <div class="block-head" style="margin-top:34px">
+    <h2>미보유 기술 우선순위<small>Gap Backlog</small></h2>
+    <div class="ctrl">
+      <div class="seg" id="statusSeg">
+        <button aria-pressed="true" data-f="gap">미보유</button>
+        <button aria-pressed="false" data-f="part">일부</button>
+        <button aria-pressed="false" data-f="all">전체</button>
+      </div>
+      <div class="rivalsel" id="rivalSel"></div>
+      <button class="btn" id="csv">CSV 내려받기</button>
+    </div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th style="width:40px">#</th><th style="width:140px">공정</th><th>세부기술</th>
+      <th style="width:110px">최고 근거</th><th style="width:180px">경쟁사 보유</th>
+      <th style="width:96px">시간 격차</th><th style="width:130px">시급도</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table></div>
+</section>
+
+<footer><span><span id="ver" class="vchip"></span> LG ENERGY SOLUTION · 기술전략 / 내부 검토용 프로토타입</span><span id="foot"></span></footer>
+</div>
+
+<script>
+/* ============ 근거 등급 정의 ============ */
+const GRADE={
+ verified:{r:4,l:"VERIFIED",c:"var(--g4)",d:"양산 라인 가동이 1차 출처로 확인됨"},
+ strong  :{r:3,l:"STRONG",  c:"var(--g3)",d:"파일럿 라인 신설·착공 또는 양산 일정 공식 언급"},
+ medium  :{r:2,l:"MEDIUM",  c:"var(--g2)",d:"등록특허의 구체적 공정 조건 또는 기술세션 발표"},
+ weak    :{r:1,l:"WEAK",    c:"var(--g1)",d:"공개특허(출원) 또는 포스터·패널 언급"}
+};
+/* ============ 버전 ============ */
+const APP_VERSION = "v2-dev";          // 스냅샷 시 pipeline/tools/snapshot.py 가 자동으로 바꿈
+const APP_BUILT   = "2026-08-20";
+const APP_FROZEN  = false;         // versions/ 에 보관된 사본은 true
+
+const SELF="LGES";
+const RIVALS=["CATL","BYD","SAMSUNG SDI","SK ON","TESLA","PANASONIC"];
+const SHORT={"CATL":"CATL","BYD":"BYD","SAMSUNG SDI":"SDI","SK ON":"SKON","TESLA":"TSLA","PANASONIC":"PANA"};
+
+/* ============ 데이터 (프로토타입 목업 — /api/tree 로 대체) ============
+ d  : 기술 설명   w : 왜 중요한가
+ s  : 자사 확인 4채널 {pat 특허, line 라인, talk 발표, prj 내부과제, note}
+ lag: {t 격차, r 경쟁사 이정표, m 자사 현재}
+ ev : {t 소스, w 기업, d 일자, s 출처, x 내용, g 등급}
+ lim: 판정 한계
+=================================================================== */
+const TREE_MOCK=[
+{id:"E",n:"전극",en:"Electrode",g:[
+{id:"E1",n:"믹싱",items:[
+ {n:"고형분 상향 슬러리 (≥72%)",en:"High solid-content slurry",own:"have",r:["CATL","SK ON"],trl:8,
+  d:"슬러리의 용매 비율을 낮춰 고형분을 높이는 배합·분산 공정. 같은 두께를 코팅해도 증발시킬 용매가 적어 건조로 부하와 에너지 소모를 함께 낮추는 기술이다.",
+  w:"건조 에너지가 전극 공정 원가에서 가장 큰 덩어리다. 고형분 1%p가 라인 처리량으로 곧장 이어진다.",
+  s:{pat:14,line:"양산 전 라인 적용",talk:3,prj:"완료(2023)",note:"국내 2개 사업장 전 라인 적용, 등록특허 14건 보유"}},
+ {n:"연속식 믹서 (Planetary→CTM)",en:"Continuous twin-screw mixing",own:"part",r:["CATL","PANASONIC"],trl:7,
+  d:"배치 단위 플래니터리 믹서 대신 트윈스크루로 슬러리를 끊김 없이 혼련하는 방식. 설비 점유 면적과 배치 간 물성 편차를 동시에 줄이는 대신, 실시간 점도 제어가 성패를 가르는 기술이다.",
+  w:"믹싱이 배치식이면 뒤 공정이 아무리 빨라도 라인 전체가 배치 리듬에 묶인다.",
+  s:{pat:3,line:"파일럿 1기",talk:0,prj:"진행중",note:"파일럿 검증 단계. 양산 라인 적용 실적은 아직 없음"},
+  lag:{t:"약 1.5년",r:"CATL 2025-Q4 양산 라인 발주",m:"파일럿 검증중"},
+  ev:[{t:"capex",w:"CATL",d:"2026-05-12",s:"Fujian 3期 증설 공시",x:"연속식 믹서 라인 12기 발주 — 배치 믹서 대비 믹싱 시간 단축을 투자 근거로 명시",g:"verified"},
+      {t:"patent",w:"PANASONIC",d:"2026-04-02",s:"WO2026/041882",x:"연속 혼련 장치의 전단속도 제어 및 슬러리 점도 인라인 피드백",g:"medium"}],
+  lim:"CATL 발주 12기가 전량 양산용인지 일부 파일럿 포함인지는 공시상 구분되지 않음."},
+ {n:"무용매 PTFE 파이브릴화",en:"Solvent-free PTFE fibrillation",own:"none",r:["TESLA","SAMSUNG SDI"],p:["CATL"],trl:8,
+  d:"용매를 전혀 쓰지 않고 PTFE 바인더에 전단력을 가해 섬유 형태로 늘린 뒤 활물질 분말을 그물처럼 붙잡게 하는 건식 전극의 전처리 공정. 전단률과 온도 창이 조금만 어긋나도 섬유가 끊기거나 뭉치기 때문에, 배합보다 전단 이력 제어가 핵심인 기술이다.",
+  w:"건식 전극 전체 공정의 성패가 이 한 단계에서 갈린다. 여기가 안 되면 뒤의 건식 코팅·라미네이션도 성립하지 않는다.",
+  s:{pat:0,line:0,talk:0,prj:"없음",note:"4개 채널 모두 0. 공정기술팀 확인 결과 사내 파일럿 착수 이력도 없음"},
+  lag:{t:"약 3.5년",r:"TESLA 2022-Q3 파일럿 → 2024-Q4 양산 음극",m:"미착수"},
+  ev:[{t:"capex",w:"TESLA",d:"2026-02-27",s:"Texas 4680 라인 증설",x:"건식 음극 전용 라인 추가 투자 — 기존 라인 양산 가동을 전제로 한 증설",g:"verified"},
+      {t:"patent",w:"TESLA",d:"2026-03-18",s:"US 2026/0098231 A1",x:"PTFE 전단 파이브릴화 후 분말 정전 부착. Claim 1에 전단률·온도 창을 수치로 한정",g:"weak"},
+      {t:"conf",w:"SAMSUNG SDI",d:"2026-06-04",s:"AABC Europe 2026",x:"건식 전극 파일럿 라인 가동 중, 2027 양산 검증 목표를 기조 세션에서 공표",g:"strong"}],
+  lim:"TESLA 양산은 음극 한정. 양극 적용 여부는 확인되지 않아 '전 전극 양산'으로 읽으면 과대평가."},
+ {n:"CNT 도전재 고분산",en:"CNT conductive dispersion",own:"have",r:["CATL","BYD","SAMSUNG SDI"],trl:9,
+  d:"뭉치기 쉬운 탄소나노튜브를 슬러리 안에 고르게 풀어내는 분산 공정. 적은 도전재로도 전자 이동 경로를 확보해 그만큼 활물질 비중을 높이는 기술이다.",
+  w:"도전재를 줄인 만큼 활물질을 더 넣을 수 있어 에너지밀도에 직접 기여한다.",
+  s:{pat:22,line:"양산 전 라인",talk:5,prj:"완료(2022)",note:"업계 선도 수준. 경쟁사 3사도 보유해 차별화 요소는 아님"}},
+ {n:"슬러리 물성 AI 예측",en:"AI slurry rheology prediction",own:"part",r:["CATL"],trl:6,
+  d:"원료 로트 정보와 혼련 조건을 입력해 최종 슬러리의 점도·분산도를 미리 추정하는 모델. 실측 결과가 나오기 전에 배합을 선제적으로 보정하는 기술이다.",
+  w:"슬러리 물성 불량은 코팅 이후에야 드러난다. 앞단에서 잡으면 롤 단위 스크랩이 사라진다.",
+  s:{pat:2,line:"1개 라인 시범",talk:1,prj:"진행중",note:"1개 라인 시범 적용, 예측 정확도 검증 단계"},
+  lag:{t:"약 1년",r:"CATL 다수 라인 적용 발표",m:"1개 라인 시범"},
+  ev:[{t:"conf",w:"CATL",d:"2026-06-10",s:"CIBF 2026",x:"슬러리 물성 예측 모델의 라인 확대 적용 사례 기술세션 발표",g:"medium"}],
+  lim:"자사 시범 라인 성능이 경쟁사 대비 어느 수준인지 비교 가능한 공개 지표가 없음."}]},
+{id:"E2",n:"코팅",items:[
+ {n:"양면 동시 코팅",en:"Simultaneous dual-side coating",own:"have",r:["CATL","BYD","SK ON"],trl:9,
+  d:"집전체 양면에 슬러리를 한 번에 도포하는 방식. 한 면씩 두 번 코팅하는 대비 라인 길이와 건조 횟수를 절반으로 줄이는 기술이다.",
+  w:"이미 업계 표준. 없으면 원가 경쟁이 성립하지 않는 기본기.",
+  s:{pat:31,line:"양산 전 라인",talk:6,prj:"완료(2019)",note:"전 사업장 표준 공정"}},
+ {n:"무용매 건식 코팅·라미네이션",en:"Dry electrode film lamination",own:"none",r:["TESLA"],p:["CATL","SAMSUNG SDI"],trl:9,
+  d:"파이브릴화된 분말을 얇은 필름으로 성형한 뒤 집전체에 열간 압착해 전극을 만드는 공정. 슬러리 탱크·건조로·용매 회수 설비를 통째로 걷어내는 기술이다.",
+  w:"건조로가 없어지면 라인 길이·공장 면적·설비투자·전력비가 동시에 내려간다. 개별 공정 개선이 아니라 셀 원가 구조 자체가 바뀌는 기술이다.",
+  s:{pat:0,line:0,talk:0,prj:"없음",note:"4개 채널 모두 0. 상위 공정인 PTFE 파이브릴화가 미착수라 종속적으로 진입 불가"},
+  lag:{t:"약 4년",r:"TESLA 2021 파일럿 → 2024-Q4 양산 가동",m:"미착수"},
+  ev:[{t:"capex",w:"TESLA",d:"2026-02-27",s:"Texas 4680 증설",x:"건식 전극 라인 양산 가동 확인 후 동일 사양 라인 추가 발주",g:"verified"},
+      {t:"patent",w:"TESLA",d:"2026-01-22",s:"US 11,987,442 B2 (등록)",x:"건식 필름을 집전체에 열간 라미네이션하는 롤 압착 구조 및 두께 편차 보정",g:"medium"},
+      {t:"capex",w:"CATL",d:"2026-04-09",s:"Hungary Debrecen 2단계",x:"건식 전극 파일럿 동(棟) 별도 신설 — 양산 동과 분리된 검증용",g:"strong"}],
+  lim:"TESLA 양산 수율은 비공개. 'verified'는 라인 가동 사실을 뜻하며 경제성 확보를 보증하지 않는다."},
+ {n:"광폭 고속 코팅 (>100 m/min)",en:"Wide high-speed coating",own:"part",r:["CATL","BYD"],trl:8,
+  d:"1.5m급 광폭 웹을 분당 100m 이상으로 도포하는 코터. 속도를 올릴수록 슬러리 흐름이 불안정해지므로 다이 설계와 웹 장력 제어가 함께 가야 하는 기술이다.",
+  w:"코터 1대의 처리량이 라인 전체 캐파를 결정한다. 같은 투자비로 나오는 GWh가 달라진다.",
+  s:{pat:9,line:"1.3m / 80 m/min 급 양산",talk:2,prj:"진행중",note:"1.3m·80m/min까지 양산 적용. 1.5m·100m/min급은 미도달"},
+  lag:{t:"약 2년",r:"BYD 1.5m 광폭 코터 라인 교체 완료",m:"1.3m·80m/min 양산"},
+  ev:[{t:"capex",w:"BYD",d:"2026-05-30",s:"Jinan 공장 라인 교체",x:"1.5m 광폭 코터 전면 도입 — 라인당 처리량 확대를 투자 목적으로 명시",g:"verified"}],
+  lim:"BYD의 실가동 속도는 공시에 없음. 광폭 도입 사실만 확인됨."},
+ {n:"다층(Dual-layer) 슬롯다이",en:"Dual-layer slot-die",own:"none",r:["CATL","PANASONIC"],trl:6,
+  d:"한 번의 토출로 조성이 다른 두 층을 동시에 쌓는 다이 구조. 집전체 쪽은 저항이 낮은 조성, 표면 쪽은 이온 전도가 좋은 조성으로 나눠 두께 방향 특성을 설계하는 기술이다.",
+  w:"급속충전과 고에너지밀도는 원래 상충한다. 두께 방향으로 조성을 나누는 건 그 상충을 완화하는 몇 안 되는 수단이다.",
+  s:{pat:1,line:0,talk:0,prj:"없음",note:"관련 출원 1건뿐. 파일럿·발표·과제 모두 없음"},
+  lag:{t:"약 2년",r:"CATL 파일럿 검증 + 로드맵 공개",m:"미착수"},
+  ev:[{t:"patent",w:"CATL",d:"2026-05-06",s:"CN 118xxxxxx A (공개)",x:"상·하층 조성이 다른 2층 동시 토출 다이 — 급속충전 시 두께 방향 저항 구배 완화",g:"weak"},
+      {t:"conf",w:"PANASONIC",d:"2026-03-11",s:"IBS 2026",x:"이층 코팅 기반 고에너지·급속충전 양립 셀 로드맵을 기술세션에서 공개",g:"medium"}],
+  lim:"양측 모두 양산 적용 신호는 없음. 경쟁사도 아직 검증 단계라 격차가 고정된 것은 아니다."},
+ {n:"저온 건조 (IR·유도가열)",en:"Low-temp IR/induction drying",own:"none",r:["CATL","SK ON","PANASONIC"],trl:8,
+  d:"열풍(HAD) 대신 근적외선이나 유도가열로 전극을 건조하는 방식. 집전체를 직접 데워 열이 안쪽에서 바깥으로 빠지게 함으로써 바인더 쏠림을 억제하고 건조로 길이까지 줄이는 기술이다.",
+  w:"건조로는 전극 라인 길이의 절반 이상을 차지한다. 짧아지면 공장 면적과 증설 단가가 함께 내려간다.",
+  s:{pat:2,line:0,talk:0,prj:"기초검토",note:"출원 2건, 라인 적용 0. 국내 경쟁사(SK온)가 이미 양산 전환 중인 영역"},
+  lag:{t:"약 2.5년",r:"SK ON 2026-Q2 양산 라인 유도가열 전환",m:"기초 검토"},
+  ev:[{t:"capex",w:"SK ON",d:"2026-06-18",s:"서산 3공장",x:"HAD 오븐 일부를 유도가열로 대체, 건조로 길이 축소를 설계 반영",g:"verified"},
+      {t:"conf",w:"PANASONIC",d:"2026-05-21",s:"The Battery Show Japan",x:"건조 에너지 저감 실적을 기술세션에서 수치와 함께 발표",g:"medium"},
+      {t:"patent",w:"CATL",d:"2026-02-14",s:"WO2026/019773",x:"근적외선 + 열풍 하이브리드 건조 프로파일 제어",g:"weak"}],
+  lim:"SK온의 전환 범위가 신규 라인 한정인지 기존 라인 개조까지인지는 미확인."},
+ {n:"패턴/스트라이프 코팅",en:"Patterned coating",own:"have",r:["CATL","SAMSUNG SDI"],trl:9,
+  d:"무지부(코팅되지 않은 구간)를 정확한 위치에 남기며 도포하는 공정. 뒤따르는 노칭·탭 용접의 기준 위치를 코팅 단계에서 미리 확정하는 기술이다.",
+  w:"무지부 위치 정밀도가 나오지 않으면 뒷공정 전체가 흔들린다.",
+  s:{pat:17,line:"양산 전 라인",talk:2,prj:"완료(2020)",note:"전 사업장 표준"}},
+ {n:"인라인 코팅 두께 X-ray 계측",en:"In-line X-ray thickness gauge",own:"have",r:["CATL","PANASONIC","SK ON"],trl:9,
+  d:"주행 중인 전극의 로딩량을 X-ray 투과로 실시간 측정하는 계측. 측정값을 코터에 즉시 되먹여 두께 편차를 주행 중에 잡아내는 기술이다.",
+  w:"로딩량 편차는 셀 용량 산포로 직결된다. 실시간 계측이 품질의 전제.",
+  s:{pat:8,line:"양산 전 라인",talk:1,prj:"완료(2021)",note:"전 사업장 표준"}}]},
+{id:"E3",n:"롤프레스",items:[
+ {n:"고밀도 압연 (≥3.6 g/cc)",en:"High-density calendering",own:"have",r:["CATL","BYD"],trl:9,
+  d:"활물질층을 목표 밀도까지 눌러 체적당 용량을 높이는 압연 공정. 과압하면 입자가 깨지고 덜 누르면 에너지밀도가 안 나오므로, 선압과 밀도의 좁은 균형점을 지켜내는 기술이다.",
+  w:"밀도가 곧 에너지밀도. 셀 스펙의 기본 축이다.",
+  s:{pat:19,line:"양산 전 라인",talk:4,prj:"완료(2022)",note:"3.65 g/cc 양산 실적"}},
+ {n:"열간 롤프레스",en:"Hot calendering",own:"none",r:["CATL","TESLA"],trl:7,
+  d:"롤 표면을 가열한 상태로 압연해 활물질층을 치밀화하는 공정. 상온 압연보다 스프링백이 적어 더 낮은 선압으로 목표 밀도에 도달하는 기술이다.",
+  w:"건식 전극 필름은 상온 압연으로 목표 밀도가 나오지 않는다. 건식 공정으로 가려면 사실상 필수 전제 기술이다.",
+  s:{pat:0,line:0,talk:0,prj:"없음",note:"4개 채널 모두 0. 건식 전극 미착수와 연동된 공백"},
+  lag:{t:"약 2년",r:"CATL 등록특허 + TESLA 건식 라인 적용 언급",m:"미착수"},
+  ev:[{t:"patent",w:"CATL",d:"2026-04-25",s:"CN 118xxxxxx B (등록)",x:"롤 표면 가열과 선압을 동기 제어해 스프링백을 저감하는 압연 방법",g:"medium"},
+      {t:"conf",w:"TESLA",d:"2026-03-05",s:"Investor Day 부대 세션",x:"건식 필름 치밀화용 가열 롤 적용을 양산 라인 구성 설명 중 언급",g:"strong"}],
+  lim:"TESLA 언급은 부대 세션 구두 발언으로, 문서화된 1차 출처가 아님. 등급을 한 단계 낮춰 볼 여지 있음."},
+ {n:"두께 폐루프 실시간 제어",en:"Closed-loop gap control",own:"have",r:["CATL","PANASONIC"],trl:9,
+  d:"압연 직후 두께를 측정해 롤 갭을 그 자리에서 보정하는 제어. 설정값 관리가 아니라 실측 기반으로 두께 산포를 억제하는 기술이다.",
+  w:"두께 산포가 셀 용량 산포로 이어진다.",
+  s:{pat:11,line:"양산 전 라인",talk:2,prj:"완료(2021)",note:"전 사업장 표준"}},
+ {n:"롤 크라운 능동 보정",en:"Active roll-crown compensation",own:"part",r:["PANASONIC"],trl:7,
+  d:"광폭 압연에서 롤이 휘어 폭 방향 두께가 달라지는 현상을 유압·열 변형으로 상쇄하는 보정. 롤 자체의 변형을 실시간으로 되돌려 폭 방향 균일도를 지키는 기술이다.",
+  w:"광폭으로 갈수록 폭 방향 편차가 커진다. 광폭 코팅의 실효성이 여기 달려 있다.",
+  s:{pat:4,line:"1개 라인",talk:0,prj:"진행중",note:"1개 라인 적용, 전 라인 확산 전"},
+  lag:{t:"약 1년",r:"PANASONIC 전 라인 적용",m:"1개 라인"},
+  ev:[{t:"patent",w:"PANASONIC",d:"2026-01-15",s:"JP 2026-0xxxxx",x:"롤 축 방향 온도 분포 제어를 통한 크라운 보정",g:"weak"}],
+  lim:"경쟁사 적용 범위 확인 근거가 특허 1건뿐이라 실제 격차는 이보다 작을 수 있음."},
+ {n:"전극 크랙 인라인 검사 (AI)",en:"AI crack inspection",own:"none",r:["CATL","SAMSUNG SDI","BYD"],trl:8,
+  d:"압연 직후 표면 영상에서 육안으로 보이지 않는 미세 크랙을 검출하는 검사. 검출에 그치지 않고 결과를 롤 압력에 되먹여 자동 보정까지 잇는 기술이다.",
+  w:"압연 크랙은 조립 이후에 발견되면 이미 전극 롤 전체가 손실이다. 스크랩률에 직접 붙는다.",
+  s:{pat:1,line:"검출만 (보정 연동 없음)",talk:0,prj:"기초검토",note:"기존 비전 검사는 있으나 압력 되먹임 연동이 없어 '미보유'로 판정"},
+  lag:{t:"약 2년",r:"CATL 전 라인 적용 + 스크랩률 개선 수치 공개",m:"검출 단계"},
+  ev:[{t:"conf",w:"CATL",d:"2026-06-10",s:"CIBF 2026",x:"전 라인 AI 검사 적용 후 스크랩률 개선 결과를 수치와 함께 공개",g:"strong"},
+      {t:"patent",w:"SAMSUNG SDI",d:"2026-05-02",s:"KR 10-2026-00xxxxx",x:"압연 직후 표면 영상 세그멘테이션 후 압력 자동 보정",g:"weak"},
+      {t:"capex",w:"BYD",d:"2026-03-02",s:"Changzhou 라인",x:"AI 검사 모듈 포함 압연기 교체",g:"strong"}],
+  lim:"자사도 검출 기능은 보유. '미보유' 판정은 폐루프 보정 연동 여부 기준이며, 이 기준선을 어디에 둘지는 공정기술팀 합의 필요."}]},
+{id:"E4",n:"슬리팅",items:[
+ {n:"레이저 슬리팅",en:"Laser slitting",own:"part",r:["CATL","TESLA","BYD"],trl:8,
+  d:"기계식 나이프 대신 레이저로 전극을 절단하는 방식. 칼날 마모와 버(burr)가 없는 대신 열영향부 관리가 관건인 기술이다.",
+  w:"버는 내부 단락의 직접 원인이다. 안전 관련 클레임의 상당수가 여기서 출발한다.",
+  s:{pat:6,line:"2개 라인",talk:1,prj:"진행중",note:"2개 라인 적용, 나머지는 시어 슬리팅 유지"},
+  lag:{t:"약 1.5년",r:"BYD 전 라인 전환 완료",m:"2개 라인"},
+  ev:[{t:"capex",w:"BYD",d:"2026-04-16",s:"Changzhou 라인",x:"기계식 나이프 → 레이저 슬리터 전면 전환",g:"verified"}],
+  lim:"자사는 의도적 병행 운용일 수 있음. '전환 지연'과 '전략적 병행'을 구분하려면 내부 확인 필요."},
+ {n:"버(Burr) 저감 시어 슬리팅",en:"Low-burr shear slitting",own:"have",r:["CATL","PANASONIC","SK ON"],trl:9,
+  d:"칼날 각도와 웹 장력을 최적화해 기계식 절단에서도 버 발생을 억제하는 공정. 레이저 전환 전까지 절단면 안전성을 지탱하는 기술이다.",
+  w:"레이저 전환 전까지 안전을 지탱하는 현행 표준.",
+  s:{pat:13,line:"양산 전 라인",talk:1,prj:"완료(2020)",note:"버 높이 관리 수준 업계 상위"}},
+ {n:"광폭 다열 슬리팅",en:"Multi-lane wide slitting",own:"have",r:["CATL","BYD"],trl:9,
+  d:"광폭 원단을 한 번에 여러 열로 나눠 절단하는 방식. 광폭 코터의 처리량을 병목 없이 뒷공정으로 넘기는 기술이다.",w:"광폭 코팅의 처리량을 뒷공정에서 받아내는 전제.",
+  s:{pat:7,line:"양산 전 라인",talk:0,prj:"완료(2021)",note:"광폭 코터와 세트로 운용"}},
+ {n:"엣지 이물 비전 검사",en:"Edge particle vision",own:"have",r:["CATL","SAMSUNG SDI"],trl:9,
+  d:"절단면에 붙은 미세 이물과 돌기를 광학으로 검출하는 검사. 분리막을 뚫을 수 있는 엣지 결함을 조립 전에 걸러내는 기술이다.",w:"엣지 이물은 분리막을 뚫는다. 필드 안전에 직결.",
+  s:{pat:9,line:"양산 전 라인",talk:1,prj:"완료(2022)",note:"전 사업장 표준"}}]}]},
+
+{id:"A",n:"조립",en:"Assembly",g:[
+{id:"A1",n:"DNC",items:[
+ {n:"고속 레이저 노칭 (>120 ppm)",en:"High-speed laser notching",own:"part",r:["CATL","SAMSUNG SDI"],trl:8,
+  d:"전극 탭 형상을 레이저로 잘라내는 공정. 속도를 올릴수록 커지는 열영향부와 분진을 억제하면서 분당 처리 매수를 끌어올리는 기술이다.",
+  w:"노칭 속도가 조립 라인 전체의 택트를 결정한다.",
+  s:{pat:8,line:"100 ppm 급 양산",talk:2,prj:"진행중",note:"100ppm 양산. 120ppm 이상은 검증 단계"},
+  lag:{t:"약 1년",r:"CATL 멀티빔 방식으로 120ppm 이상",m:"100 ppm"},
+  ev:[{t:"patent",w:"CATL",d:"2026-03-29",s:"CN 118xxxxxx A",x:"멀티빔 분기 광학계로 동시 다열 노칭, 열영향부 저감",g:"weak"}],
+  lim:"CATL 실가동 속도는 특허 기재값 기준 추정. 실측 근거 아님."},
+ {n:"Z-스태킹 고속화",en:"High-speed Z-stacking",own:"have",r:["SAMSUNG SDI","SK ON"],trl:9,
+  d:"분리막을 지그재그로 접으며 그 사이에 전극을 교대로 넣는 적층 방식. 분리막 연속성을 유지한 채 적층 속도를 높이는 기술이다.",w:"파우치 셀 조립의 표준 경로.",
+  s:{pat:24,line:"양산 전 라인",talk:5,prj:"완료(2021)",note:"업계 선도 속도"}},
+ {n:"라미네이션 & 스태킹 (L&S)",en:"Lamination & stacking",own:"have",r:["CATL","SK ON"],trl:9,
+  d:"전극과 분리막을 미리 접합해 바이셀을 만든 뒤 그 단위를 쌓는 적층 방식. 낱장 적층보다 정렬 흐트러짐이 적어 고속화에 유리한 기술이다.",
+  w:"고속 적층에서 정렬을 유지하는 현실적 해법.",s:{pat:18,line:"양산 다수 라인",talk:3,prj:"완료(2022)",note:"주력 적층 방식"}},
+ {n:"스택 정렬 실시간 비전 보정",en:"Closed-loop stack alignment",own:"none",r:["CATL","SAMSUNG SDI"],trl:8,
+  d:"적층 중 매 장의 전극 위치 편차를 측정해 다음 장 투입 위치를 즉시 되돌리는 폐루프 정렬. 사후 검사로 불량을 걸러내는 대신 편차 발생 자체를 억제하는 기술이다.",
+  w:"적층 정렬 편차는 국부 리튬 석출과 내부 단락의 직접 원인이다. 안전과 수율에 동시에 걸린다.",
+  s:{pat:2,line:"사후 검사만",talk:0,prj:"기초검토",note:"적층 후 검사는 운용 중이나 투입 위치 되먹임은 없음"},
+  lag:{t:"약 2년",r:"CATL 정렬 편차 ±0.1mm 라인 공개",m:"사후 검사"},
+  ev:[{t:"conf",w:"CATL",d:"2026-06-11",s:"CIBF 2026",x:"정렬 편차 ±0.1mm 이하를 유지하는 폐루프 적층 라인을 기술세션에서 공개",g:"strong"},
+      {t:"patent",w:"SAMSUNG SDI",d:"2026-06-01",s:"KR 10-2026-00xxxxx",x:"적층 중 전극 위치 편차를 매 장 측정해 다음 장 투입 위치 보정",g:"weak"}],
+  lim:"CATL이 공개한 ±0.1mm가 전 라인 실적인지 대표 라인 값인지 불명."},
+ {n:"초음파 탭 용접 품질 AI 판정",en:"AI weld quality inspection",own:"part",r:["CATL","PANASONIC"],trl:7,
+  d:"용접 파형과 접합부 영상을 학습해 접합 강도를 비파괴로 추정하는 판정. 파괴검사 없이 전수 품질 보증을 가능하게 하는 기술이다.",
+  w:"탭 용접 불량은 파괴검사로만 확인되어 전수 보증이 어렵다.",
+  s:{pat:5,line:"2개 라인 시범",talk:1,prj:"진행중",note:"시범 적용 중, 판정 신뢰도 검증 단계"},
+  lag:{t:"약 1년",r:"CATL 다수 라인 적용",m:"2개 라인 시범"},
+  ev:[{t:"conf",w:"CATL",d:"2026-06-10",s:"CIBF 2026",x:"용접 품질 AI 판정의 라인 확대 사례 발표",g:"medium"}],
+  lim:"판정 정확도 비교 지표가 양측 모두 공개되지 않음."}]},
+{id:"A2",n:"AZS",items:[
+ {n:"탭리스(Tabless) 젤리롤 와인딩",en:"Tabless jellyroll winding",own:"have",r:["TESLA","PANASONIC","SAMSUNG SDI"],trl:8,
+  d:"별도 탭을 붙이지 않고 전극 무지부 전체를 집전 경로로 쓰는 원통형 권취 구조. 전류 경로를 짧고 넓게 만들어 내부 저항과 발열을 동시에 낮추는 기술이다.",
+  w:"내부 저항과 발열을 동시에 낮춘다. 46파이 대형 셀의 전제.",
+  s:{pat:15,line:"파일럿 + 양산 준비",talk:4,prj:"진행중",note:"46파이 라인과 함께 양산 준비 단계"}},
+ {n:"46-시리즈 대형 원통 양산",en:"46-series large cylindrical",own:"part",r:["TESLA","PANASONIC"],trl:8,
+  d:"지름 46mm급 대형 원통 셀을 대량 생산하는 공정 체계. 셀이 커지면서 함께 어려워지는 발열·주액·용접을 양산 조건에서 성립시키는 기술이다.",
+  w:"완성차 채택이 진행 중인 폼팩터. 양산 진입 시점이 수주에 직결된다.",
+  s:{pat:12,line:"양산 준비 (오창)",talk:6,prj:"진행중",note:"라인 구축 완료, 양산 램프업 단계"},
+  lag:{t:"약 1.5년",r:"PANASONIC 2025 양산 + 2026 증설",m:"램프업"},
+  ev:[{t:"capex",w:"PANASONIC",d:"2026-05-08",s:"Wakayama 4680 증설",x:"양산 라인 추가 및 수율 개선 투자 — 기존 라인 가동 전제",g:"verified"}],
+  lim:"자사 램프업 진척은 내부 정보 기준. 외부 신호만으로는 격차 산정이 불가한 항목."},
+ {n:"진공 주액 사이클 최적화",en:"Vacuum electrolyte filling",own:"have",r:["CATL","BYD","SK ON"],trl:9,
+  d:"감압과 가압을 반복해 전해액을 전극 기공 깊숙이 밀어 넣는 주액 공정. 함침 시간을 줄이면서도 기공 내부까지 균일하게 채우는 기술이다.",
+  w:"함침 불량은 초기 용량과 수명에 그대로 남는다.",s:{pat:16,line:"양산 전 라인",talk:2,prj:"완료(2021)",note:"전 사업장 표준"}},
+ {n:"케이스 레이저 용접 실시간 감시 (OCT)",en:"In-process weld monitoring",own:"none",r:["TESLA","PANASONIC"],trl:7,
+  d:"용접 중 광간섭단층촬영으로 용입 깊이를 실시간 측정하는 감시 방식. 측정값에 따라 레이저 출력을 그 자리에서 조정해 샘플 검사 대신 전수 보증을 가능하게 하는 기술이다.",
+  w:"케이스 용접 미접합은 전해액 누액과 화재로 직결되는데, 현행은 샘플 검사에 의존한다.",
+  s:{pat:0,line:"샘플 파괴검사",talk:0,prj:"없음",note:"특허·파일럿·발표 모두 0. 현행은 샘플링 파괴검사"},
+  lag:{t:"약 2.5년",r:"TESLA 등록특허 + PANASONIC 공동 발표",m:"미착수"},
+  ev:[{t:"patent",w:"TESLA",d:"2026-02-05",s:"US 2026/0071554 A1",x:"OCT 기반 용입 깊이 실시간 측정 후 레이저 출력 피드백",g:"weak"},
+      {t:"conf",w:"PANASONIC",d:"2026-04-23",s:"LASER World of PHOTONICS",x:"용접 결함 저감 사례를 장비사와 공동 기술세션 발표",g:"medium"}],
+  lim:"근거가 특허 1 + 발표 1로 medium 이하. 양산 적용 확인은 아직 없어 '경쟁사 앞섬' 강도는 중간."},
+ {n:"셀 투 팩 직결 조립 (모듈리스)",en:"Module-less direct assembly",own:"part",r:["CATL","BYD","TESLA"],trl:9,
+  d:"모듈 단계를 건너뛰고 셀을 팩에 직접 배열·고정하는 조립 방식. 부품 수와 공정 수를 함께 줄여 원가와 체적 효율을 동시에 얻는 기술이다.",
+  w:"부품 수와 공정 수가 줄어 원가와 체적 효율이 동시에 개선된다.",
+  s:{pat:14,line:"일부 고객향 양산",talk:3,prj:"진행중",note:"특정 고객 프로그램 한정 양산"},
+  lag:{t:"약 1년",r:"CATL·BYD 표준 제품화",m:"일부 고객 한정"},
+  ev:[{t:"capex",w:"CATL",d:"2026-01-30",s:"신규 팩 라인",x:"모듈리스 전용 팩 라인 증설",g:"verified"}],
+  lim:"자사 제한은 기술 한계가 아니라 고객 사양 요구일 수 있음."}]},
+{id:"A3",n:"PKG",items:[
+ {n:"파우치 딥드로잉 포밍",en:"Pouch deep-drawing",own:"have",r:["SK ON","SAMSUNG SDI"],trl:9,
+  d:"알루미늄 라미네이트 필름을 깊게 성형해 셀 수납부를 만드는 공정. 필름을 찢지 않으면서 성형 깊이를 키워 같은 외형에 더 많은 용량을 담는 기술이다.",w:"성형 깊이가 곧 셀 용량. 파우치 셀의 기본기.",
+  s:{pat:20,line:"양산 전 라인",talk:2,prj:"완료(2019)",note:"업계 선도 성형 깊이"}},
+ {n:"디게싱 자동화 라인",en:"Automated degassing",own:"have",r:["CATL","SK ON"],trl:9,
+  d:"화성 중 발생한 가스를 빼내고 다시 실링하는 공정을 무인화한 라인. 사람 손이 남기 쉬운 파우치 후공정의 병목을 없애는 기술이다.",w:"수작업이 남으면 파우치 라인의 병목이 된다.",
+  s:{pat:10,line:"양산 전 라인",talk:1,prj:"완료(2022)",note:"전 사업장 무인화"}},
+ {n:"셀 외관 AI 검사 (멀티모달)",en:"Multimodal AI appearance test",own:"none",r:["CATL","BYD","SAMSUNG SDI"],trl:8,
+  d:"영상과 초음파 신호를 함께 학습해 결함을 판별하는 검사. 단일 비전으로는 잡히지 않는 실링부 미접합처럼 겉으로 드러나지 않는 결함까지 걸러내는 기술이다.",
+  w:"실링 불량은 필드에서 누액으로 나타난다. 출하 전에 못 잡으면 회수 비용이 검사 설비 투자의 수십 배다.",
+  s:{pat:3,line:"단일 비전 검사",talk:0,prj:"기초검토",note:"영상 단독 검사는 운용 중. 초음파 융합 판정은 없음"},
+  lag:{t:"약 2년",r:"CATL 검사 무인화 + 오검율 개선 공개",m:"단일 비전"},
+  ev:[{t:"conf",w:"CATL",d:"2026-06-12",s:"CIBF 2026",x:"검사 공정 무인화 및 오검율 감소 결과를 기술세션에서 공개",g:"strong"},
+      {t:"patent",w:"BYD",d:"2026-05-19",s:"CN 118xxxxxx A",x:"영상 + 초음파 신호 융합으로 실링 미접합 판별",g:"weak"},
+      {t:"capex",w:"SAMSUNG SDI",d:"2026-02-11",s:"헝가리 라인 증설",x:"멀티모달 검사 설비 포함 발주",g:"strong"}],
+  lim:"자사 단일 비전의 검출률이 경쟁사 멀티모달과 얼마나 차이 나는지 정량 비교 근거는 없음."},
+ {n:"레이저 실링 (파우치)",en:"Laser pouch sealing",own:"none",r:["CATL"],trl:6,
+  d:"열판 대신 레이저로 파우치 실링부를 접합하는 방식. 실링 폭을 좁혀 같은 외형에서 활물질이 들어갈 공간을 늘리는 기술이다.",
+  w:"셀 설계를 바꾸지 않고 체적 에너지밀도를 올리는 몇 안 되는 공정 수단.",
+  s:{pat:0,line:0,talk:0,prj:"없음",note:"4개 채널 모두 0"},
+  lag:{t:"약 1년",r:"CATL 공개특허 단계",m:"미착수"},
+  ev:[{t:"patent",w:"CATL",d:"2026-04-11",s:"WO2026/052110",x:"열판 대신 레이저로 실링폭을 축소해 셀 체적 효율 향상",g:"weak"}],
+  lim:"근거가 공개특허 1건(weak)뿐. 판정 규칙상 '보유'에 미달하나 신호 자체가 얕아 우선순위는 낮게 볼 것."}]}]},
+
+{id:"F",n:"활성화",en:"Formation",g:[
+{id:"F1",n:"화성·에이징",items:[
+ {n:"고전류 급속 화성",en:"High-current fast formation",own:"part",r:["CATL","TESLA","BYD"],trl:8,
+  d:"초기 SEI를 형성하는 화성 공정을 높은 전류로 짧게 끝내는 방식. 전류를 올리면 흔들리는 SEI 품질을 전류·전압 프로파일 설계로 붙잡는 기술이다.",
+  w:"화성 설비는 대당 단가가 높고 대수가 많다. 시간이 줄면 투자비가 그대로 줄어든다.",
+  s:{pat:11,line:"일부 라인 적용",talk:3,prj:"진행중",note:"일부 라인 적용, 전 제품 확산 전"},
+  lag:{t:"약 1년",r:"CATL 라인 면적·재공 축소 효과 공개",m:"일부 라인"},
+  ev:[{t:"conf",w:"CATL",d:"2026-06-10",s:"CIBF 2026",x:"화성 시간 단축에 따른 라인 면적·재공 축소 효과 제시",g:"medium"}],
+  lim:"화성 단축은 제품별 SEI 특성에 종속. 경쟁사 수치를 자사 제품에 그대로 대입할 수 없음."},
+ {n:"가압 화성 (Pressurized formation)",en:"Pressurized formation",own:"have",r:["SAMSUNG SDI","SK ON"],trl:9,
+  d:"셀을 가압한 상태로 화성해 전극과 분리막의 밀착을 유지하는 공정. 화성 중 발생하는 가스와 부풀음이 계면을 벌리지 않게 눌러주는 기술이다.",w:"파우치 셀 수명 편차를 줄이는 표준 수단.",
+  s:{pat:13,line:"양산 전 라인",talk:2,prj:"완료(2020)",note:"전 사업장 표준"}},
+ {n:"에이징 기간 단축 알고리즘",en:"Aging period reduction",own:"none",r:["CATL","PANASONIC"],trl:7,
+  d:"초기 OCV 거동으로 셀마다 필요한 잔여 에이징 시간을 산출하는 방식. 전 물량을 일괄로 며칠 재우는 대신 셀 단위로 출고 시점을 앞당기는 기술이다.",
+  w:"에이징 창고는 공장 면적과 재공 재고를 가장 많이 잡아먹는다. 기간이 줄면 증설 없이 생산능력이 늘어난다.",
+  s:{pat:1,line:"고정 기간 일괄",talk:0,prj:"기초검토",note:"현행은 전 물량 고정 기간 일괄 에이징"},
+  lag:{t:"약 2년",r:"CATL 에이징 창고 축소 전제 레이아웃 변경",m:"고정 기간 운용"},
+  ev:[{t:"capex",w:"CATL",d:"2026-05-22",s:"Yibin 라인 재배치",x:"에이징 창고 면적 축소를 전제로 라인 레이아웃 변경 — 알고리즘 적용의 간접 증거",g:"strong"},
+      {t:"patent",w:"PANASONIC",d:"2026-03-27",s:"JP 2026-0xxxxx A",x:"초기 OCV 거동으로 셀별 잔여 에이징 필요시간 산출",g:"weak"}],
+  lim:"CATL 근거는 레이아웃 변경에서 역추론한 간접 증거. 창고 축소 원인이 다른 데 있을 가능성 배제 못함."},
+ {n:"화성 데이터 기반 불량 예측 (AI)",en:"AI early defect prediction",own:"part",r:["CATL","TESLA","SAMSUNG SDI"],trl:8,
+  d:"화성 중 전류·전압 곡선의 미세 특징을 학습해 내부단락 가능 셀을 골라내는 모델. 필드에서 드러날 불량을 공장 안에서 미리 끊어내는 기술이다.",
+  w:"필드 화재 리스크를 공장 안에서 끊어내는 마지막 관문.",
+  s:{pat:7,line:"2개 라인",talk:2,prj:"진행중",note:"2개 라인 적용, 선별 기준 정합성 검증 중"},
+  lag:{t:"약 1년",r:"TESLA 등록특허 + 전 라인 적용 추정",m:"2개 라인"},
+  ev:[{t:"patent",w:"TESLA",d:"2026-01-30",s:"US 2026/0065012 A1",x:"화성 전류·전압 곡선 특징으로 내부단락 셀 조기 선별",g:"weak"}],
+  lim:"경쟁사 적용 범위는 특허 기반 추정. 실제 라인 적용 확인 근거 없음."},
+ {n:"고속 자가방전 선별 (μA급)",en:"Fast self-discharge screening",own:"none",r:["TESLA","PANASONIC","CATL"],trl:8,
+  d:"며칠간 전위 변화를 관찰하는 대신 μA급 미세전류를 직접 측정하는 선별 검사. 검사 리드타임을 일 단위에서 시간 단위로 낮춰 전수 적용을 가능하게 하는 기술이다.",
+  w:"자가방전 불량은 필드 화재의 주요 원인 중 하나인데, 현행 검사가 느려서 전수 적용이 어렵다.",
+  s:{pat:2,line:"전위 유지법(수일 소요)",talk:0,prj:"기초검토",note:"현행은 수일 소요 전위 유지법. 전수 적용 제약"},
+  lag:{t:"약 2.5년",r:"PANASONIC 리드타임 단축 양산 적용 발표",m:"전위 유지법 유지"},
+  ev:[{t:"conf",w:"PANASONIC",d:"2026-05-21",s:"The Battery Show Japan",x:"자가방전 검사 리드타임 단축 양산 적용 사례를 기술세션에서 발표",g:"strong"},
+      {t:"patent",w:"TESLA",d:"2026-04-08",s:"US 2026/0112340 A1",x:"전위 유지법 대신 미세전류 직접 측정으로 선별 시간 단축",g:"weak"},
+      {t:"capex",w:"CATL",d:"2026-03-19",s:"검사 설비 발주",x:"고속 자가방전 검사기 대량 발주",g:"strong"}],
+  lim:"측정 분해능이 자사 요구 수준을 만족하는지는 설비 사양 확인 전까지 미검증."}]}]},
+
+{id:"P",n:"Pack",en:"Pack",g:[
+{id:"P1",n:"구조·통합",items:[
+ {n:"CTP (Cell to Pack)",en:"Cell to Pack",own:"have",r:["CATL","BYD","SK ON"],trl:9,
+  d:"모듈 없이 셀을 팩에 직접 배열하는 구조 설계. 모듈 케이스와 부품이 차지하던 공간을 셀로 채워 체적 효율과 원가를 함께 개선하는 기술이다.",w:"체적 효율과 원가를 동시에 개선하는 현행 표준.",
+  s:{pat:21,line:"양산 다수 프로그램",talk:5,prj:"완료(2023)",note:"복수 고객 양산 적용"}},
+ {n:"CTC / CTB 차체 일체화",en:"Cell to Chassis/Body",own:"none",r:["CATL","BYD","TESLA"],trl:8,
+  d:"셀을 팩 케이스가 아니라 차체 플로어에 직접 통합하는 구조. 팩 상판이 곧 차체 바닥이 되어 모듈과 팩 케이스를 동시에 없애는 기술이다.",
+  w:"셀 제조사가 구조 설계까지 가져가느냐, 완성차에 셀만 납품하느냐를 가르는 분기점. 기술 문제이자 사업 구조 문제다.",
+  s:{pat:4,line:0,talk:1,prj:"컨셉 검토",note:"출원 4건·컨셉 검토 단계. 양산 프로그램 없음"},
+  lag:{t:"약 3년",r:"BYD 2023 양산 → TESLA 구조형 팩 설비 확장",m:"컨셉 검토"},
+  ev:[{t:"capex",w:"TESLA",d:"2026-03-14",s:"Giga Berlin",x:"구조형 팩 전용 캐스팅·접합 설비 확장 — 양산 가동 전제",g:"verified"},
+      {t:"patent",w:"BYD",d:"2026-02-19",s:"CN 118xxxxxx B (등록)",x:"셀 상판을 차체 플로어와 공유하는 구조 접합 및 실링",g:"medium"},
+      {t:"conf",w:"CATL",d:"2026-06-11",s:"CIBF 2026",x:"차체 일체형 스케이트보드 플랫폼 공급 계획을 기조 세션에서 발표",g:"strong"}],
+  lim:"CTC는 완성차 설계 권한과 얽혀 있어, 기술 미보유와 사업 전략상 미추진을 구분해야 한다. 판정 전 사업부 확인 필요."},
+ {n:"구조용 접착 자동 도포",en:"Structural adhesive dispensing",own:"have",r:["TESLA","BYD"],trl:9,
+  d:"셀과 팩 구조물을 접착제로 결합하며 도포량과 경로를 자동 제어하는 공정. 볼트 체결 없이 팩 강성을 확보하는 모듈리스 구조의 결합 기술이다.",w:"모듈리스 구조의 강성을 책임지는 결합 수단.",
+  s:{pat:9,line:"양산 적용",talk:1,prj:"완료(2023)",note:"모듈리스 팩 라인 표준"}}]},
+{id:"P2",n:"안전·제어",items:[
+ {n:"열폭주 전파 차단 구조",en:"Thermal propagation barrier",own:"have",r:["CATL","SAMSUNG SDI","PANASONIC"],trl:9,
+  d:"한 셀에서 시작된 열폭주가 이웃 셀로 번지지 않도록 차열재와 배기 경로를 설계하는 구조. 단일 셀 사고를 팩 전체 화재로 키우지 않는 기술이다.",
+  w:"각국 안전 규제의 핵심 요구사항. 미충족 시 인증 자체가 안 된다.",
+  s:{pat:27,line:"양산 전 프로그램",talk:6,prj:"완료(2022)",note:"규제 대응 완료, 전 프로그램 적용"}},
+ {n:"무선 BMS (wBMS)",en:"Wireless BMS",own:"none",r:["TESLA","SAMSUNG SDI"],trl:7,
+  d:"모듈 간 배선 하네스 없이 무선으로 셀 전압·온도를 수집하는 BMS 구성. 하네스를 걷어내는 대신 통신 이중화로 신뢰성을 보전하는 기술이다.",
+  w:"팩 조립 라인의 수작업 대부분이 하네스 결선이다. 자동화율 자체가 달라진다.",
+  s:{pat:1,line:"유선 하네스",talk:0,prj:"기초검토",note:"출원 1건. 현행 전 프로그램 유선"},
+  lag:{t:"약 2년",r:"SAMSUNG SDI 등록특허 + TESLA 양산 적용 발표",m:"유선 유지"},
+  ev:[{t:"conf",w:"TESLA",d:"2026-05-15",s:"IEEE VPPC",x:"배선 하네스 제거에 따른 팩 조립 공수 절감 실적을 기술세션에서 발표",g:"medium"},
+      {t:"patent",w:"SAMSUNG SDI",d:"2026-04-30",s:"KR 10-2026-00xxxxx",x:"모듈 간 무선 통신 이중화 및 셀 밸런싱 동기화",g:"weak"}],
+  lim:"근거가 medium + weak 조합. 판정 규칙상 '보유'이나 강도는 낮음. 양산 확인 신호가 나오면 우선순위 재조정 필요."},
+ {n:"클라우드 BMS 진단·수명 예측",en:"Cloud BMS diagnostics",own:"part",r:["CATL","BYD","TESLA"],trl:8,
+  d:"차량 운행 데이터를 서버로 모아 셀 상태와 잔여 수명을 추정하는 체계. 이상 징후를 고장 이전에 통보해 보증 비용을 관리하는 기술이다.",
+  w:"보증 비용을 좌우한다. 나아가 배터리 잔존가치 사업의 전제.",
+  s:{pat:8,line:"일부 고객 프로그램",talk:3,prj:"진행중",note:"일부 고객 대상 운영. 자체 플랫폼 확대 중"},
+  lag:{t:"약 1.5년",r:"CATL 수명 보증 서비스 상용화",m:"일부 고객"},
+  ev:[{t:"capex",w:"CATL",d:"2026-06-02",s:"배터리 운영 플랫폼 투자",x:"운행 데이터 기반 수명 보증 서비스 확대 투자",g:"strong"}],
+  lim:"데이터 소유권이 완성차에 있는 경우가 많아, 기술력만으로 격차가 좁혀지지 않는 영역."},
+ {n:"화재 조기감지 센서 내장",en:"In-pack early fire sensing",own:"none",r:["CATL","PANASONIC"],trl:6,
+  d:"가스 센서와 압력 센서를 팩 내부에 넣어 이상을 감지하는 구성. 온도가 오르기 전, 벤팅 이전 단계에서 열폭주 징후를 잡아내는 기술이다.",
+  w:"열폭주는 감지 시점이 몇 분 앞서느냐로 인명 피해가 갈린다. 규제도 이 방향으로 움직이고 있다.",
+  s:{pat:2,line:"온도 기반 감지",talk:0,prj:"기초검토",note:"현행 온도 기반. 가스·압력 융합 감지 미적용"},
+  lag:{t:"약 1.5년",r:"CATL 공개특허 + 파일럿",m:"온도 기반"},
+  ev:[{t:"patent",w:"CATL",d:"2026-05-27",s:"CN 118xxxxxx A",x:"가스 센서와 압력 센서 융합으로 벤팅 이전 단계 감지",g:"weak"},
+      {t:"conf",w:"PANASONIC",d:"2026-04-23",s:"Battery Safety Summit",x:"조기 감지 센서 팩 내장 검증 결과 발표",g:"medium"}],
+  lim:"규제 요구 확정 전이라 사양이 유동적. 지금 격차가 그대로 굳어질지는 불확실."}]}]},
+
+{id:"I",n:"인프라",en:"Infrastructure",g:[
+{id:"I1",n:"물류",items:[
+ {n:"AMR 기반 무인 공정간 반송",en:"AMR inter-process transfer",own:"part",r:["CATL","BYD"],trl:8,
+  d:"고정 경로 AGV가 아니라 자율주행 로봇이 공정 간 자재를 옮기는 반송 체계. 라인을 재배치해도 반송 인프라를 다시 깔지 않아도 되는 기술이다.",
+  w:"라인 재배치 때마다 반송 인프라를 다시 깔지 않아도 된다. 증설 속도에 붙는다.",
+  s:{pat:3,line:"2개 구간",talk:1,prj:"진행중",note:"2개 구간 적용. 전 공정 확산 전"},
+  lag:{t:"약 1.5년",r:"CATL 전 공정 AMR 전제 레이아웃",m:"2개 구간"},
+  ev:[{t:"capex",w:"CATL",d:"2026-04-09",s:"Debrecen 2단계",x:"전 공정 AMR 반송을 전제로 한 레이아웃 설계",g:"strong"}],
+  lim:"설계 반영과 실가동은 다름. 가동 확인 신호는 아직 없음."},
+ {n:"전극 롤 자동 반송·보관",en:"Automated roll handling / AS-RS",own:"have",r:["CATL","PANASONIC"],trl:9,
+  d:"무거운 전극 롤을 무인 창고와 라인 사이에서 자동으로 옮기고 보관하는 설비. 취급 중 손상으로 롤 전체를 잃는 일을 없애는 기술이다.",
+  w:"롤 취급 중 손상은 롤 통째 손실이다. 자동화가 곧 품질.",
+  s:{pat:6,line:"양산 전 사업장",talk:1,prj:"완료(2021)",note:"전 사업장 적용"}},
+ {n:"물류 디지털 트윈 시뮬레이션",en:"Logistics digital twin",own:"none",r:["CATL","TESLA"],trl:7,
+  d:"공장 전체 물류를 가상 공간에 재현해 라인 배치와 반송 경로를 검증하는 시뮬레이션. 실물 라인을 세운 뒤 고치는 대신 착공 전에 문제를 걸러내는 기술이다.",
+  w:"신규 공장 램프업 기간이 곧 기회비용이다. 증설 속도 경쟁에서 직접 차이가 난다.",
+  s:{pat:0,line:0,talk:0,prj:"없음",note:"4개 채널 모두 0. 레이아웃 검증은 현재 경험 기반"},
+  lag:{t:"약 2년",r:"TESLA 램프업 단축 사례 공개",m:"미착수"},
+  ev:[{t:"conf",w:"TESLA",d:"2026-02-26",s:"Automate 2026",x:"공장 전체 시뮬레이션으로 램프업 기간을 단축한 사례를 기술세션에서 발표",g:"strong"},
+      {t:"patent",w:"CATL",d:"2026-03-08",s:"CN 118xxxxxx A",x:"실시간 재공 데이터로 반송 경로를 재계획하는 스케줄러",g:"weak"}],
+  lim:"시뮬레이션 도구는 외부 솔루션 구매로도 확보 가능. '기술 격차'보다 '도입 의사결정 지연'에 가까울 수 있음."}]},
+{id:"I2",n:"에너지",items:[
+ {n:"드라이룸 폐열회수 제습",en:"Dry-room heat recovery",own:"part",r:["CATL","PANASONIC","SK ON"],trl:8,
+  d:"제습 로터를 재생시키는 열을 외부 공급 대신 공정 배열에서 회수해 쓰는 구성. 드라이룸이 소비하는 에너지를 공정이 버리는 에너지로 대체하는 기술이다.",
+  w:"드라이룸은 배터리 공장 전력의 큰 몫을 차지한다. 여기서 줄인 만큼 원단위가 내려간다.",
+  s:{pat:4,line:"1개 사업장",talk:1,prj:"진행중",note:"1개 사업장 적용, 확산 검토 중"},
+  lag:{t:"약 1.5년",r:"PANASONIC 등록특허 + 다수 사업장 적용",m:"1개 사업장"},
+  ev:[{t:"patent",w:"PANASONIC",d:"2026-04-17",s:"JP 2026-0xxxxx A",x:"제습 로터 재생열을 건조로 배열로 공급하는 회수 회로",g:"weak"}],
+  lim:"지역 기후에 따라 효과 편차가 큼. 경쟁사 수치를 국내 사업장에 그대로 적용할 수 없음."},
+ {n:"공정 폐열 재활용 네트워크",en:"Process waste-heat reuse",own:"none",r:["CATL","PANASONIC"],trl:7,
+  d:"건조로와 화성 공정의 폐열을 회수해 제습·난방 열원으로 되돌리는 공장 단위 순환 설비. 개별 설비가 아니라 공장 전체를 하나의 열 순환 계통으로 묶는 기술이다.",
+  w:"전력 원단위가 곧 제품 탄소발자국이고, EU 배터리 규정 아래서는 그게 판매 조건이 된다.",
+  s:{pat:1,line:0,talk:0,prj:"기초검토",note:"개별 설비 회수는 일부 있으나 공장 단위 네트워크는 없음"},
+  lag:{t:"약 2년",r:"CATL 제로카본 공장 폐열 순환 설비 투자",m:"기초 검토"},
+  ev:[{t:"capex",w:"CATL",d:"2026-05-22",s:"Yibin 제로카본 공장",x:"건조·화성 폐열을 공장 열원으로 순환하는 설비 투자 및 가동",g:"verified"},
+      {t:"conf",w:"PANASONIC",d:"2026-06-05",s:"Battery Japan",x:"공장 단위 에너지 원단위 개선 로드맵 발표",g:"medium"}],
+  lim:"CATL Yibin은 수력 전력 기반이라 조건이 다름. 동일 설계를 국내에 옮겼을 때 효과는 재산정 필요."},
+ {n:"탄소배출 실시간 모니터링 (제품 LCA)",en:"Real-time carbon / LCA tracking",own:"part",r:["CATL","BYD"],trl:8,
+  d:"공정별 에너지·원료 데이터를 모아 셀 한 개 단위 탄소발자국을 산정하는 체계. 사후 집계가 아니라 생산과 동시에 배출량을 추적하는 기술이다.",
+  w:"EU 배터리 여권 대응의 실무 기반. 없으면 수출 자체가 막힌다.",
+  s:{pat:2,line:"월 단위 집계",talk:2,prj:"진행중",note:"월 단위 집계 운영. 실시간 셀 단위는 미구현"},
+  lag:{t:"약 1년",r:"CATL 셀 단위 실시간 산정",m:"월 단위 집계"},
+  ev:[{t:"conf",w:"CATL",d:"2026-06-10",s:"CIBF 2026",x:"셀 단위 탄소발자국 실시간 산정 체계 공개",g:"medium"}],
+  lim:"산정 방법론 인증 여부가 관건. 실시간성 자체가 경쟁 우위는 아닐 수 있음."},
+ {n:"재생에너지 직접 연계 운영",en:"RE-linked plant operation",own:"none",r:["CATL","TESLA","BYD"],trl:8,
+  d:"자체 ESS·태양광과 계통을 조합해 공장 전력을 운영하는 체계. 시간대별로 어떤 전력원을 썼는지까지 추적해 제품 탄소발자국 인증에 쓰는 기술이다.",
+  w:"제품 단위 탄소발자국 인증에 직결. 기술이라기보다 인증을 통과시키는 인프라 역량이다.",
+  s:{pat:0,line:"PPA 계약 기반",talk:1,prj:"기초검토",note:"PPA 계약은 있으나 자체 발전·ESS 연계 운영은 없음"},
+  lag:{t:"약 2년",r:"TESLA 자체 ESS·태양광 연계 공장 운영",m:"PPA 계약"},
+  ev:[{t:"capex",w:"TESLA",d:"2026-01-19",s:"Nevada 확장",x:"자체 ESS·태양광 연계 공장 전력 운영 설비 투자 및 가동",g:"verified"},
+      {t:"conf",w:"CATL",d:"2026-06-10",s:"CIBF 2026",x:"제로카본 공장 인증 확대 계획 발표",g:"medium"}],
+  lim:"국내 전력 시장 구조상 동일 방식이 그대로 성립하지 않음. 격차를 기술 격차로만 읽으면 오독."}]},
+{id:"I3",n:"건설",items:[
+ {n:"모듈러 공장 공법",en:"Modular fab construction",own:"none",r:["CATL","TESLA"],trl:7,
+  d:"표준화된 동(棟) 모듈을 반복 시공해 공장을 짓는 방식. 거점마다 설계를 새로 하지 않고 착공과 설비 반입을 겹쳐 진행하는 기술이다.",
+  w:"착공에서 양산까지 기간이 곧 시장 점유율이다. 증설 경쟁의 실제 승부처.",
+  s:{pat:0,line:0,talk:0,prj:"없음",note:"거점별 개별 설계 방식 유지"},
+  lag:{t:"약 2년",r:"CATL 해외 거점 반복 시공 적용",m:"개별 설계"},
+  ev:[{t:"capex",w:"CATL",d:"2026-03-21",s:"해외 신규 거점",x:"표준 모듈 동 반복 시공으로 착공~양산 기간 단축을 투자 근거로 제시",g:"strong"},
+      {t:"conf",w:"TESLA",d:"2026-02-26",s:"Automate 2026",x:"공장 건설과 설비 반입을 병행하는 공정 사례 발표",g:"medium"}],
+  lim:"국가별 건축 인허가 제도 차이가 커서, 중국·미국 사례의 국내 적용 가능성은 별도 검토 필요."},
+ {n:"Copy-Exact 표준 라인 패키지",en:"Copy-exact line package",own:"part",r:["CATL","PANASONIC"],trl:8,
+  d:"검증된 라인 구성을 사양과 배치까지 그대로 복제해 신규 거점에 이식하는 표준화 방식. 신규 라인의 수율 안정화를 처음부터 다시 하지 않게 하는 기술이다.",
+  w:"라인마다 사양이 다르면 수율 안정화를 매번 처음부터 다시 한다.",
+  s:{pat:1,line:"부분 표준화",talk:1,prj:"진행중",note:"핵심 공정만 표준화. 전 라인 패키지화는 미완"},
+  lag:{t:"약 1년",r:"CATL 전 라인 패키지 복제",m:"부분 표준화"},
+  ev:[{t:"capex",w:"CATL",d:"2026-03-21",s:"해외 신규 거점",x:"기존 검증 라인 사양을 그대로 이식하는 발주 구조",g:"strong"}],
+  lim:"고객 사양 요구가 거점별로 다르면 표준화 여지 자체가 제한됨."},
+ {n:"증설 리드타임 단축 공법",en:"Fast-track expansion",own:"have",r:["CATL","BYD"],trl:8,
+  d:"기존 동 내 여유 공간에 라인을 증설하며 가동 중단을 최소화하는 시공 방식. 생산을 멈추지 않은 채 캐파를 늘리는 기술이다.",
+  w:"수주 대응 속도를 결정한다.",
+  s:{pat:2,line:"복수 사업장 실적",talk:1,prj:"완료(2024)",note:"국내외 증설 실적 다수"}}]}]}
+];
+
+/* ============ API 연결 지점 ============================================
+   USE_API=false  → 아래 TREE_MOCK(목업) 사용  ← 현재 상태
+   USE_API=true   → API_BASE + "/api/tree" 호출, 실패 시 목업으로 폴백
+   백엔드 응답 스키마는 docs/PRD.md §7 "API 계약" 참조
+======================================================================= */
+const API_BASE = "";        // 같은 오리진이면 빈 문자열. 예: "http://localhost:8000"
+const USE_API  = false;     // 파이프라인 붙이면 true 로만 바꾸면 됨
+
+let TREE=[], SEQ=[], GAPS=[], PARTS=[], openSet=new Set(), sel=null;
+let activeRivals=new Set(RIVALS), filter="gap", query="";
+let SRC={live:false, at:"2026-08-13 09:00 KST", err:"",
+  items:[{b:"4,128",s:"특허 누적"},{b:"+37",s:"특허 24H"},{b:"312",s:"설비투자 누적"},
+         {b:"+5",s:"설비투자 24H"},{b:"486",s:"컨퍼런스 누적"},{b:"+18",s:"컨퍼런스 7D"},
+         {b:"11",s:"리뷰 대기",pending:1}]};
+
+/* API 응답(flat nodes) → 화면 내부 구조(nested tree) 변환 */
+function adaptApi(j){
+  const byL1=new Map();
+  (j.nodes||[]).forEach(nd=>{
+    if(!byL1.has(nd.l1)) byL1.set(nd.l1,{id:nd.l1,n:nd.l1,en:nd.l1_en||"",g:[],_m:new Map()});
+    const st=byL1.get(nd.l1);
+    if(!st._m.has(nd.l2)){const g={id:nd.l2,n:nd.l2,items:[]}; st._m.set(nd.l2,g); st.g.push(g);}
+    const self=nd.self||{}, r=[], p=[];
+    Object.entries(nd.rivals||{}).forEach(([co,v])=>{
+      const s2=(v&&v.status)||v; if(s2==="have")r.push(co); else if(s2==="part")p.push(co);
+    });
+    st._m.get(nd.l2).items.push({
+      n:nd.name, en:nd.name_en||"", d:nd.desc||"", w:nd.why||"",
+      own:self.status||nd.self_status||"none", r:r, p:p, trl:nd.est_trl||null,
+      s:{pat:self.patents!=null?self.patents:0, line:self.line!=null?self.line:0,
+         talk:self.talks!=null?self.talks:0, prj:self.project||"—", note:self.note||""},
+      lag: nd.lag?{t:nd.lag.gap, r:nd.lag.rival_milestone, m:nd.lag.self_state}:null,
+      ev:(nd.evidence||[]).map(e=>({
+        t:e.type==="patent"?"patent":e.type==="capex"?"capex":"conf",
+        w:e.company, d:e.date, s:e.ref, x:e.summary, url:e.url,
+        g:GRADE[e.grade]?e.grade:"weak"})),
+      lim:nd.limit||""
+    });
+  });
+  const tree=[...byL1.values()].map(x=>{delete x._m; return x;});
+  const items=[];
+  (j.sources||[]).forEach(x=>{
+    items.push({b:String(x.total!=null?x.total:"–"), s:x.name+" 누적"});
+    if(x.new_24h!=null) items.push({b:"+"+x.new_24h, s:x.name+" 24H"});
+  });
+  return {tree, src:{live:true, at:j.collected_at||"", err:"", items:items}};
+}
+
+/* ============ 파생 인덱스 ============ */
+function buildIndex(){
+  SEQ=[];
+  TREE.forEach(s=>s.g.forEach(g=>g.items.forEach((it,i)=>{
+    it.stage=s.n; it.stageId=s.id; it.grp=g.n; it.grpId=g.id; it.id=g.id+"-"+i;
+    it.r=it.r||[]; it.p=it.p||[]; it.ev=it.ev||[]; it.s=it.s||{pat:0,line:0,talk:0,prj:"—",note:""};
+    it.status = it.own==="none"&&it.r.length>0 ? "gap" : (it.own==="part"?"part":"ok");
+    it.recent = it.ev.filter(e=>e.d>="2026-04-01").length;
+    it.top = it.ev.length ? it.ev.reduce((a,b)=>GRADE[b.g].r>GRADE[a.g].r?b:a) : null;
+    it.topGrade = it.top ? it.top.g : null;
+    const gb = it.top ? GRADE[it.top.g].r : 0;
+    it.score = Math.min(100, it.r.length*11 + it.p.length*3 + it.recent*8 + (it.own==="none"?18:0) + gb*6 + (it.trl||0));
+    SEQ.push(it);
+  })));
+  GAPS=SEQ.filter(i=>i.status==="gap").sort((a,b)=>b.score-a.score);
+  PARTS=SEQ.filter(i=>i.status==="part").sort((a,b)=>b.score-a.score);
+  openSet=new Set(TREE.map(s=>s.id).concat(TREE.flatMap(s=>s.g.map(g=>g.id))));
+  sel=GAPS[0]||SEQ[0]||null;
+}
+
+/* ============ 부팅: API 우선, 실패 시 목업 폴백 ============ */
+async function boot(){
+  if(USE_API){
+    try{
+      const res=await fetch(API_BASE+"/api/tree",{headers:{Accept:"application/json"}});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const a=adaptApi(await res.json());
+      if(!a.tree.length) throw new Error("nodes 비어 있음");
+      TREE=a.tree; SRC=a.src;
+    }catch(e){
+      TREE=TREE_MOCK; SRC.live=false; SRC.err=String(e.message||e);
+      console.warn("[CTI] API 연결 실패 → 목업 데이터로 폴백:",e);
+    }
+  }else{
+    TREE=TREE_MOCK;
+  }
+  buildIndex(); renderAll();
+}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const visibleRivals=it=>it.r.filter(r=>activeRivals.has(r));
+const isVisible=it=>it.status!=="gap"||visibleRivals(it).length>0;
+
+/* ============ 렌더 ============ */
+function renderSources(){
+  const flag = SRC.live
+    ? {b:"LIVE", s:"API 연결됨", flag:1}
+    : {b:"MOCK", s:(USE_API?"API 실패·폴백":"목업 데이터"), flag:1, warn:1};
+  $("#sources").innerHTML=[flag].concat(SRC.items)
+    .map(x=>`<div class="src ${x.pending?"pending":""} ${x.flag?"flag":""} ${x.warn?"warn":""}"><b>${x.b}</b><span>${x.s}</span></div>`).join("");
+  $("#stamp").innerHTML=(SRC.live
+      ? "LIVE · /api/tree"
+      : (USE_API ? "API 연결 실패 ("+esc(SRC.err)+") — 목업 표시 중" : "USE_API=false — 목업 데이터 표시 중"))
+    + " | KIPRIS · GOOGLE PATENTS · EPO OPS · DART/SEC/CNINFO · CONFERENCE PROGRAMS | "+esc(SRC.at);
+  $("#foot").textContent="판정 규칙  STRONG 1건 · MEDIUM 2건 · WEAK 3건 이상 = 보유  |  TRL 8 이상은 서로 다른 소스 2종 교차 시에만 부여";
+  const vb=$("#ver");
+  if(vb){ vb.textContent = APP_VERSION.toUpperCase()+" · "+APP_BUILT+(APP_FROZEN?" · 보관본":" · 작업본");
+          vb.className = APP_FROZEN?"vchip frozen":"vchip"; }
+}
+function renderKpis(){
+  const verified=GAPS.filter(g=>g.topGrade==="verified").length;
+  [["자사 미보유 기술",GAPS.length,`추적 세부기술 ${SEQ.length}건 중`,1],
+   ["양산 확인된 격차",verified,"경쟁사 양산 가동이 1차 출처로 확인된 미보유 항목"],
+   ["일부·검토 단계",PARTS.length,"적용 범위·성숙도 확인 필요"],
+   ["추적 경쟁사",RIVALS.length,RIVALS.map(r=>SHORT[r]).join(" · ")]]
+  .forEach(()=>{});
+  $("#kpis").innerHTML=[
+   {l:"자사 미보유 기술",v:GAPS.length,s:`추적 세부기술 ${SEQ.length}건 중`,a:1},
+   {l:"양산 확인된 격차",v:verified,s:"경쟁사 양산 가동이 1차 출처로 확인된 건",a:1},
+   {l:"일부·검토 단계",v:PARTS.length,s:"적용 범위·성숙도 확인 필요"},
+   {l:"추적 경쟁사",v:RIVALS.length,s:RIVALS.map(r=>SHORT[r]).join(" · ")}
+  ].map(k=>`<div class="kpi ${k.a?"alert":""}"><div class="eyebrow">${k.l}</div><div class="v">${k.v}</div><div class="sub">${esc(k.s)}</div></div>`).join("");
+}
+function renderRail(){
+  $("#rail").innerHTML=TREE.map(s=>{
+    const gaps=s.g.flatMap(g=>g.items).filter(i=>i.status==="gap"&&isVisible(i)).length;
+    return `<div class="stage"><div class="stage-h"><b>${s.n}</b><em class="${gaps?"":"zero"}">${gaps?"GAP "+gaps:"—"}</em></div>
+    <span class="stage-en">${s.en}</span>
+    ${s.g.map(g=>`<div class="grp"><div class="grp-n">${g.n}</div><div class="cells">
+      ${g.items.map(it=>`<button class="cell ${it.status==="gap"?"gap":it.status==="part"?"part":""} ${sel&&sel.id===it.id?"sel":""} ${it.status==="gap"&&!isVisible(it)?"dim":""}"
+        data-id="${it.id}" title="${esc(it.n)} — ${it.status==="gap"?"미보유":it.status==="part"?"일부":"보유"}"></button>`).join("")}
+    </div></div>`).join("")}</div>`;}).join("");
+  $("#rail").querySelectorAll(".cell").forEach(b=>b.onclick=()=>select(b.dataset.id));
+}
+function renderTree(){
+  const q=query.trim().toLowerCase(); let out="";
+  TREE.forEach(s=>{
+    const sg=s.g.flatMap(g=>g.items).filter(i=>i.status==="gap"&&isVisible(i)).length;
+    out+=`<button class="node lv1" data-t="s" data-id="${s.id}"><span class="tw">${openSet.has(s.id)?"−":"+"}</span>
+      <span class="nm">${s.n}</span>${sg?`<span class="badge b-gap">GAP ${sg}</span>`:`<span class="badge b-cnt">0</span>`}</button>`;
+    if(!openSet.has(s.id))return;
+    s.g.forEach(g=>{
+      const items=g.items.filter(it=>!q||(it.n+it.en).toLowerCase().includes(q));
+      if(q&&!items.length)return;
+      const gg=g.items.filter(i=>i.status==="gap"&&isVisible(i)).length;
+      out+=`<button class="node lv2" data-t="g" data-id="${g.id}"><span class="tw">${openSet.has(g.id)||q?"−":"+"}</span>
+        <span class="nm">${g.n}</span>${gg?`<span class="badge b-gap">${gg}</span>`:""}</button>`;
+      if(!openSet.has(g.id)&&!q)return;
+      items.forEach(it=>{
+        out+=`<button class="node lv3 ${sel&&sel.id===it.id?"active":""}" data-t="i" data-id="${it.id}">
+          <span class="dot ${it.status==="gap"?"gap":it.status==="part"?"part":""}"></span><span class="nm">${esc(it.n)}</span>
+          ${it.status==="gap"?`<span class="badge b-gap">미보유</span>`:it.status==="part"?`<span class="badge b-part">일부</span>`:""}</button>`;
+      });
+    });
+  });
+  $("#tree").innerHTML=out; $("#treeCount").textContent=`${SEQ.length} NODES`;
+  $("#tree").querySelectorAll(".node").forEach(b=>b.onclick=()=>{
+    const {t,id}=b.dataset;
+    if(t==="i")select(id); else{openSet.has(id)?openSet.delete(id):openSet.add(id);renderTree();}
+  });
+}
+function gradeOf(it,co){
+  const evs=it.ev.filter(e=>e.w===co);
+  if(!evs.length)return null;
+  return evs.reduce((a,b)=>GRADE[b.g].r>GRADE[a.g].r?b:a).g;
+}
+function statusCell(co,st,self,it){
+  const cls=st==="have"?"have":st==="part"?"part":"none";
+  const label=st==="have"?"보유":st==="part"?"일부":"—";
+  let note="";
+  if(self){
+    note = st==="none" ? "근거 0" : `특허 ${it.s.pat}`;
+  }else{
+    const g=gradeOf(it,co);
+    note = g?`${GRADE[g].l}<br>TRL ${it.trl||"–"}`:(st==="none"?"신호 없음":"기보유");
+  }
+  return `<div class="mcol ${self?"self":""}"><div class="co">${co}</div>
+    <div class="st ${cls} ${self&&st==="none"?"self":""}">${label}</div><div class="gr">${note}</div></div>`;
+}
+/* ============ 출처 계보: 근거 1건이 어느 원천에서 어떤 경로로 왔는가 ============ */
+const KR=["SAMSUNG SDI","SK ON"], CN=["CATL","BYD"], JP=["PANASONIC"], US=["TESLA"];
+function originOf(e){
+  if(e.t==="patent"){
+    if(KR.indexOf(e.w)>=0) return {n:"KIPRIS Plus Open API",k:"api",tier:"1차 (특허원부)",
+      dedup:"INPADOC Family ID",map:"CPC 필터 → 청구항 LLM 매핑"};
+    if(CN.indexOf(e.w)>=0) return {n:"Google Patents (BigQuery)",k:"api",tier:"1차 (특허원부)",
+      dedup:"Family ID → 우선권번호",map:"CPC 필터 → 초록·청구항 LLM 매핑"};
+    return {n:"EPO OPS API",k:"api",tier:"1차 (특허원부)",
+      dedup:"INPADOC Family ID (마스터)",map:"CPC 필터 → 청구항 LLM 매핑"};
+  }
+  if(e.t==="capex"){
+    if(US.indexOf(e.w)>=0) return {n:"SEC EDGAR (8-K)",k:"api",tier:"1차 (법정공시)",
+      dedup:"프로젝트 생애주기 매칭",map:"Line_Type·Technology_Keywords 추출 → 노드 매핑"};
+    if(KR.indexOf(e.w)>=0) return {n:"DART 오픈API (신규시설투자)",k:"api",tier:"1차 (법정공시)",
+      dedup:"프로젝트 생애주기 매칭",map:"Line_Type·Technology_Keywords 추출 → 노드 매핑"};
+    if(JP.indexOf(e.w)>=0) return {n:"EDINET API v2 / TDnet",k:"api",tier:"1차 (법정공시)",
+      dedup:"프로젝트 생애주기 매칭",map:"Line_Type·Technology_Keywords 추출 → 노드 매핑"};
+    return {n:"巨潮资讯(cninfo) 공告 파싱",k:"parse",tier:"1차 (거래소 공시)",
+      dedup:"프로젝트 생애주기 매칭",map:"Line_Type·Technology_Keywords 추출 → 노드 매핑"};
+  }
+  return {n:"컨퍼런스 프로그램 파싱 (PDF/웹)",k:"parse",tier:"2차 (주최측 공개자료)",
+    dedup:"행사·연사·세션 해시 Upsert",map:"세션 초록 청킹 → LLM 매핑"};
+}
+function lineage(it){
+  if(!it.ev.length) return `<div class="linsum">수집 신호가 없어 계보를 그릴 수 없습니다.</div>`;
+  const rows=it.ev.map(e=>{const o=originOf(e);
+    return `<tr>
+      <td><span class="okind ${o.k==="api"?"k-api":"k-parse"}">${o.k==="api"?"공식 API":"문서 파싱"}</span><br>
+          <b>${o.n}</b><br><span style="color:var(--muted)">${o.tier}</span></td>
+      <td class="arrow">→</td>
+      <td>${SHORT[e.w]} · ${e.d}<br><span style="color:var(--muted)">${esc(e.s)}</span></td>
+      <td class="arrow">→</td>
+      <td>${o.dedup}<br><span style="color:var(--muted)">${o.map}</span></td>
+      <td class="arrow">→</td>
+      <td><span class="gbadge" style="background:${GRADE[e.g].c}">${GRADE[e.g].l}</span></td>
+    </tr>`;}).join("");
+  const api=it.ev.filter(e=>originOf(e).k==="api").length;
+  return `<div class="lin"><table><thead><tr>
+      <th>원천 (Source)</th><th></th><th>수집 레코드</th><th></th><th>정제 · 기술매핑</th><th></th><th>등급</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="linsum">이 노드의 판정은 근거 <b>${it.ev.length}건</b>으로 구성되며, 그중 <b>${api}건</b>이 공식 API에서
+      자동 수집된 것이고 <b>${it.ev.length-api}건</b>은 문서 파싱분입니다.
+      화면의 모든 판정은 이 표의 각 행을 거슬러 올라가 원문까지 추적할 수 있습니다.</div>`;
+}
+function ladder(it){
+  const order=["verified","strong","medium","weak"];
+  const rows=order.map(g=>{
+    const hits=it.ev.filter(e=>e.g===g);
+    const on=hits.length>0;
+    return `<div class="rung ${on?"":"off"}">
+      <div class="lv"><i style="background:${on?GRADE[g].c:"#D6DBDF"}"></i>${GRADE[g].l}</div>
+      <div class="desc">${GRADE[g].d}</div>
+      <div class="hits">${on?hits.map(h=>`<div><span class="who">${SHORT[h.w]}</span>${esc(h.s)} — ${esc(h.x)}</div>`).join(""):"해당 근거 없음"}</div>
+    </div>`;}).join("");
+  const top=it.top?GRADE[it.top.g]:null;
+  const srcKinds=new Set(it.ev.map(e=>e.t)).size;
+  const rule = !it.ev.length ? "수집 신호 0건 — 판정 근거 없음(미관측)"
+    : `최고 등급 <b>${top.l}</b> (${SHORT[it.top.w]}) · 소스 ${srcKinds}종 ${srcKinds>=2?"교차 확인 ✓":"단일 — 신뢰도 주의"} → 판정: <b>${it.status==="gap"?"경쟁사 보유 / 자사 미보유":it.status==="part"?"경쟁사 앞섬 / 자사 일부":"양측 보유"}</b>`;
+  return `<div class="ladder">${rows}</div><div class="rule-note">${rule}</div>`;
+}
+function renderDetail(){
+  const it=sel; if(!it){$("#detail").innerHTML="";return;}
+  const vr=visibleRivals(it);
+  const best=vr.map(c=>({c,g:gradeOf(it,c)})).filter(x=>x.g).sort((a,b)=>GRADE[b.g].r-GRADE[a.g].r)[0];
+  const selfLabel=it.own==="have"?"보유":it.own==="part"?"일부 확보":"미보유";
+  const v1cls=it.own==="none"?"bad":it.own==="part"?"mid":"";
+  const ch=[["특허",it.s.pat],["라인 적용",it.s.line],["대외 발표",it.s.talk],["내부 과제",it.s.prj]];
+
+  $("#detail").innerHTML=`
+  <div class="crumb">${it.stage} / ${it.grp}</div>
+  <h3>${esc(it.n)}</h3><div class="en2">${esc(it.en)}</div>
+
+  <div class="explain">
+    <div class="lbl">이 기술은</div>
+    <p>${esc(it.d)}</p>
+    ${it.w?`<div class="why"><b>왜 중요한가 —</b> ${esc(it.w)}</div>`:""}
+  </div>
+
+  <div class="verdict3">
+    <div class="v3 ${v1cls}"><div class="k">자사</div><div class="m">${selfLabel}</div>
+      <div class="n">${esc(it.s.note||"—")}</div></div>
+    <div class="v3"><div class="k">경쟁사 최고</div>
+      <div class="m">${best?SHORT[best.c]:"—"}</div>
+      <div class="n">${best?`${GRADE[best.g].l} · 추정 TRL ${it.trl||"–"}<br>${GRADE[best.g].d}`:"확인된 경쟁사 신호 없음"}</div></div>
+    <div class="v3 ${it.lag?"bad":""}"><div class="k">시간 격차</div>
+      <div class="m">${it.lag?it.lag.t:"—"}</div>
+      <div class="n">${it.lag?`${esc(it.lag.r)}<br>자사: ${esc(it.lag.m)}`:"격차 산정 대상 아님"}</div></div>
+  </div>
+
+  <div class="sec-t">보유 현황 매트릭스<span>각 칸 아래는 판정 근거의 최고 등급</span></div>
+  <div class="matrix">${statusCell("LGES",it.own,true,it)}
+    ${RIVALS.map(r=>statusCell(SHORT[r],it.r.includes(r)?"have":it.p.includes(r)?"part":"none",false,it)).join("")}</div>
+
+  <div class="sec-t">근거 사다리<span>어느 강도의 증거가 있어서 이렇게 판정했는가</span></div>
+  ${ladder(it)}
+
+  <div class="sec-t">자사 측 확인<span>같은 4개 채널로 대칭 확인</span></div>
+  <div class="selfgrid">${ch.map(([k,v])=>{
+    const zero=(v===0||v==="없음");
+    return `<div class="sg ${zero?"zero":""}"><div class="k">${k}</div><div class="v">${v===0?"0":esc(v)}</div></div>`;}).join("")}</div>
+  ${it.s.note?`<div class="selfnote"><b>판정 근거 —</b> ${esc(it.s.note)}</div>`:""}
+
+  <div class="sec-t">출처 계보<span>이 판정이 어느 원천에서 어떤 경로로 만들어졌는가</span></div>
+  ${lineage(it)}
+
+  <div class="sec-t">수집 근거 원문 (${it.ev.length})</div>
+  ${it.ev.length?it.ev.map(e=>`<div class="ev">
+      <span class="gbadge" style="background:${GRADE[e.g].c}">${GRADE[e.g].l}</span>
+      <span class="tag ${e.t==="patent"?"t-pat":e.t==="capex"?"t-cap":"t-conf"}">${e.t==="patent"?"특허":e.t==="capex"?"설비투자":"컨퍼런스"}</span>
+      <div class="body"><div class="ttl">${esc(e.x)}</div><div class="meta">${SHORT[e.w]} · ${esc(e.s)} · ${e.d} · ${originOf(e).n}</div></div></div>`).join("")
+    :`<div style="font-size:12px;color:var(--muted);padding:10px 0">개별 수집 근거 없음 — 보유 판정은 기존 등록 특허군과 내부 확인 기준.</div>`}
+
+  <div class="sec-t">이 판정의 한계</div>
+  <div class="limits">
+    <ul>
+      ${it.lim?`<li>${esc(it.lim)}</li>`:""}
+      <li>자사 보유 여부는 공정기술팀 확인값입니다. 사내 비공개 파일럿이 있으면 판정이 바뀝니다.</li>
+      ${it.ev.length===0?`<li><b>수집 신호 0건</b> — "경쟁사 미보유"가 아니라 "관측되지 않음"입니다.</li>`:""}
+      ${new Set(it.ev.map(e=>e.t)).size<2&&it.ev.length?`<li>단일 소스 근거입니다. 다른 소스에서 교차 확인되기 전까지 TRL 추정은 상한 7로 봅니다.</li>`:""}
+    </ul>
+  </div>`;
+}
+function renderTable(){
+  let rows=filter==="gap"?GAPS:filter==="part"?PARTS:[...GAPS,...PARTS,...SEQ.filter(i=>i.status==="ok")];
+  rows=rows.filter(isVisible);
+  $("#tbody").innerHTML=rows.map((it,i)=>`<tr data-id="${it.id}">
+    <td class="rank">${String(i+1).padStart(2,"0")}</td>
+    <td>${it.stage} <span style="color:var(--muted)">/ ${it.grp}</span></td>
+    <td>${esc(it.n)}</td>
+    <td>${it.topGrade?`<span class="gbadge" style="background:${GRADE[it.topGrade].c}">${GRADE[it.topGrade].l}</span>`:`<span style="color:var(--muted);font-size:11px">미관측</span>`}</td>
+    <td><div class="chips">${visibleRivals(it).map(r=>`<span class="chip">${SHORT[r]}</span>`).join("")}
+      ${it.p.filter(r=>activeRivals.has(r)).map(r=>`<span class="chip p">${SHORT[r]}</span>`).join("")}</div></td>
+    <td style="font-family:var(--mono);font-size:11px;color:${it.lag?"var(--mark)":"var(--muted)"}">${it.lag?it.lag.t:"—"}</td>
+    <td><div class="score"><div class="score-bar"><i style="width:${it.score}%"></i></div><b>${it.score}</b></div></td>
+  </tr>`).join("")||`<tr><td colspan="7" style="padding:26px;text-align:center;color:var(--muted)">조건에 해당하는 항목이 없습니다.</td></tr>`;
+  $("#tbody").querySelectorAll("tr[data-id]").forEach(tr=>tr.onclick=()=>{select(tr.dataset.id);window.scrollTo({top:0,behavior:"smooth"});});
+}
+function renderRivalSel(){
+  $("#rivalSel").innerHTML=RIVALS.map(r=>`<button aria-pressed="${activeRivals.has(r)}" data-r="${r}">${SHORT[r]}</button>`).join("");
+  $("#rivalSel").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    const r=b.dataset.r; activeRivals.has(r)?activeRivals.delete(r):activeRivals.add(r);
+    if(!activeRivals.size)activeRivals=new Set(RIVALS); renderAll();});
+}
+function select(id){sel=SEQ.find(i=>i.id===id)||sel;renderRail();renderTree();renderDetail();}
+function renderAll(){renderSources();renderKpis();renderRail();renderTree();renderDetail();renderTable();renderRivalSel();}
+
+$("#q").oninput=e=>{query=e.target.value;renderTree();};
+$("#statusSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  filter=b.dataset.f;$("#statusSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderTable();});
+$("#prevBtn").onclick=()=>{const i=SEQ.indexOf(sel);select(SEQ[(i-1+SEQ.length)%SEQ.length].id);};
+$("#nextBtn").onclick=()=>{const i=SEQ.indexOf(sel);select(SEQ[(i+1)%SEQ.length].id);};
+$("#csv").onclick=()=>{
+  const rows=[["순위","공정","세부공정","세부기술","기술설명","자사","자사근거","경쟁사보유","최고근거등급","추정TRL","시간격차","시급도","판정한계"]];
+  GAPS.filter(isVisible).forEach((it,i)=>rows.push([i+1,it.stage,it.grp,it.n,it.d,"미보유",it.s.note,
+    visibleRivals(it).join("|"),it.topGrade?GRADE[it.topGrade].l:"미관측",it.trl||"",it.lag?it.lag.t:"",it.score,it.lim||""]));
+  const csv="\uFEFF"+rows.map(r=>r.map(c=>`"${String(c==null?"":c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="tech_gap_backlog_20260813.csv";a.click();
+};
+boot();
+</script>
+</body>
+</html>
