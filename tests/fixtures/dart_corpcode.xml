@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<result>
+  <list><corp_code>00000001</corp_code><corp_name>삼성에스디아이</corp_name><stock_code>006400</stock_code><modify_date>20260101</modify_date></list>
+  <list><corp_code>00000002</corp_code><corp_name>에스케이온</corp_name><stock_code></stock_code><modify_date>20260101</modify_date></list>
+  <list><corp_code>00000003</corp_code><corp_name>엘지에너지솔루션</corp_name><stock_code>373220</stock_code><modify_date>20260101</modify_date></list>
+  <list><corp_code>00000004</corp_code><corp_name>삼성에스디아이서비스</corp_name><stock_code></stock_code><modify_date>20260101</modify_date></list>
+  <list><corp_code>00000005</corp_code><corp_name>에스케이이노베이션</corp_name><stock_code>096770</stock_code><modify_date>20260101</modify_date></list>
+</result>

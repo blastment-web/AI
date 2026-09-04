@@ -194,7 +194,7 @@ EPO OPS 무료 계정에는 처리량 상한이 있으므로, 수집량이 늘�
 | **Google Patents BQ** | GCP 서비스 계정 JSON | GCP 콘솔 | **최우선.** 이것 하나로 CN·US·JP 청구항이 전부 열린다 |
 | KIPRIS Plus | 서비스키 | plus.kipris.or.kr | 무료 |
 | EPO OPS | Consumer Key / Secret | developer.epo.org | 무료, OAuth2 |
-| DART | API 키 | opendart.fss.or.kr | 무료 |
+| DART | API 키 | opendart.fss.or.kr | 무료 · **어댑터 구현 완료** (`adapters/capex_dart.py`) |
 | EDINET v2 | Subscription-Key | disclosure2.edinet-fsa.go.jp | 2023-08부터 필수 · MFA 필요 |
 | USPTO ODP | API 키 | data.uspto.gov | 2026-03 PatentsView 통합 · MFA + 프로필 추가 항목 필수. **BQ로 대체 가능하므로 후순위** |
 

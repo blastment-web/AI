@@ -14,6 +14,7 @@ server/
   cache.py                결과 캐시 · 레이트리미터
   config.py               환경변수 설정
   .env.example            설정 템플릿 (복사해서 .env 로)
+adapters/capex_dart.py    DART 설비투자 공시 수집 어댑터
 data/tree.sample.json     /api/tree 응답 계약 예시
 tools/coverage_audit.py   수집 커버리지 실측 (근거 61건 → 어댑터 귀속)
 docs/COVERAGE.md          커버리지 진단 · 키 발급 체크리스트
@@ -191,6 +192,37 @@ GCP 자격증명 없이 돌아갑니다.
 ```
 
 SQL 조립, 파라미터 바인딩, 제목 모드의 초록 컬럼 배제, 한도 절삭을 검증합니다.
+
+## 수집 어댑터
+
+### DART — 설비투자 공시 (구현됨)
+
+삼성SDI·SK온·LG에너지솔루션의 신규시설투자 공시를 끌어와 evidence 레코드로 만듭니다.
+출력은 `data/tree.sample.json` 의 evidence 계약을 따릅니다.
+
+```bash
+# 키 없이 변환 로직만 시험 (픽스처 사용)
+python -m adapters.capex_dart --from-fixture tests/fixtures/dart_list.json
+
+# 실제 수집 — .env 에 DART_API_KEY 필요
+python -m adapters.capex_dart --from 2026-01-01 --to 2026-09-04
+python -m adapters.capex_dart --list-targets     # corp_code 해결 결과만 확인
+```
+
+**등급은 제안이지 확정이 아닙니다.** `GRADE` 사다리의 VERIFIED 는 "양산 라인 가동이
+1차 출처로 확인됨"인데, 이를 키워드 매칭으로 자동 확정하면 근거 없는 등급이 생깁니다.
+그래서 어댑터는 판단 근거 구절을 `grade_basis` 에 싣고, 아래 경우 `needs_review=true` 로
+표시해 사람이 확인하게 합니다.
+
+- VERIFIED 를 제안한 건 (가장 강한 주장이므로 항상)
+- 등급 규칙이 하나도 맞지 않은 건
+- **기술 키워드가 하나도 추출되지 않은 건** — 어느 기술 노드에도 붙일 수 없으므로
+
+기술 노드 매핑은 이 어댑터 범위 밖입니다. 키워드 추출까지만 하고 별도 단계로 남겨둡니다.
+
+**키 취급** — DART 는 인증키를 쿼리스트링으로 받으므로 URL 을 그대로 로깅하면 그대로
+노출됩니다. `redact()` 가 로그·오류·트레이스백에서 키를 지우며, `tests/test_dart.py` 가
+이를 강제합니다.
 
 ## 로드맵
 

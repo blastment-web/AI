@@ -1,0 +1,54 @@
+{
+  "status": "000",
+  "message": "정상",
+  "page_no": 1,
+  "page_count": 10,
+  "total_count": 4,
+  "total_page": 1,
+  "list": [
+    {
+      "corp_code": "00000001",
+      "corp_name": "삼성에스디아이",
+      "stock_code": "006400",
+      "corp_cls": "Y",
+      "report_nm": "신규시설투자등",
+      "rcept_no": "20260211000123",
+      "flr_nm": "삼성에스디아이",
+      "rcept_dt": "20260211",
+      "rm": ""
+    },
+    {
+      "corp_code": "00000001",
+      "corp_name": "삼성에스디아이",
+      "stock_code": "006400",
+      "corp_cls": "Y",
+      "report_nm": "유형자산 취득결정",
+      "rcept_no": "20260415000456",
+      "flr_nm": "삼성에스디아이",
+      "rcept_dt": "20260415",
+      "rm": ""
+    },
+    {
+      "corp_code": "00000001",
+      "corp_name": "삼성에스디아이",
+      "stock_code": "006400",
+      "corp_cls": "Y",
+      "report_nm": "분기보고서 (2026.03)",
+      "rcept_no": "20260515000789",
+      "flr_nm": "삼성에스디아이",
+      "rcept_dt": "20260515",
+      "rm": ""
+    },
+    {
+      "corp_code": "00000001",
+      "corp_name": "삼성에스디아이",
+      "stock_code": "006400",
+      "corp_cls": "Y",
+      "report_nm": "최대주주등소유주식변동신고서",
+      "rcept_no": "20260601000111",
+      "flr_nm": "삼성에스디아이",
+      "rcept_dt": "20260601",
+      "rm": ""
+    }
+  ]
+}

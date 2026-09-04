@@ -6,9 +6,10 @@ key.json
 .env.local
 credentials/
 
-# 로컬 캐시 · 스냅샷 산출물
+# 로컬 캐시 · 스냅샷 · 수집 산출물
 .cache/
 data/tree.json
+data/evidence_*.jsonl
 
 # Python
 .venv/
