@@ -15,6 +15,8 @@ server/
   config.py               환경변수 설정
   .env.example            설정 템플릿 (복사해서 .env 로)
 data/tree.sample.json     /api/tree 응답 계약 예시
+tools/coverage_audit.py   수집 커버리지 실측 (근거 61건 → 어댑터 귀속)
+docs/COVERAGE.md          커버리지 진단 · 키 발급 체크리스트
 tests/test_sql.py         SQL 조립 검증 (GCP 없이 실행 가능)
 ```
 
@@ -66,6 +68,11 @@ tests/test_sql.py         SQL 조립 검증 (GCP 없이 실행 가능)
 
 근거 1건마다 `원천 → 수집 레코드 → 정제·기술매핑 → 등급` 경로를 표로 되짚을 수 있습니다.
 
+> **이 라우팅은 확정안이 아닙니다.** 현재는 *기업 국적*으로 원천을 고르지만, 특허는
+> *발행관할*로 정해져야 합니다. 그 결과 US·JP 특허가 청구항에 도달하지 못해
+> 특허 근거의 38%가 MEDIUM 판정 근거를 갖추지 못합니다.
+> 실측과 재설계 권고는 **[docs/COVERAGE.md](docs/COVERAGE.md)** 참조.
+
 | 신호 | 원천 |
 |------|------|
 | 특허 (KR) | KIPRIS Plus Open API — INPADOC Family ID 중복 제거 |
@@ -76,6 +83,13 @@ tests/test_sql.py         SQL 조립 검증 (GCP 없이 실행 가능)
 | 설비투자 (JP) | EDINET API v2 / TDnet |
 | 설비투자 (CN) | 巨潮资讯(cninfo) 공고 파싱 |
 | 컨퍼런스 | 프로그램 PDF/웹 파싱 — 행사·연사·세션 해시 Upsert |
+
+현재 이 계보 중 실제로 수집 가능한 것은 근거 61건 기준 **30%** 입니다.
+판정을 좌우하는 고등급(VERIFIED·STRONG) 28건 중 22건이 미구현 원천 소관입니다.
+
+```bash
+python3 tools/coverage_audit.py     # 커버리지 실측 재현
+```
 
 ## 백엔드 연결
 
@@ -186,6 +200,16 @@ SQL 조립, 파라미터 바인딩, 제목 모드의 초록 컬럼 배제, 한�
 | **Phase 2** | 로드맵 대조 · TRL 격차 | 미착수 (탭 비활성) |
 
 ## 남은 작업
+
+수집 커버리지 관련 (우선순위순, 근거는 [docs/COVERAGE.md](docs/COVERAGE.md)):
+
+1. **Google Patents BigQuery 수집 어댑터** — 키 1개로 CN·US·JP 청구항이 한 번에 열림. `server/bq.py` 재사용
+2. **cninfo 공고 파싱** — 단일 최대 공백. 고등급 근거 13건(CATL·BYD 양산 신호)
+3. **컨퍼런스 프로그램 파싱** — 현재 커버리지 0%. OpenAlex로는 대체 불가
+4. EDINET v2 어댑터 — PANASONIC 설비투자
+5. 라우팅 축을 `기업 국적` → `발행관할 × 신선도`로 전환 (1~3 착수 전에 확정할 것)
+
+그 외:
 
 - `/api/tree` 수집 파이프라인 구현 후 `USE_API=true` 전환 (특허 검색은 이미 연결됨)
 - 자사 4채널(특허·라인·발표·내부과제) 값의 사내 시스템 연동 — 현재는 공정기술팀 확인값 수기 입력
