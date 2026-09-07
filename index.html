@@ -64,47 +64,13 @@ h2 small{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.
 .sw-have{background:var(--graphite)}
 .sw-part{background:var(--amber-soft);border:1px solid var(--amber)}
 .sw-gap{background:var(--panel);border:1.5px solid var(--mark)}
-.web{border:1px solid var(--rule);background:var(--panel);overflow-x:auto}
-.web-edge{height:10px;background:var(--foil);background-image:repeating-linear-gradient(90deg,transparent,transparent 14px,#C6CCD0 14px,#C6CCD0 15px)}
-.rail{display:flex;min-width:940px}
-.stage{border-right:1px solid var(--rule-soft);padding:14px 12px 16px;flex:1 1 0}
-.stage:last-child{border-right:0}
-.stage-h{display:flex;align-items:baseline;justify-content:space-between}
-.stage-h b{font-size:12.5px;font-weight:700}
-.stage-h em{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--mark);font-weight:700}
-.stage-h em.zero{color:var(--muted);font-weight:400}
-.stage-en{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin:2px 0 10px}
-.grp{margin-bottom:11px}
-.grp-n{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--ink2);margin-bottom:5px;text-transform:uppercase}
-.cells{display:flex;flex-wrap:wrap;gap:4px}
-.cell{width:17px;height:17px;border:0;padding:0;cursor:pointer;position:relative;background:var(--graphite);transition:transform .12s ease}
-.cell:hover{transform:scale(1.28);z-index:3}
-.cell.part{background:var(--amber-soft);box-shadow:inset 0 0 0 1.5px var(--amber)}
-.cell.gap{background:#fff;box-shadow:inset 0 0 0 1.5px var(--mark)}
-.cell.gap::after{content:"";position:absolute;inset:5px;background:var(--mark)}
-.cell.sel{outline:2px solid var(--ink);outline-offset:2px}
-.cell.dim{opacity:.22}
 
-.grid{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(460px,1.6fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:34px}
+.grid{border:1px solid var(--rule);background:var(--rule);margin-top:28px}
 .pane{background:var(--panel);min-width:0}
 .pane-h{padding:13px 18px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;align-items:center;gap:12px}
-.pane-b{padding:6px 8px 18px;max-height:900px;overflow:auto}
-.node{border:0;background:none;width:100%;text-align:left;cursor:pointer;padding:8px 10px;display:flex;align-items:center;gap:8px}
-.node:hover{background:#F4F6F7}
-.node .tw{font-family:var(--mono);font-size:10px;color:var(--muted);width:9px}
-.lv1{font-weight:700;font-size:13.5px;border-top:1px solid var(--rule-soft)}
-.lv1:first-child{border-top:0}
-.lv2{padding-left:26px;font-size:12.5px;color:var(--ink2);font-weight:600}
-.lv3{padding-left:46px;font-size:12.5px}
-.node .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .badge{font-family:var(--mono);font-size:9.5px;font-weight:700;padding:2px 5px;white-space:nowrap}
 .b-gap{background:var(--mark);color:#fff}
 .b-part{background:var(--amber-soft);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
-.b-cnt{background:#EDF0F1;color:var(--muted)}
-.dot{width:8px;height:8px;flex:0 0 8px;background:var(--graphite)}
-.dot.part{background:var(--amber-soft);box-shadow:inset 0 0 0 1.5px var(--amber)}
-.dot.gap{background:var(--mark)}
-.node.active{background:#F0F2F3;box-shadow:inset 3px 0 0 var(--ink)}
 
 .det{padding:22px 24px 30px}
 .crumb{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
@@ -249,8 +215,62 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .pc-f a{color:var(--mark);text-decoration:none;font-weight:700}
 .pc-f a:hover{text-decoration:underline}
 .detact{margin-top:12px}
+/* ── 공정 파이프라인 (V2 · 임원 보고용) ── */
+.pipe-block{margin-top:32px}
+.pipe-tally{display:inline-flex;align-items:center;font-size:11px;color:var(--ink2);margin-right:6px}
+.pipe-tally i{display:inline-block;width:11px;height:11px;margin-right:6px}
+.pipe-tally b{font-family:var(--mono);font-size:12.5px;font-weight:700;margin-left:5px;letter-spacing:-.02em}
+.btn.ghost[aria-pressed="true"]{background:var(--ink);color:#fff}
+.pipe-wrap{border:1px solid var(--rule);background:var(--panel);overflow-x:auto}
+.pipe{display:flex;align-items:stretch;min-width:1180px}
+.pipe-stage{flex:1 1 0;min-width:0;position:relative;display:flex;flex-direction:column;padding-bottom:16px}
+.pipe-stage+.pipe-stage{border-left:1px solid var(--rule-soft)}
+/* 공정 간 흐름 화살표 — 경계선을 헤더색으로 가리고 그 위에 꺾쇠를 얹는다 */
+.pipe-stage::before{content:"";position:absolute;right:-8px;top:17px;width:16px;height:16px;background:#FAFBFB;z-index:4}
+.pipe-stage::after{content:"";position:absolute;right:-3px;top:21px;width:7px;height:7px;
+  border-top:2px solid var(--ink2);border-right:2px solid var(--ink2);transform:rotate(45deg);z-index:5}
+.pipe-stage:last-child::before,.pipe-stage:last-child::after{display:none}
+
+.ps-h{padding:13px 13px 11px;border-bottom:1px solid var(--rule-soft);background:#FAFBFB}
+.ps-t{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.ps-n{font-size:14.5px;font-weight:800;letter-spacing:-.03em}
+.ps-gap{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--mark);white-space:nowrap}
+.ps-gap.zero{color:var(--muted);font-weight:400}
+.ps-en{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:block;margin-top:3px}
+.ps-b{padding:11px 11px 0;display:flex;flex-direction:column;gap:7px}
+.ps-sec{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:7px;margin-top:5px}
+.ps-sec:first-child{margin-top:0}
+.ps-sec::after{content:"";flex:1;height:1px;background:var(--rule-soft)}
+.ps-empty{font-size:11px;color:var(--muted);padding:16px 10px;text-align:center;border:1px dashed var(--rule-soft)}
+
+/* 기술 카드 */
+.pc{border:0;width:100%;text-align:left;cursor:pointer;background:var(--panel);position:relative;
+  display:block;font-family:inherit;padding:9px 10px 10px 13px;transition:transform .1s ease}
+.pc:hover{transform:translateX(2px)}
+.pc-grp{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.pc-n{font-size:12.5px;font-weight:700;line-height:1.35;letter-spacing:-.01em;color:var(--ink)}
+.pc-m{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:7px}
+.pc-lag{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--mark);white-space:nowrap}
+.pc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.pc.gap{box-shadow:inset 0 0 0 2px var(--mark);background:#fff}
+.pc.gap::before{background:var(--mark)}
+.pc.part{background:var(--amber-soft);box-shadow:inset 0 0 0 1px var(--amber);padding-left:12px}
+.pc.part::before{background:var(--amber);width:3px}
+.pc.part .pc-n{font-weight:600}
+.pc.sel{outline:2px solid var(--ink);outline-offset:1px;z-index:2}
+
+/* 보유 기술 — 배경 없는 회색 칩 (기본 숨김) */
+.ps-have{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.pc.have{width:auto;padding:4px 7px;background:transparent;box-shadow:inset 0 0 0 1px var(--rule);
+  font-size:10.5px;font-weight:500;color:var(--muted);line-height:1.3}
+.pc.have::before{display:none}
+.pc.have:hover{color:var(--ink);box-shadow:inset 0 0 0 1px var(--muted);transform:none}
+.pc.have.sel{outline:2px solid var(--ink);outline-offset:1px;color:var(--ink)}
+
+@media (max-width:720px){.pipe{min-width:900px}.ps-n{font-size:13px}}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
-@media (max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.wrap{padding:0 16px 56px}
+@media (max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:0 16px 56px}
   .verdict3{grid-template-columns:1fr}.selfgrid{grid-template-columns:repeat(2,1fr)}.rung{flex-wrap:wrap}.rung .desc{flex:1 1 100%}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -277,27 +297,23 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 
 <section class="kpis" id="kpis"></section>
 
-<section class="rail-block">
+<section class="pipe-block">
   <div class="block-head">
-    <h2>공정 레인 GAP 맵<small>Process Lane · 1 cell = 1 세부기술</small></h2>
-    <div class="legend">
-      <span><i class="sw-have"></i>자사 보유</span>
-      <span><i class="sw-part"></i>일부·검토 단계</span>
-      <span><i class="sw-gap"></i>미보유 (경쟁사 보유)</span>
+    <h2>공정 파이프라인<small>Process Pipeline · 전극 → 조립 → 활성화 → Pack → 인프라</small></h2>
+    <div class="ctrl">
+      <span class="pipe-tally"><i class="sw-gap"></i>미보유 <b id="tallyGap">0</b></span>
+      <span class="pipe-tally"><i class="sw-part"></i>일부 <b id="tallyPart">0</b></span>
+      <button class="btn ghost" id="haveToggle" aria-pressed="false">보유 기술 <b id="tallyHave">0</b>건 표시</button>
+      <input type="search" id="q" placeholder="기술 검색" aria-label="기술 검색">
     </div>
   </div>
-  <div class="web"><div class="web-edge"></div><div class="rail" id="rail"></div><div class="web-edge"></div></div>
+  <div class="pipe-wrap"><div class="pipe" id="pipe"></div></div>
 </section>
 
 <section class="grid">
   <div class="pane">
-    <div class="pane-h"><h2>기술 트리<small id="treeCount"></small></h2>
-      <div class="ctrl"><input type="search" id="q" placeholder="기술 검색" aria-label="기술 검색"></div></div>
-    <div class="pane-b" id="tree"></div>
-  </div>
-  <div class="pane">
     <div class="pane-h"><h2>기술 상세<small>What it is · Why it matters · Evidence</small></h2>
-      <div class="ctrl"><button class="btn ghost" id="prevBtn">◀</button><button class="btn ghost" id="nextBtn">▶</button></div></div>
+      <div class="ctrl"><button class="btn ghost" id="prevBtn">◀ 이전</button><button class="btn ghost" id="nextBtn">다음 ▶</button></div></div>
     <div id="detail" class="det"></div>
   </div>
 </section>
@@ -757,8 +773,8 @@ const TREE_MOCK=[
 const API_BASE = "";        // 같은 오리진이면 빈 문자열. 예: "http://localhost:8000"
 const USE_API  = false;     // 파이프라인 붙이면 true 로만 바꾸면 됨
 
-let TREE=[], SEQ=[], GAPS=[], PARTS=[], openSet=new Set(), sel=null;
-let activeRivals=new Set(RIVALS), filter="gap", query="";
+let TREE=[], SEQ=[], GAPS=[], PARTS=[], sel=null;
+let activeRivals=new Set(RIVALS), filter="gap", query="", showHave=false;
 let SRC={live:false, at:"2026-08-13 09:00 KST", err:"",
   items:[{b:"4,128",s:"특허 누적"},{b:"+37",s:"특허 24H"},{b:"312",s:"설비투자 누적"},
          {b:"+5",s:"설비투자 24H"},{b:"486",s:"컨퍼런스 누적"},{b:"+18",s:"컨퍼런스 7D"},
@@ -813,7 +829,6 @@ function buildIndex(){
   })));
   GAPS=SEQ.filter(i=>i.status==="gap").sort((a,b)=>b.score-a.score);
   PARTS=SEQ.filter(i=>i.status==="part").sort((a,b)=>b.score-a.score);
-  openSet=new Set(TREE.map(s=>s.id).concat(TREE.flatMap(s=>s.g.map(g=>g.id))));
   sel=GAPS[0]||SEQ[0]||null;
 }
 
@@ -870,43 +885,58 @@ function renderKpis(){
    {l:"추적 경쟁사",v:RIVALS.length,s:RIVALS.map(r=>SHORT[r]).join(" · ")}
   ].map(k=>`<div class="kpi ${k.a?"alert":""}"><div class="eyebrow">${k.l}</div><div class="v">${k.v}</div><div class="sub">${esc(k.s)}</div></div>`).join("");
 }
-function renderRail(){
-  $("#rail").innerHTML=TREE.map(s=>{
-    const gaps=s.g.flatMap(g=>g.items).filter(i=>i.status==="gap"&&isVisible(i)).length;
-    return `<div class="stage"><div class="stage-h"><b>${s.n}</b><em class="${gaps?"":"zero"}">${gaps?"GAP "+gaps:"—"}</em></div>
-    <span class="stage-en">${s.en}</span>
-    ${s.g.map(g=>`<div class="grp"><div class="grp-n">${g.n}</div><div class="cells">
-      ${g.items.map(it=>`<button class="cell ${it.status==="gap"?"gap":it.status==="part"?"part":""} ${sel&&sel.id===it.id?"sel":""} ${it.status==="gap"&&!isVisible(it)?"dim":""}"
-        data-id="${it.id}" title="${esc(it.n)} — ${it.status==="gap"?"미보유":it.status==="part"?"일부":"보유"}"></button>`).join("")}
-    </div></div>`).join("")}</div>`;}).join("");
-  $("#rail").querySelectorAll(".cell").forEach(b=>b.onclick=()=>select(b.dataset.id));
+/* ============ 공정 파이프라인 (V2) =====================================
+   기존 renderRail(추상 셀 맵) + renderTree(폴더 트리)를 하나로 합친 것.
+   컬럼 = 공정(L1), 컬럼 안은 미보유 → 일부 → 보유 순. 각 구간은 시급도 내림차순.
+   세부공정(L2)은 카드 윗줄에 작게. 보유는 기본 숨김(showHave).
+====================================================================== */
+function pipeCard(it){
+  const cls = it.status==="gap" ? "gap" : it.status==="part" ? "part" : "have";
+  const on  = sel && sel.id===it.id ? "sel" : "";
+  const body = it.status==="ok" ? esc(it.n) : `
+      <span class="pc-grp">${esc(it.grp)}</span>
+      <span class="pc-n">${esc(it.n)}</span>
+      <span class="pc-m">
+        ${visibleRivals(it).slice(0,3).map(r=>`<span class="chip">${SHORT[r]}</span>`).join("")}
+        ${it.lag?`<span class="pc-lag">${esc(it.lag.t)} 뒤짐</span>`:""}
+      </span>`;
+  return `<button class="pc ${cls} ${on}" data-id="${it.id}" title="${esc(it.n)}">${body}</button>`;
 }
-function renderTree(){
-  const q=query.trim().toLowerCase(); let out="";
-  TREE.forEach(s=>{
-    const sg=s.g.flatMap(g=>g.items).filter(i=>i.status==="gap"&&isVisible(i)).length;
-    out+=`<button class="node lv1" data-t="s" data-id="${s.id}"><span class="tw">${openSet.has(s.id)?"−":"+"}</span>
-      <span class="nm">${s.n}</span>${sg?`<span class="badge b-gap">GAP ${sg}</span>`:`<span class="badge b-cnt">0</span>`}</button>`;
-    if(!openSet.has(s.id))return;
-    s.g.forEach(g=>{
-      const items=g.items.filter(it=>!q||(it.n+it.en).toLowerCase().includes(q));
-      if(q&&!items.length)return;
-      const gg=g.items.filter(i=>i.status==="gap"&&isVisible(i)).length;
-      out+=`<button class="node lv2" data-t="g" data-id="${g.id}"><span class="tw">${openSet.has(g.id)||q?"−":"+"}</span>
-        <span class="nm">${g.n}</span>${gg?`<span class="badge b-gap">${gg}</span>`:""}</button>`;
-      if(!openSet.has(g.id)&&!q)return;
-      items.forEach(it=>{
-        out+=`<button class="node lv3 ${sel&&sel.id===it.id?"active":""}" data-t="i" data-id="${it.id}">
-          <span class="dot ${it.status==="gap"?"gap":it.status==="part"?"part":""}"></span><span class="nm">${esc(it.n)}</span>
-          ${it.status==="gap"?`<span class="badge b-gap">미보유</span>`:it.status==="part"?`<span class="badge b-part">일부</span>`:""}</button>`;
-      });
-    });
-  });
-  $("#tree").innerHTML=out; $("#treeCount").textContent=`${SEQ.length} NODES`;
-  $("#tree").querySelectorAll(".node").forEach(b=>b.onclick=()=>{
-    const {t,id}=b.dataset;
-    if(t==="i")select(id); else{openSet.has(id)?openSet.delete(id):openSet.add(id);renderTree();}
-  });
+function renderPipeline(){
+  const q = query.trim().toLowerCase();
+  const hit = it => !q || (it.n+" "+it.en+" "+it.grp).toLowerCase().includes(q);
+  const byScore = (a,b) => b.score - a.score;
+
+  $("#pipe").innerHTML = TREE.map(st=>{
+    const all   = st.g.flatMap(g=>g.items);
+    const shown = all.filter(hit);
+    const gaps  = shown.filter(i=>i.status==="gap" && isVisible(i)).sort(byScore);
+    const parts = shown.filter(i=>i.status==="part").sort(byScore);
+    const haves = shown.filter(i=>i.status==="ok");
+    const gapAll = all.filter(i=>i.status==="gap" && isVisible(i)).length;
+
+    let body = "";
+    if(gaps.length)  body += `<div class="ps-sec">미보유 ${gaps.length}</div>` + gaps.map(pipeCard).join("");
+    if(parts.length) body += `<div class="ps-sec">일부 ${parts.length}</div>` + parts.map(pipeCard).join("");
+    if(showHave && haves.length)
+      body += `<div class="ps-sec">보유 ${haves.length}</div>`
+            + `<div class="ps-have">${haves.map(pipeCard).join("")}</div>`;
+    if(!body) body = `<div class="ps-empty">${q ? "검색 결과 없음" : "표시할 항목 없음"}</div>`;
+
+    return `<div class="pipe-stage">
+      <div class="ps-h">
+        <div class="ps-t"><span class="ps-n">${esc(st.n)}</span>
+          <span class="ps-gap ${gapAll?"":"zero"}">${gapAll?"GAP "+gapAll:"—"}</span></div>
+        <span class="ps-en">${esc(st.en)}</span>
+      </div>
+      <div class="ps-b">${body}</div>
+    </div>`;
+  }).join("");
+
+  $("#pipe").querySelectorAll(".pc").forEach(b=>b.onclick=()=>select(b.dataset.id));
+  $("#tallyGap").textContent  = GAPS.filter(isVisible).length;
+  $("#tallyPart").textContent = PARTS.length;
+  $("#tallyHave").textContent = SEQ.filter(i=>i.status==="ok").length;
 }
 function gradeOf(it,co){
   const evs=it.ev.filter(e=>e.w===co);
@@ -1072,10 +1102,16 @@ function renderRivalSel(){
     const r=b.dataset.r; activeRivals.has(r)?activeRivals.delete(r):activeRivals.add(r);
     if(!activeRivals.size)activeRivals=new Set(RIVALS); renderAll();});
 }
-function select(id){sel=SEQ.find(i=>i.id===id)||sel;renderRail();renderTree();renderDetail();}
-function renderAll(){renderSources();renderKpis();renderRail();renderTree();renderDetail();renderTable();renderRivalSel();}
+function select(id){sel=SEQ.find(i=>i.id===id)||sel;renderPipeline();renderDetail();}
+function renderAll(){renderSources();renderKpis();renderPipeline();renderDetail();renderTable();renderRivalSel();}
 
-$("#q").oninput=e=>{query=e.target.value;renderTree();};
+$("#q").oninput=e=>{query=e.target.value;renderPipeline();};
+$("#haveToggle").onclick=()=>{
+  showHave=!showHave;
+  $("#haveToggle").setAttribute("aria-pressed",String(showHave));
+  $("#haveToggle").innerHTML=`보유 기술 <b id="tallyHave">${SEQ.filter(i=>i.status==="ok").length}</b>건 ${showHave?"숨기기":"표시"}`;
+  renderPipeline();
+};
 $("#statusSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{
   filter=b.dataset.f;$("#statusSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderTable();});
 $("#prevBtn").onclick=()=>{const i=SEQ.indexOf(sel);select(SEQ[(i-1+SEQ.length)%SEQ.length].id);};
