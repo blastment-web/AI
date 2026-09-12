@@ -269,6 +269,32 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .pc.have.sel{outline:2px solid var(--ink);outline-offset:1px;color:var(--ink)}
 
 @media (max-width:720px){.pipe{min-width:900px}.ps-n{font-size:13px}}
+/* ── 수집 파이프라인 현황 (V3) ── */
+.src-block{margin-top:32px}
+.srcgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.srcpane{background:var(--panel);padding:0;min-width:0}
+.srcpane-h{padding:11px 14px;border-bottom:1px solid var(--rule-soft);background:#FAFBFB;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+.srow{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--rule-soft)}
+.srow:last-child{border-bottom:0}
+.sdot{width:8px;height:8px;flex:0 0 8px}
+.sdot.on{background:var(--g3)} .sdot.off{background:var(--mark)} .sdot.part{background:var(--amber)}
+.sname{flex:1;min-width:0;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sname small{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--muted);font-weight:400;text-transform:uppercase}
+.svol{font-family:var(--mono);font-size:11px;font-weight:700;text-align:right;flex:0 0 88px;letter-spacing:-.02em}
+.svol span{display:block;font-size:8.5px;font-weight:400;color:var(--muted);letter-spacing:.04em}
+.sbar{flex:0 0 86px;height:6px;background:#EDF0F1;position:relative}
+.sbar i{position:absolute;left:0;top:0;bottom:0;background:var(--graphite)}
+.sbar.low i{background:var(--mark)} .sbar.mid i{background:var(--amber)}
+.spct{font-family:var(--mono);font-size:10px;font-weight:700;flex:0 0 34px;text-align:right}
+.flowline{display:flex;align-items:stretch;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:14px;overflow-x:auto}
+.fstep{background:var(--panel);flex:1 1 0;min-width:150px;padding:13px 14px 15px}
+.fstep .fn{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fstep .fv{font-size:15px;font-weight:800;letter-spacing:-.03em;margin-top:7px}
+.fstep .fd{font-size:11px;color:var(--ink2);margin-top:5px;line-height:1.45}
+.fstep.bad .fv{color:var(--mark)}
+@media (max-width:900px){.srcgrid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:560px){.srow{gap:7px;padding:9px 10px}.sbar{flex:0 0 52px}.svol{flex:0 0 70px}.spct{flex:0 0 30px}}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 @media (max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:0 16px 56px}
   .verdict3{grid-template-columns:1fr}.selfgrid{grid-template-columns:repeat(2,1fr)}.rung{flex-wrap:wrap}.rung .desc{flex:1 1 100%}}
@@ -339,6 +365,22 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   </table></div>
 </section>
 
+<section class="src-block">
+  <div class="block-head">
+    <h2>수집 파이프라인 현황<small>Data Pipeline Status · 2026-09-12 실측</small></h2>
+    <div class="legend">
+      <span><i class="sw-have" style="background:var(--g3)"></i>연결됨</span>
+      <span><i class="sw-part" style="background:var(--amber);border:0"></i>부분</span>
+      <span><i class="sw-gap" style="background:var(--mark);border:0"></i>미구현</span>
+    </div>
+  </div>
+  <div class="srcgrid">
+    <div class="srcpane"><div class="srcpane-h">특허 원천</div><div id="srcPat"></div></div>
+    <div class="srcpane"><div class="srcpane-h">설비투자 · 기타 원천</div><div id="srcCap"></div></div>
+  </div>
+  <div class="flowline" id="flowLine"></div>
+</section>
+
 <section class="rail-block" id="patentSec">
   <div class="block-head">
     <h2>특허 원문 검색<small>BigQuery · patents-public-data</small></h2>
@@ -376,8 +418,8 @@ const GRADE={
  weak    :{r:1,l:"WEAK",    c:"var(--g1)",d:"공개특허(출원) 또는 포스터·패널 언급"}
 };
 /* ============ 버전 ============ */
-const APP_VERSION = "v2-dev";          // 스냅샷 시 pipeline/tools/snapshot.py 가 자동으로 바꿈
-const APP_BUILT   = "2026-08-20";
+const APP_VERSION = "v3";              // 스냅샷 시 pipeline/tools/snapshot.py 가 자동으로 바꿈
+const APP_BUILT   = "2026-09-12";
 const APP_FROZEN  = false;         // versions/ 에 보관된 사본은 true
 
 const SELF="LGES";
@@ -775,10 +817,10 @@ const USE_API  = false;     // 파이프라인 붙이면 true 로만 바꾸면 �
 
 let TREE=[], SEQ=[], GAPS=[], PARTS=[], sel=null;
 let activeRivals=new Set(RIVALS), filter="gap", query="", showHave=false;
-let SRC={live:false, at:"2026-08-13 09:00 KST", err:"",
-  items:[{b:"4,128",s:"특허 누적"},{b:"+37",s:"특허 24H"},{b:"312",s:"설비투자 누적"},
-         {b:"+5",s:"설비투자 24H"},{b:"486",s:"컨퍼런스 누적"},{b:"+18",s:"컨퍼런스 7D"},
-         {b:"11",s:"리뷰 대기",pending:1}]};
+let SRC={live:false, at:"2026-09-12 실측 KST", err:"",
+  items:[{b:"170.4M",s:"BigQuery 보유"},{b:"88,306",s:"KIPRIS 이차전지"},
+         {b:"4/8",s:"원천 연결"},{b:"127",s:"실수집 evidence"},
+         {b:"40%",s:"완성도"},{b:"57",s:"리뷰 대기",pending:1}]};
 
 /* API 응답(flat nodes) → 화면 내부 구조(nested tree) 변환 */
 function adaptApi(j){
@@ -1102,8 +1144,57 @@ function renderRivalSel(){
     const r=b.dataset.r; activeRivals.has(r)?activeRivals.delete(r):activeRivals.add(r);
     if(!activeRivals.size)activeRivals=new Set(RIVALS); renderAll();});
 }
+
+/* ============ 수집 파이프라인 현황 (V3) ================================
+   2026-09-12 실호출로 측정한 값. 추정치가 아니다.
+   docs/REVIEW-V3.md 의 표와 같은 수치를 쓴다.
+====================================================================== */
+const SOURCES = {
+  pat: [
+    {n:"Google Patents", en:"BigQuery · 전 관할", st:"on",   vol:"170.4M", unit:"보유 건수", pct:35,
+     note:"연결됐으나 적재 안 함"},
+    {n:"KIPRIS Plus",    en:"국내 특허·실용",     st:"on",   vol:"88,306", unit:"이차전지",   pct:40},
+    {n:"EPO OPS",        en:"EP · WO(PCT)",      st:"off",  vol:"—",      unit:"미연결",    pct:0},
+    {n:"USPTO ODP",      en:"US 청구항",          st:"off",  vol:"—",      unit:"BQ로 대체", pct:0},
+  ],
+  cap: [
+    {n:"cninfo",         en:"CATL · BYD",        st:"part", vol:"6",      unit:"수집 건수",  pct:30,
+     note:"BYD 0건 — HKEX로 이탈"},
+    {n:"DART",           en:"삼성SDI · SK온",     st:"part", vol:"2",      unit:"수집 건수",  pct:25,
+     note:"경쟁사 0건 — 원천에 없음"},
+    {n:"SEC EDGAR",      en:"TESLA",             st:"off",  vol:"—",      unit:"미구현",    pct:0},
+    {n:"컨퍼런스 프로그램", en:"CIBF · AABC 등",    st:"off",  vol:"—",      unit:"미구현",    pct:0},
+  ],
+};
+const FLOW = [
+  {n:"원천 보유", v:"1억 7,041만", d:"BigQuery 전체 특허 문헌"},
+  {n:"경쟁사 6사", v:"54만+",      d:"법인명 통합 전 기준"},
+  {n:"실제 수집",  v:"127건",      d:"KIPRIS 119 · cninfo 6 · DART 2", bad:1},
+  {n:"화면 표시",  v:"61건",       d:"아직 목업 — 실데이터 미연결", bad:1},
+  {n:"완성도",     v:"약 40%",     d:"뼈대는 섰고 적재·매핑이 남음", bad:1},
+];
+
+function srcRow(x){
+  const cls = x.pct>=60 ? "" : x.pct>=25 ? "mid" : "low";
+  return `<div class="srow">
+    <span class="sdot ${x.st==="on"?"on":x.st==="part"?"part":"off"}"></span>
+    <span class="sname">${esc(x.n)}<small>${esc(x.en)}${x.note?" · "+esc(x.note):""}</small></span>
+    <span class="svol">${esc(x.vol)}<span>${esc(x.unit)}</span></span>
+    <span class="sbar ${cls}"><i style="width:${x.pct}%"></i></span>
+    <span class="spct">${x.pct}%</span>
+  </div>`;
+}
+function renderSourceStatus(){
+  if(!$("#srcPat")) return;
+  $("#srcPat").innerHTML = SOURCES.pat.map(srcRow).join("");
+  $("#srcCap").innerHTML = SOURCES.cap.map(srcRow).join("");
+  $("#flowLine").innerHTML = FLOW.map(f=>`<div class="fstep ${f.bad?"bad":""}">
+    <div class="fn">${esc(f.n)}</div><div class="fv">${esc(f.v)}</div>
+    <div class="fd">${esc(f.d)}</div></div>`).join("");
+}
+
 function select(id){sel=SEQ.find(i=>i.id===id)||sel;renderPipeline();renderDetail();}
-function renderAll(){renderSources();renderKpis();renderPipeline();renderDetail();renderTable();renderRivalSel();}
+function renderAll(){renderSources();renderKpis();renderPipeline();renderDetail();renderTable();renderRivalSel();renderSourceStatus();}
 
 $("#q").oninput=e=>{query=e.target.value;renderPipeline();};
 $("#haveToggle").onclick=()=>{
@@ -1229,6 +1320,13 @@ function seedPatentSearch(it){
 }
 async function pHealth(){
   const el=$("#bqState"); if(!el)return;
+  // 파일로 직접 열면(file://) 상대경로 API 호출이 file:///C:/api/health 로 풀려 실패한다.
+  // 백엔드 없이 화면만 보는 정상 사용이므로 조용히 표시만 바꾼다.
+  if(location.protocol==="file:"){
+    el.className="bqstate wait"; el.textContent="파일 열람";
+    el.title="백엔드 없이 화면만 보는 중입니다. 특허 검색은 서버 실행 후 사용하십시오.";
+    return;
+  }
   try{
     const j=await pFetch("/api/health");
     if(j.bigquery==="ready"){ el.className="bqstate on"; el.textContent="BQ 연결됨"; }

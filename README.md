@@ -14,10 +14,14 @@ server/
   cache.py                결과 캐시 · 레이트리미터
   config.py               환경변수 설정
   .env.example            설정 템플릿 (복사해서 .env 로)
-adapters/capex_dart.py    DART 설비투자 공시 수집 어댑터
+adapters/capex_dart.py    DART 설비투자 공시 (한국 — 삼성SDI·SK온·LGES)
+adapters/capex_cninfo.py  cninfo 설비투자 공고 (중국 — CATL·BYD, 키 불필요)
+adapters/patent_kipris.py KIPRIS 국내 특허·실용신안
 data/tree.sample.json     /api/tree 응답 계약 예시
 tools/coverage_audit.py   수집 커버리지 실측 (근거 61건 → 어댑터 귀속)
 docs/COVERAGE.md          커버리지 진단 · 키 발급 체크리스트
+docs/REVIEW-V3.md         V3 수집 구조 검토 (빈틈·비용·완성도·일정)
+docs/경쟁기술_인텔리전스_구조_V3.pptx   임원 보고용 1장 요약
 tests/test_sql.py         SQL 조립 검증 (GCP 없이 실행 가능)
 ```
 
@@ -218,6 +222,30 @@ GCP 자격증명 없이 돌아갑니다.
 SQL 조립, 파라미터 바인딩, 제목 모드의 초록 컬럼 배제, 한도 절삭을 검증합니다.
 
 ## 수집 어댑터
+
+### 공통 — 등급은 제안이지 확정이 아니다
+
+세 어댑터 모두 같은 원칙을 따른다. VERIFIED(양산 확인)는 규칙이 맞아도 항상 사람 확인
+대상으로 남기고, 기술 키워드가 하나도 안 잡히면 어느 기술 노드에도 붙일 수 없으므로
+역시 확인 대상이다. 판단 근거 구절은 `grade_basis` 에 남는다.
+
+```bash
+python -m adapters.capex_dart   --from 2023-01-01 --to 2026-09-12 --with-detail
+python -m adapters.capex_cninfo --from 2022-01-01 --to 2026-09-12
+python -m adapters.patent_kipris --words "건식 전극,전극 코팅" --rows 50
+```
+
+### KIPRIS — 국내 특허 (구현됨)
+
+**인증 파라미터명은 `accessKey` 다.** 공공데이터 관례인 `ServiceKey` 를 쓰면
+`SERVICE_KEY_IS_NOT_REGISTERED_ERROR` 가 돌아온다 — 키 문제가 아니라 파라미터명 문제다.
+`RegistrationStatus`(등록/공개)가 GRADE 사다리의 MEDIUM/WEAK 에 그대로 대응된다.
+
+### cninfo — 중국 설비투자 (구현됨, 키 불필요)
+
+`投资建设`(투자건설)이 설비투자 공고를 잡는 유일하게 정확한 키워드다. `投资`만 쓰면
+회사채·투자펀드가 섞이고 `产能`·`扩产`·`工厂` 는 0건이다.
+**BYD 는 모든 키워드에서 0건** — cninfo 상 orgId 가 홍콩(`gshk0001211`)이라 HKEX 로 빠진다.
 
 ### DART — 설비투자 공시 (구현됨)
 
