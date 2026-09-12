@@ -278,23 +278,81 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .srow{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--rule-soft)}
 .srow:last-child{border-bottom:0}
 .sdot{width:8px;height:8px;flex:0 0 8px}
-.sdot.on{background:var(--g3)} .sdot.off{background:var(--mark)} .sdot.part{background:var(--amber)}
+/* 색이 겹치면 뜻이 헷갈린다. 마젠타는 '자사 미보유 기술' 전용으로 남기고,
+   창구 연결 상태는 초록(연결)·앰버(부분)·회색(미연결)만 쓴다. */
+.sdot.on{background:var(--g3)} .sdot.off{background:#B6BDC3} .sdot.part{background:var(--amber)}
 .sname{flex:1;min-width:0;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sname small{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--muted);font-weight:400;text-transform:uppercase}
 .svol{font-family:var(--mono);font-size:11px;font-weight:700;text-align:right;flex:0 0 88px;letter-spacing:-.02em}
 .svol span{display:block;font-size:8.5px;font-weight:400;color:var(--muted);letter-spacing:.04em}
 .sbar{flex:0 0 86px;height:6px;background:#EDF0F1;position:relative}
 .sbar i{position:absolute;left:0;top:0;bottom:0;background:var(--graphite)}
-.sbar.low i{background:var(--mark)} .sbar.mid i{background:var(--amber)}
+.sbar.low i{background:#B6BDC3} .sbar.mid i{background:var(--amber)} .sbar.on i{background:var(--g3)}
 .spct{font-family:var(--mono);font-size:10px;font-weight:700;flex:0 0 34px;text-align:right}
 .flowline{display:flex;align-items:stretch;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:14px;overflow-x:auto}
 .fstep{background:var(--panel);flex:1 1 0;min-width:150px;padding:13px 14px 15px}
 .fstep .fn{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .fstep .fv{font-size:15px;font-weight:800;letter-spacing:-.03em;margin-top:7px}
 .fstep .fd{font-size:11px;color:var(--ink2);margin-top:5px;line-height:1.45}
-.fstep.bad .fv{color:var(--mark)}
+.fstep.bad .fv{color:var(--amber)}
+.src.offsrc{background:#F6F7F8}
+.src.offsrc b{color:#A7AFB6;font-weight:500}
 @media (max-width:900px){.srcgrid{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:560px){.srow{gap:7px;padding:9px 10px}.sbar{flex:0 0 52px}.svol{flex:0 0 70px}.spct{flex:0 0 30px}}
+/* -- 근거 팝업 (V3) -- */
+.whybtn{border:0;background:#EDF0F1;color:var(--ink2);font-family:var(--mono);font-size:9px;
+  font-weight:700;width:15px;height:15px;line-height:15px;padding:0;margin-left:6px;cursor:pointer;vertical-align:1px}
+.whybtn:hover{background:var(--ink);color:#fff}
+.modal{position:fixed;inset:0;background:rgba(20,24,28,.55);z-index:99;display:none;
+  align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+.modal.on{display:flex}
+.modal-box{background:var(--panel);border:1px solid var(--ink);max-width:760px;width:100%;
+  box-shadow:0 18px 48px rgba(0,0,0,.22)}
+.modal-h{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:15px 18px;border-bottom:1px solid var(--rule)}
+.modal-h h3{margin:0;font-size:16px;font-weight:800;letter-spacing:-.02em}
+.modal-x{border:1px solid var(--rule);background:#fff;width:26px;height:26px;cursor:pointer;
+  font-size:15px;line-height:1;color:var(--ink2)}
+.modal-x:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.modal-b{padding:16px 18px 20px;max-height:66vh;overflow:auto}
+.modal-intro{font-size:13px;line-height:1.65;color:var(--ink);margin:0 0 14px}
+.crit{width:100%;border-collapse:collapse;min-width:0}
+.crit th{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);
+  text-align:left;padding:7px 9px;border-bottom:1px solid var(--rule);white-space:nowrap}
+.crit td{padding:8px 9px;border-bottom:1px solid var(--rule-soft);font-size:12px;vertical-align:top;line-height:1.5}
+.crit td.lv{font-family:var(--mono);font-weight:700;white-space:nowrap;color:var(--ink)}
+.crit td.nm{font-weight:600;white-space:nowrap}
+.modal-note{margin-top:13px;padding:10px 12px;background:#F7F8F9;border-left:3px solid var(--graphite);
+  font-size:12px;line-height:1.6;color:var(--ink2)}
+.mine{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--rule-soft);font-size:12px}
+.mine:last-child{border-bottom:0}
+.mine .lbl{flex:0 0 92px;font-weight:600}
+.mine .mb{flex:0 0 120px;height:7px;background:#EDF0F1;position:relative}
+.mine .mb i{position:absolute;left:0;top:0;bottom:0;background:var(--graphite)}
+.mine .sc{font-family:var(--mono);font-size:11px;font-weight:700;flex:0 0 52px;text-align:right}
+.mine .wy{flex:1;min-width:0;color:var(--muted);font-size:11px}
+.plist{border:1px solid var(--rule-soft)}
+.pitem{display:flex;gap:10px;padding:9px 11px;border-bottom:1px solid var(--rule-soft);align-items:flex-start}
+.pitem:last-child{border-bottom:0}
+.pitem .pg{font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 5px;color:#fff;flex:0 0 auto;margin-top:2px}
+.pitem .pb{min-width:0;flex:1}
+.pitem .pt{font-size:12px;line-height:1.45;display:block}
+.pitem .pm{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:3px;display:block}
+.pitem a{color:var(--mark);font-weight:700;text-decoration:none;font-family:var(--mono);font-size:9.5px;white-space:nowrap}
+.pitem a:hover{text-decoration:underline}
+.mcol.clickable{cursor:pointer}
+.mcol.clickable:hover{background:#F0F2F3}
+.sg.clickable{cursor:pointer}
+.sg.clickable:hover{background:#F4F6F7}
+.ev .ttl a{color:var(--mark);text-decoration:none;font-weight:700}
+.ev .ttl a:hover{text-decoration:underline}
+.linkbtn{border:0;background:none;padding:0;cursor:pointer;font:inherit;color:var(--mark);
+  font-weight:700;text-decoration:underline}
+.conflict{margin-top:20px;padding:13px 15px;background:var(--amber-soft);
+  border-left:4px solid var(--amber);font-size:12.5px;line-height:1.65;color:var(--ink)}
+.conflict b{font-weight:700}
+.conflict span{display:block;margin-top:6px;color:var(--ink2);font-size:12px}
+.kpi.alert .v{color:var(--mark)}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 @media (max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:0 16px 56px}
   .verdict3{grid-template-columns:1fr}.selfgrid{grid-template-columns:repeat(2,1fr)}.rung{flex-wrap:wrap}.rung .desc{flex:1 1 100%}}
@@ -346,7 +404,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 
 <section>
   <div class="block-head" style="margin-top:34px">
-    <h2>미보유 기술 우선순위<small>Gap Backlog</small></h2>
+    <h2>우선 검토가 필요한 미보유 기술<small>Gap Backlog</small></h2>
     <div class="ctrl">
       <div class="seg" id="statusSeg">
         <button aria-pressed="true" data-f="gap">미보유</button>
@@ -359,8 +417,8 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   </div>
   <div class="tbl-wrap"><table>
     <thead><tr><th style="width:40px">#</th><th style="width:140px">공정</th><th>세부기술</th>
-      <th style="width:110px">최고 근거</th><th style="width:180px">경쟁사 보유</th>
-      <th style="width:96px">시간 격차</th><th style="width:130px">시급도</th></tr></thead>
+      <th style="width:110px">근거 등급<button class="whybtn" data-why="hold" title="판정 기준">?</button></th><th style="width:180px">경쟁사 보유</th>
+      <th style="width:110px">따라잡는 시간<button class="whybtn" data-why="lag" title="산정 근거">?</button></th><th style="width:150px">시급도<button class="whybtn" data-why="urgency" title="산정 근거">?</button></th></tr></thead>
     <tbody id="tbody"></tbody>
   </table></div>
 </section>
@@ -371,7 +429,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
     <div class="legend">
       <span><i class="sw-have" style="background:var(--g3)"></i>연결됨</span>
       <span><i class="sw-part" style="background:var(--amber);border:0"></i>부분</span>
-      <span><i class="sw-gap" style="background:var(--mark);border:0"></i>미구현</span>
+      <span><i class="sw-gap" style="background:#B6BDC3;border:0"></i>미연결</span>
     </div>
   </div>
   <div class="srcgrid">
@@ -405,6 +463,14 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   <div class="pmeta" id="pmeta"></div>
   <div class="pcards" id="pcards"></div>
 </section>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="modal-h"><h3 id="modalTitle"></h3>
+      <button class="modal-x" id="modalX" aria-label="닫기">X</button></div>
+    <div class="modal-b" id="modalBody"></div>
+  </div>
+</div>
 
 <footer><span><span id="ver" class="vchip"></span> LG ENERGY SOLUTION · 기술전략 / 내부 검토용 프로토타입</span><span id="foot"></span></footer>
 </div>
@@ -812,15 +878,17 @@ const TREE_MOCK=[
    USE_API=true   → API_BASE + "/api/tree" 호출, 실패 시 목업으로 폴백
    백엔드 응답 스키마는 docs/PRD.md §7 "API 계약" 참조
 ======================================================================= */
+/* 파이프라인이 만든 실데이터. pipeline/render_html.py 가 이 줄을 통째로 바꿔 넣는다.
+   null 이면 아래 TREE_MOCK(샘플)으로 그린다. */
+const TREE_DATA = null;
+let CRITERIA = null, COVERAGE = null;
+
 const API_BASE = "";        // 같은 오리진이면 빈 문자열. 예: "http://localhost:8000"
 const USE_API  = false;     // 파이프라인 붙이면 true 로만 바꾸면 됨
 
 let TREE=[], SEQ=[], GAPS=[], PARTS=[], sel=null;
 let activeRivals=new Set(RIVALS), filter="gap", query="", showHave=false;
-let SRC={live:false, at:"2026-09-12 실측 KST", err:"",
-  items:[{b:"170.4M",s:"BigQuery 보유"},{b:"88,306",s:"KIPRIS 이차전지"},
-         {b:"4/8",s:"원천 연결"},{b:"127",s:"실수집 evidence"},
-         {b:"40%",s:"완성도"},{b:"57",s:"리뷰 대기",pending:1}]};
+let SRC={live:false, at:"예시 데이터", err:"", items:[]};
 
 /* API 응답(flat nodes) → 화면 내부 구조(nested tree) 변환 */
 function adaptApi(j){
@@ -838,20 +906,24 @@ function adaptApi(j){
       own:self.status||nd.self_status||"none", r:r, p:p, trl:nd.est_trl||null,
       s:{pat:self.patents!=null?self.patents:0, line:self.line!=null?self.line:0,
          talk:self.talks!=null?self.talks:0, prj:self.project||"—", note:self.note||""},
-      lag: nd.lag?{t:nd.lag.gap, r:nd.lag.rival_milestone, m:nd.lag.self_state}:null,
+      lag: nd.lag?{t:nd.lag.gap, r:nd.lag.rival_milestone, m:nd.lag.self_state,
+                   basis:nd.lag.basis||"", years:nd.lag.gap_years||0}:null,
+      trlWhy: nd.trl_basis||"", selfTrl: self.trl||null, selfTrlWhy: self.trl_basis||"",
+      urg: nd.urgency||null,
+      rel: nd.related_count||0, relSelf: nd.related_self||0, relRiv: nd.related_rivals||0,
+      conflict: !!nd.self_conflict, selfEv: self.evidence_count||0,
       ev:(nd.evidence||[]).map(e=>({
         t:e.type==="patent"?"patent":e.type==="capex"?"capex":"conf",
         w:e.company, d:e.date, s:e.ref, x:e.summary, url:e.url,
+        src:e.source||"", rev:!!e.needs_review,
         g:GRADE[e.grade]?e.grade:"weak"})),
       lim:nd.limit||""
     });
   });
   const tree=[...byL1.values()].map(x=>{delete x._m; return x;});
-  const items=[];
-  (j.sources||[]).forEach(x=>{
-    items.push({b:String(x.total!=null?x.total:"–"), s:x.name+" 누적"});
-    if(x.new_24h!=null) items.push({b:"+"+x.new_24h, s:x.name+" 24H"});
-  });
+  if(j.criteria) CRITERIA = j.criteria;
+  if(j.coverage) COVERAGE = j.coverage;
+  const items=(j.sources||[]).map(x=>({key:x.name, n:x.total||0}));
   return {tree, src:{live:true, at:j.collected_at||"", err:"", items:items}};
 }
 
@@ -866,7 +938,10 @@ function buildIndex(){
     it.top = it.ev.length ? it.ev.reduce((a,b)=>GRADE[b.g].r>GRADE[a.g].r?b:a) : null;
     it.topGrade = it.top ? it.top.g : null;
     const gb = it.top ? GRADE[it.top.g].r : 0;
-    it.score = Math.min(100, it.r.length*11 + it.p.length*3 + it.recent*8 + (it.own==="none"?18:0) + gb*6 + (it.trl||0));
+    // 시급도는 pipeline/judge.py 가 계산한 값을 쓴다(근거를 팝업으로 보여주기 위해).
+    // 샘플 데이터에는 없으므로 그때만 화면에서 임시 계산한다.
+    it.score = it.urg && it.urg.score!=null ? it.urg.score
+      : Math.min(100, it.r.length*11 + it.p.length*3 + it.recent*8 + (it.own==="none"?18:0) + gb*6 + (it.trl||0));
     SEQ.push(it);
   })));
   GAPS=SEQ.filter(i=>i.status==="gap").sort((a,b)=>b.score-a.score);
@@ -876,6 +951,11 @@ function buildIndex(){
 
 /* ============ 부팅: API 우선, 실패 시 목업 폴백 ============ */
 async function boot(){
+  if(TREE_DATA && (TREE_DATA.nodes||[]).length){
+    const a=adaptApi(TREE_DATA);
+    TREE=a.tree; SRC=a.src;
+    buildIndex(); renderAll(); return;
+  }
   if(USE_API){
     try{
       const res=await fetch(API_BASE+"/api/tree",{headers:{Accept:"application/json"}});
@@ -898,32 +978,54 @@ const visibleRivals=it=>it.r.filter(r=>activeRivals.has(r));
 const isVisible=it=>it.status!=="gap"||visibleRivals(it).length>0;
 
 /* ============ 렌더 ============ */
+/* 창구 8곳을 항상 같은 순서로, '이름(건수)' 형식으로 보여준다.
+   보는 사람이 "지금 어디서 얼마나 들어오고 있나"를 한 줄로 읽게 하는 것이 목적이다. */
+const SOURCE_ORDER = [
+  {key:"BigQuery", label:"구글 특허",   note:"전 세계 특허"},
+  {key:"KIPRIS",   label:"KIPRIS",     note:"국내 특허"},
+  {key:"cninfo",   label:"CNINFO",     note:"중국 공시"},
+  {key:"DART",     label:"DART",       note:"한국 공시"},
+  {key:"EPO",      label:"EPO",        note:"유럽 특허"},
+  {key:"USPTO",    label:"USPTO",      note:"미국 특허"},
+  {key:"SEC",      label:"SEC",        note:"미국 공시"},
+  {key:"CONF",     label:"컨퍼런스",    note:"기술세션"},
+];
 function renderSources(){
-  const flag = SRC.live
-    ? {b:"LIVE", s:"API 연결됨", flag:1}
-    : {b:"MOCK", s:(USE_API?"API 실패·폴백":"목업 데이터"), flag:1, warn:1};
-  $("#sources").innerHTML=[flag].concat(SRC.items)
-    .map(x=>`<div class="src ${x.pending?"pending":""} ${x.flag?"flag":""} ${x.warn?"warn":""}"><b>${x.b}</b><span>${x.s}</span></div>`).join("");
-  $("#stamp").innerHTML=(SRC.live
-      ? "LIVE · /api/tree"
-      : (USE_API ? "API 연결 실패 ("+esc(SRC.err)+") — 목업 표시 중" : "USE_API=false — 목업 데이터 표시 중"))
-    + " | KIPRIS · GOOGLE PATENTS · EPO OPS · DART/SEC/CNINFO · CONFERENCE PROGRAMS | "+esc(SRC.at);
+  const got = {};
+  (SRC.items||[]).forEach(x=>{ if(x.key) got[x.key] = x.n; });
+  const live = SRC.live;
+  const head = live
+    ? {b:"실데이터", s:"실제 수집분", flag:1}
+    : {b:"샘플", s:"예시 데이터 — 실수집 아님", flag:1, warn:1};
+  const cells = SOURCE_ORDER.map(sc=>{
+    const n = got[sc.key];
+    return n==null
+      ? {b:`${sc.label}(미연결)`, s:sc.note, off:1}
+      : {b:`${sc.label}(${n.toLocaleString()})`, s:sc.note};
+  });
+  $("#sources").innerHTML=[head].concat(cells)
+    .map(x=>`<div class="src ${x.off?"offsrc":""} ${x.flag?"flag":""} ${x.warn?"warn":""}"><b>${x.b}</b><span>${x.s}</span></div>`).join("");
+  const cov = COVERAGE
+    ? ` | 근거 ${COVERAGE.evidence_total.toLocaleString()}건 중 ${COVERAGE.assigned.toLocaleString()}건을 기술에 배정 · 근거가 붙은 기술 ${COVERAGE.nodes_with_evidence}/${COVERAGE.nodes_total}`
+    : "";
+  $("#stamp").innerHTML=(live
+      ? "실제 수집 데이터로 그린 화면입니다"
+      : "화면 동작 확인용 예시 데이터입니다 — 실제 수집 결과가 아닙니다")
+    + cov + " | " + esc(SRC.at);
   $("#foot").textContent="판정 규칙  STRONG 1건 · MEDIUM 2건 · WEAK 3건 이상 = 보유  |  TRL 8 이상은 서로 다른 소스 2종 교차 시에만 부여";
   const vb=$("#ver");
   if(vb){ vb.textContent = APP_VERSION.toUpperCase()+" · "+APP_BUILT+(APP_FROZEN?" · 보관본":" · 작업본");
           vb.className = APP_FROZEN?"vchip frozen":"vchip"; }
 }
 function renderKpis(){
-  const verified=GAPS.filter(g=>g.topGrade==="verified").length;
-  [["자사 미보유 기술",GAPS.length,`추적 세부기술 ${SEQ.length}건 중`,1],
-   ["양산 확인된 격차",verified,"경쟁사 양산 가동이 1차 출처로 확인된 미보유 항목"],
-   ["일부·검토 단계",PARTS.length,"적용 범위·성숙도 확인 필요"],
-   ["추적 경쟁사",RIVALS.length,RIVALS.map(r=>SHORT[r]).join(" · ")]]
-  .forEach(()=>{});
+  const wide=GAPS.filter(g=>visibleRivals(g).length>=4).length;
+  const conflicts=SEQ.filter(i=>i.conflict).length;
+  const judged=SEQ.filter(i=>i.ev.length>0).length;
   $("#kpis").innerHTML=[
-   {l:"자사 미보유 기술",v:GAPS.length,s:`추적 세부기술 ${SEQ.length}건 중`,a:1},
-   {l:"양산 확인된 격차",v:verified,s:"경쟁사 양산 가동이 1차 출처로 확인된 건",a:1},
-   {l:"일부·검토 단계",v:PARTS.length,s:"적용 범위·성숙도 확인 필요"},
+   {l:"자사 미보유 기술",v:GAPS.length,s:`근거로 확인된 건 · 추적 ${SEQ.length}건 중`,a:1},
+   {l:"자사 보유 여부 재확인 필요",v:conflicts,
+    s:"기존 기록은 '미보유'인데 자사 특허가 검색된 기술",a:conflicts?1:0},
+   {l:"판정 근거를 확보한 기술",v:judged,s:`전체 ${SEQ.length}건 중 · 나머지는 근거 부족`},
    {l:"추적 경쟁사",v:RIVALS.length,s:RIVALS.map(r=>SHORT[r]).join(" · ")}
   ].map(k=>`<div class="kpi ${k.a?"alert":""}"><div class="eyebrow">${k.l}</div><div class="v">${k.v}</div><div class="sub">${esc(k.s)}</div></div>`).join("");
 }
@@ -995,7 +1097,9 @@ function statusCell(co,st,self,it){
     const g=gradeOf(it,co);
     note = g?`${GRADE[g].l}<br>TRL ${it.trl||"–"}`:(st==="none"?"신호 없음":"기보유");
   }
-  return `<div class="mcol ${self?"self":""}"><div class="co">${co}</div>
+  const full = self ? "LGES" : (RIVALS.find(r=>SHORT[r]===co) || co);
+  return `<div class="mcol clickable ${self?"self":""}" data-co="${esc(full)}" title="${esc(co)} 근거 보기">
+    <div class="co">${co}</div>
     <div class="st ${cls} ${self&&st==="none"?"self":""}">${label}</div><div class="gr">${note}</div></div>`;
 }
 /* ============ 출처 계보: 근거 1건이 어느 원천에서 어떤 경로로 왔는가 ============ */
@@ -1081,11 +1185,11 @@ function renderDetail(){
   <div class="verdict3">
     <div class="v3 ${v1cls}"><div class="k">자사</div><div class="m">${selfLabel}</div>
       <div class="n">${esc(it.s.note||"—")}</div></div>
-    <div class="v3"><div class="k">경쟁사 최고</div>
+    <div class="v3"><div class="k">최고 수준 경쟁사<button class="whybtn" data-why="trl" title="TRL 기준">?</button></div>
       <div class="m">${best?SHORT[best.c]:"—"}</div>
-      <div class="n">${best?`${GRADE[best.g].l} · 추정 TRL ${it.trl||"–"}<br>${GRADE[best.g].d}`:"확인된 경쟁사 신호 없음"}</div></div>
-    <div class="v3 ${it.lag?"bad":""}"><div class="k">시간 격차</div>
-      <div class="m">${it.lag?it.lag.t:"—"}</div>
+      <div class="n">${best?`${GRADE[best.g].l} · 추정 TRL ${it.trl||"–"}<br>${esc(it.trlWhy||GRADE[best.g].d)}`:"확인된 경쟁사 신호 없음"}</div></div>
+    <div class="v3 ${it.lag?"bad":""}"><div class="k">따라잡는 데 걸리는 시간<button class="whybtn" data-why="lag" title="산정 방식">?</button></div>
+      <div class="m">${it.lag?`<button class="linkbtn" id="lagBtn">${it.lag.t}</button>`:"—"}</div>
       <div class="n">${it.lag?`${esc(it.lag.r)}<br>자사: ${esc(it.lag.m)}`:"격차 산정 대상 아님"}</div></div>
   </div>
 
@@ -1099,7 +1203,8 @@ function renderDetail(){
   <div class="sec-t">자사 측 확인<span>같은 4개 채널로 대칭 확인</span></div>
   <div class="selfgrid">${ch.map(([k,v])=>{
     const zero=(v===0||v==="없음");
-    return `<div class="sg ${zero?"zero":""}"><div class="k">${k}</div><div class="v">${v===0?"0":esc(v)}</div></div>`;}).join("")}</div>
+    const clk = k==="특허" ? ' clickable" data-selfev="1' : '';
+    return `<div class="sg ${zero?"zero":""}${clk}" ${k==="특허"?'title="자사 특허 근거 보기"':""}><div class="k">${k}</div><div class="v">${v===0?"0":esc(v)}</div></div>`;}).join("")}</div>
   ${it.s.note?`<div class="selfnote"><b>판정 근거 —</b> ${esc(it.s.note)}</div>`:""}
 
   <div class="sec-t">출처 계보<span>이 판정이 어느 원천에서 어떤 경로로 만들어졌는가</span></div>
@@ -1109,12 +1214,23 @@ function renderDetail(){
   ${it.ev.length?it.ev.map(e=>`<div class="ev">
       <span class="gbadge" style="background:${GRADE[e.g].c}">${GRADE[e.g].l}</span>
       <span class="tag ${e.t==="patent"?"t-pat":e.t==="capex"?"t-cap":"t-conf"}">${e.t==="patent"?"특허":e.t==="capex"?"설비투자":"컨퍼런스"}</span>
-      <div class="body"><div class="ttl">${esc(e.x)}</div><div class="meta">${SHORT[e.w]} · ${esc(e.s)} · ${e.d} · ${originOf(e).n}</div></div></div>`).join("")
+      <div class="body"><div class="ttl">${e.url?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.x)} ↗</a>`:esc(e.x)}</div><div class="meta">${SHORT[e.w]||esc(e.w)} · ${esc(e.s)} · ${e.d} · ${esc(e.src||originOf(e).n)}</div></div></div>`).join("")
     :`<div style="font-size:12px;color:var(--muted);padding:10px 0">개별 수집 근거 없음 — 보유 판정은 기존 등록 특허군과 내부 확인 기준.</div>`}
+
+  ${it.conflict?`<div class="conflict">
+    <b>자사 보유 여부를 다시 확인해야 합니다.</b>
+    기존 기록은 <b>미보유</b>지만, 자사 명의 특허가 검색되었습니다
+    (판정에 쓴 근거 ${it.selfEv}건 · 관련 가능성 ${it.relSelf}건).
+    기존 기록이 오래되었거나, 검색이 다른 기술의 특허를 잘못 집었을 수 있습니다.
+    <span>위 매트릭스의 <b>LGES</b> 칸을 눌러 어떤 특허인지 확인하십시오.</span>
+  </div>`:""}
 
   <div class="sec-t">이 판정의 한계</div>
   <div class="limits">
     <ul>
+      ${it.rel?`<li><b>관련 가능성만 있는 근거 ${it.rel.toLocaleString()}건은 판정에서 제외</b>했습니다.
+        용어는 겹치지만 정말 이 기술의 것인지 확신할 수 없어, 숫자를 부풀리지 않으려고 뺐습니다.</li>`:""}
+      ${it.ev.length===0?`<li><b>판정에 쓸 근거가 아직 없습니다.</b> 이 기술은 위 숫자로 판단하지 마십시오.</li>`:""}
       ${it.lim?`<li>${esc(it.lim)}</li>`:""}
       <li>자사 보유 여부는 공정기술팀 확인값입니다. 사내 비공개 파일럿이 있으면 판정이 바뀝니다.</li>
       ${it.ev.length===0?`<li><b>수집 신호 0건</b> — "경쟁사 미보유"가 아니라 "관측되지 않음"입니다.</li>`:""}
@@ -1122,6 +1238,12 @@ function renderDetail(){
     </ul>
   </div>`;
   const sb=$("#searchThis"); if(sb) sb.onclick=()=>seedPatentSearch(it);
+  const lb=$("#lagBtn"); if(lb) lb.onclick=()=>openLagDetail(it);
+  $("#detail").querySelectorAll(".mcol.clickable").forEach(c=>{
+    c.onclick=()=>openEvidenceList(it, c.dataset.co==="LGES"?"LGES":c.dataset.co);
+  });
+  const sev=$("#detail").querySelector('.sg[data-selfev]');
+  if(sev) sev.onclick=()=>openEvidenceList(it,"LGES");
 }
 function renderTable(){
   let rows=filter==="gap"?GAPS:filter==="part"?PARTS:[...GAPS,...PARTS,...SEQ.filter(i=>i.status==="ok")];
@@ -1133,10 +1255,14 @@ function renderTable(){
     <td>${it.topGrade?`<span class="gbadge" style="background:${GRADE[it.topGrade].c}">${GRADE[it.topGrade].l}</span>`:`<span style="color:var(--muted);font-size:11px">미관측</span>`}</td>
     <td><div class="chips">${visibleRivals(it).map(r=>`<span class="chip">${SHORT[r]}</span>`).join("")}
       ${it.p.filter(r=>activeRivals.has(r)).map(r=>`<span class="chip p">${SHORT[r]}</span>`).join("")}</div></td>
-    <td style="font-family:var(--mono);font-size:11px;color:${it.lag?"var(--mark)":"var(--muted)"}">${it.lag?it.lag.t:"—"}</td>
-    <td><div class="score"><div class="score-bar"><i style="width:${it.score}%"></i></div><b>${it.score}</b></div></td>
+    <td style="font-family:var(--mono);font-size:11px;color:${it.lag?"var(--mark)":"var(--muted)"}">${it.lag?`<button class="linkbtn" data-lag="${it.id}">${it.lag.t}</button>`:"—"}</td>
+    <td><div class="score"><div class="score-bar"><i style="width:${it.score}%"></i></div><button class="linkbtn" data-urg="${it.id}">${it.score}</button></div></td>
   </tr>`).join("")||`<tr><td colspan="7" style="padding:26px;text-align:center;color:var(--muted)">조건에 해당하는 항목이 없습니다.</td></tr>`;
   $("#tbody").querySelectorAll("tr[data-id]").forEach(tr=>tr.onclick=()=>{select(tr.dataset.id);window.scrollTo({top:0,behavior:"smooth"});});
+  $("#tbody").querySelectorAll("[data-urg]").forEach(b=>b.onclick=e=>{
+    e.stopPropagation(); const it=SEQ.find(x=>x.id===b.dataset.urg); if(it) openUrgencyDetail(it);});
+  $("#tbody").querySelectorAll("[data-lag]").forEach(b=>b.onclick=e=>{
+    e.stopPropagation(); const it=SEQ.find(x=>x.id===b.dataset.lag); if(it) openLagDetail(it);});
 }
 function renderRivalSel(){
   $("#rivalSel").innerHTML=RIVALS.map(r=>`<button aria-pressed="${activeRivals.has(r)}" data-r="${r}">${SHORT[r]}</button>`).join("");
@@ -1193,8 +1319,118 @@ function renderSourceStatus(){
     <div class="fd">${esc(f.d)}</div></div>`).join("");
 }
 
+
+/* ============ 근거 팝업 =================================================
+   숫자만 보여주면 믿을 수 없다. 어떤 기준으로 나온 값인지, 그리고
+   "특허 N건"이 구체적으로 어떤 특허인지 눌러서 볼 수 있어야 한다.
+====================================================================== */
+function modalOpen(title, html){
+  $("#modalTitle").textContent = title;
+  $("#modalBody").innerHTML = html;
+  $("#modal").classList.add("on");
+}
+function modalClose(){ $("#modal").classList.remove("on"); }
+
+/* 샘플 데이터로 볼 때도 기준 설명은 보여야 하므로 기본값을 둔다 */
+const CRITERIA_FALLBACK = {
+  trl:{title:"TRL 을 어떻게 정했는가",
+    intro:"경쟁사가 어디까지 갔는지를 관측된 근거만으로 추정합니다. 추측은 숫자로 바꾸지 않습니다.",
+    rows:[{level:9,name:"양산 중",rule:"양산 가동 확인 + 서로 다른 소스 2종"},
+          {level:8,name:"양산 준비·초기",rule:"양산 가동 확인 1건 또는 착공·양산일정 2건"},
+          {level:7,name:"파일럿 가동",rule:"파일럿 신설·착공 1건"},
+          {level:6,name:"실증·검증",rule:"등록특허 공정조건 또는 기술세션 2건"},
+          {level:5,name:"요소기술 확보",rule:"등록특허 공정조건 1건"},
+          {level:4,name:"출원 단계",rule:"공개특허만 관측"},
+          {level:3,name:"미관측",rule:"근거 없음"}],
+    note:"TRL 8 이상은 특허·설비투자·발표 중 서로 다른 2종이 교차 확인될 때만 부여합니다."},
+  lag:{title:"따라잡는 데 걸리는 시간",
+    intro:"경쟁사가 도달한 TRL 에서 자사 TRL 을 뺀 뒤 구간별 소요기간을 더합니다. 뒤 단계일수록 오래 걸립니다.",
+    rows:[{level:"TRL 4 → 5",name:"0.5년",rule:""},{level:"TRL 5 → 6",name:"0.75년",rule:""},
+          {level:"TRL 6 → 7",name:"1년",rule:""},{level:"TRL 7 → 8",name:"1.25년",rule:""},
+          {level:"TRL 8 → 9",name:"1.5년",rule:""}],
+    note:"자사 TRL 은 보유=9, 일부=7, 출원만 있음=4, 미착수=3 으로 봅니다."},
+  urgency:{title:"시급도 점수 산정",
+    intro:"100점 만점. 다섯 항목의 합이며 각 항목은 관측값에서 바로 계산됩니다.",
+    rows:[{level:"35점",name:"격차 크기",rule:"TRL 차이. 5단계 이상이면 만점"},
+          {level:"25점",name:"경쟁사 확산",rule:"몇 개사가 보유했는가"},
+          {level:"20점",name:"근거 강도",rule:"최고 근거 등급"},
+          {level:"10점",name:"최근 움직임",rule:"최근 12개월 신호 수"},
+          {level:"10점",name:"자사 공백",rule:"특허·라인·발표·과제 4채널 중 빈 개수"}],
+    note:"순위를 매기기 위한 점수이지 절대적 위험도가 아닙니다."},
+  hold:{title:"'보유' 판정 기준",
+    intro:"STRONG 1건, MEDIUM 2건, WEAK 3건 이상이면 보유로 봅니다.",
+    rows:[{level:"VERIFIED",name:"양산 가동 확인",rule:"공시 등 1차 출처로 확인"},
+          {level:"STRONG",name:"착공·양산일정",rule:"파일럿 신설 또는 일정 공표"},
+          {level:"MEDIUM",name:"등록특허·기술세션",rule:"공정조건이 적힌 등록특허"},
+          {level:"WEAK",name:"공개특허·포스터",rule:"출원 공개 단계"}],
+    note:"근거 0건은 '없다'가 아니라 '관측되지 않았다'입니다. 둘을 구분해 표기합니다."},
+};
+function openCriteria(key){
+  const c = (CRITERIA && CRITERIA[key]) || CRITERIA_FALLBACK[key];
+  if(!c) return;
+  const rows = (c.rows||[]).map(r=>'<tr><td class="lv">'+esc(String(r.level))+'</td><td class="nm">'
+    +esc(r.name||"")+'</td><td>'+esc(r.rule||"")+'</td></tr>').join("");
+  modalOpen(c.title, '<p class="modal-intro">'+esc(c.intro||"")+'</p>'
+    +'<table class="crit"><thead><tr><th>구분</th><th>뜻</th><th>부여 조건</th></tr></thead><tbody>'
+    +rows+'</tbody></table>'+(c.note?'<div class="modal-note">'+esc(c.note)+'</div>':''));
+}
+function openUrgencyDetail(it){
+  const b = it.urg && it.urg.breakdown;
+  if(!b){ openCriteria("urgency"); return; }
+  const rows = b.map(r=>'<div class="mine"><span class="lbl">'+esc(r.label)
+    +'</span><span class="mb"><i style="width:'+Math.round(r.got/r.max*100)+'%"></i></span>'
+    +'<span class="sc">'+r.got+'/'+r.max+'</span><span class="wy">'+esc(r.why)+'</span></div>').join("");
+  modalOpen("시급도 "+it.score+"점 — "+it.n,
+    '<p class="modal-intro">이 기술의 점수가 어떻게 나왔는지 항목별로 보여드립니다. 100점 만점입니다.</p>'
+    +rows+'<div class="modal-note">항목 정의는 표 머리의 ? 버튼에서 볼 수 있습니다.</div>');
+}
+function openLagDetail(it){
+  if(!it.lag){ openCriteria("lag"); return; }
+  modalOpen("따라잡는 시간 "+it.lag.t+" — "+it.n,
+    '<p class="modal-intro">'+esc(it.lag.basis||"TRL 차이를 구간별 소요기간으로 환산한 값입니다.")+'</p>'
+    +'<div class="mine"><span class="lbl">경쟁사</span><span class="wy">'+esc(it.lag.r||"")+'</span></div>'
+    +'<div class="mine"><span class="lbl">자사</span><span class="wy">'+esc(it.lag.m||"")+'</span></div>'
+    +'<div class="modal-note">단계별 소요기간은 배터리 공정기술 통상치이며 사내 실적으로 보정할 수 있습니다.</div>');
+}
+function openEvidenceList(it, company){
+  const list = it.ev.filter(function(e){ return !company || e.w === company; });
+  const who = company || "전체";
+  if(!list.length){
+    modalOpen(who+" — "+it.n,
+      '<p class="modal-intro">이 기술에 배정된 '+esc(who)+' 근거가 없습니다. '
+      +'<b>없다는 뜻이 아니라 아직 관측되지 않았다</b>는 뜻입니다.</p>');
+    return;
+  }
+  const g = {};
+  list.forEach(function(e){ g[e.g]=(g[e.g]||0)+1; });
+  const sum = Object.keys(GRADE).filter(function(k){return g[k];})
+    .map(function(k){ return GRADE[k].l+" "+g[k]+"건"; }).join(" · ");
+  const rows = list.slice(0,60).map(function(e){
+    return '<div class="pitem"><span class="pg" style="background:'+GRADE[e.g].c+'">'+GRADE[e.g].l+'</span>'
+      +'<span class="pb"><span class="pt">'+esc(e.x||e.s||"(제목 없음)")+'</span>'
+      +'<span class="pm">'+esc(e.w)+' · '+esc(e.s||"")+' · '+esc(e.d||"")
+      +(e.src?" · "+esc(e.src):"")+(e.rev?" · 확인 필요":"")+'</span></span>'
+      +(e.url?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">원문 ↗</a>':'')
+      +'</div>'; }).join("");
+  modalOpen(who+" 근거 "+list.length+"건 — "+it.n,
+    '<p class="modal-intro">'+esc(sum)+(list.length>60?" · 상위 60건만 표시":"")
+    +'. 오른쪽 <b>원문</b> 을 눌러 출처를 직접 확인할 수 있습니다.</p>'
+    +'<div class="plist">'+rows+'</div>');
+}
+function wireModal(){
+  const m=$("#modal"); if(!m) return;
+  $("#modalX").onclick=modalClose;
+  m.onclick=function(e){ if(e.target===m) modalClose(); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") modalClose(); });
+  document.addEventListener("click",function(e){
+    const b=e.target.closest(".whybtn");
+    if(b){ e.preventDefault(); e.stopPropagation(); openCriteria(b.dataset.why); }
+  });
+}
+
 function select(id){sel=SEQ.find(i=>i.id===id)||sel;renderPipeline();renderDetail();}
 function renderAll(){renderSources();renderKpis();renderPipeline();renderDetail();renderTable();renderRivalSel();renderSourceStatus();}
+wireModal();
 
 $("#q").oninput=e=>{query=e.target.value;renderPipeline();};
 $("#haveToggle").onclick=()=>{

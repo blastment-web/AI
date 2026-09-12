@@ -24,3 +24,6 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
+data/tree.json
+data/state.json
+dist/
