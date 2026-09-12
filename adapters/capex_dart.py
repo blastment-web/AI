@@ -13,6 +13,7 @@ needs_review=true 로 표시해 사람이 확인하게 한다.
 from __future__ import annotations
 
 import argparse
+import html
 import io
 import json
 import logging
@@ -60,7 +61,11 @@ TARGETS = [
 ]
 
 # 시설투자 성격의 공시만 남기는 1차 필터 (report_nm 대상)
-REPORT_PATTERNS = [r"신규\s*시설\s*투자", r"시설\s*투자", r"유형자산\s*(취득|양수)", r"투자\s*판단"]
+# 시설투자 성격의 공시만 남기는 1차 필터 (report_nm 대상).
+# '투자판단관련주요경영사항'은 M&A·JV·공급계약까지 담는 포괄 카테고리라 제외한다.
+# 실데이터 검증(2025-01~2026-09, 삼성SDI·SK온·LGES) 결과 이 패턴이 잡은 9건 중
+# 7건이 합작법인 지분거래·공급계약이었다.
+REPORT_PATTERNS = [r"신규\s*시설\s*투자", r"시설\s*투자", r"유형자산\s*(취득|양수)"]
 
 # 등급 제안 규칙. GRADE 사다리(index.html)의 capex 정의를 그대로 옮긴 것.
 GRADE_RULES = [
@@ -125,6 +130,21 @@ def viewer_url(rcept_no: str) -> str:
 
 def matches_report(report_nm: str) -> bool:
     return any(re.search(p, report_nm or "") for p in REPORT_PATTERNS)
+
+
+def clean_document_html(raw: str) -> str:
+    """DART 공시 원문 HTML → 평문.
+
+    태그만 지우면 <style>/<script> 안에 든 CSS·JS 본문이 그대로 남는다.
+    실제 DART 공시는 앞머리에 대형 <style> 블록이 있어서, 이 처리를 빠뜨리면
+    요약문이 통째로 CSS 가 된다(실호출에서 확인됨). 블록을 먼저 통째로 걷어낸다.
+    """
+    if not raw:
+        return ""
+    raw = re.sub(r"(?is)<(style|script)[^>]*>.*?</\1>", " ", raw)
+    text = re.sub(r"<[^>]+>", " ", raw)
+    text = html.unescape(text)
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def extract_keywords(text: str) -> list[str]:
@@ -299,11 +319,7 @@ class Dart:
         return rows
 
     def document_text(self, rcept_no: str) -> str:
-        """공시 원문에서 텍스트만 뽑는다.
-
-        document.xml 의 내부 구조를 실호출로 확인하지 못했으므로 기본 경로에서는 쓰지 않는다
-        (--with-detail 로만 켠다). 태그를 걷어내고 평문만 남기는 보수적 처리.
-        """
+        """공시 원문(ZIP)에서 평문만 뽑는다. --with-detail 에서만 호출된다."""
         blob = self._get("document.xml", {"rcept_no": rcept_no}, binary=True)
         try:
             with zipfile.ZipFile(io.BytesIO(blob)) as z:
@@ -311,8 +327,7 @@ class Dart:
                 raw = z.read(names[0]).decode("utf-8", "ignore") if names else ""
         except zipfile.BadZipFile:
             raw = blob.decode("utf-8", "ignore")
-        text = re.sub(r"<[^>]+>", " ", raw)
-        return re.sub(r"\s+", " ", text).strip()
+        return clean_document_html(raw)
 
 
 def collect(client: Dart, bgn_de: str, end_de: str, targets: list[dict] = None,

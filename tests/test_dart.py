@@ -13,7 +13,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 FIX = ROOT / "tests" / "fixtures"
 
-from adapters.capex_dart import (Dart, NotConfigured, extract_keywords,  # noqa: E402
+from adapters.capex_dart import (Dart, NotConfigured,  # noqa: E402
+                                 clean_document_html, extract_keywords,
                                  fmt_date, matches_report, norm,
                                  parse_corpcode_zip, propose_grade, redact,
                                  resolve_targets, status, to_evidence,
@@ -109,14 +110,26 @@ def test_norm_strips_legal_forms():
 
 # ── 공시 필터 ──────────────────────────────────────────────────────
 def test_report_filter_keeps_capex_only():
+    """픽스처는 실호출에서 관측된 report_nm 이다."""
     rows = _list_fixture()["list"]
     kept = [r for r in rows if matches_report(r["report_nm"])]
     names = [r["report_nm"] for r in kept]
     assert "신규시설투자등" in names
-    assert "유형자산 취득결정" in names
-    assert not any("분기보고서" in n for n in names)
-    assert not any("최대주주" in n for n in names)
-    assert len(kept) == 2
+    assert "유형자산취득결정(종속회사의주요경영사항)" in names
+    assert "[기재정정]유형자산취득결정(종속회사의주요경영사항)" in names   # 정정본도 잡아야 한다
+    assert len(kept) == 3
+
+
+def test_report_filter_excludes_investment_judgment():
+    """'투자판단관련주요경영사항'은 M&A·JV·공급계약을 담는 포괄 카테고리다.
+
+    실호출 검증에서 이 패턴이 잡은 9건 중 7건이 합작법인 지분거래·공급계약이었다.
+    다시 넣으면 노이즈가 되돌아오므로 회귀로 고정한다.
+    """
+    assert not matches_report("투자판단관련주요경영사항")
+    assert not matches_report("투자설명서")            # 증권신고서 계열
+    assert not matches_report("임원ㆍ주요주주특정증권등소유상황보고서")
+    assert not matches_report("분기보고서 (2026.03)")
 
 
 # ── evidence 변환 ──────────────────────────────────────────────────
@@ -124,14 +137,14 @@ def test_to_evidence_matches_tree_contract():
     """data/tree.sample.json 의 evidence 필드를 빠짐없이 채워야 한다."""
     contract = set(json.loads((ROOT / "data" / "tree.sample.json")
                               .read_text(encoding="utf-8"))["nodes"][0]["evidence"][0])
-    rec = to_evidence(_list_fixture()["list"][0], "SAMSUNG SDI")
+    rec = to_evidence(_list_fixture()["list"][0], "LGES")
     assert contract <= set(rec), f"누락 필드: {contract - set(rec)}"
     assert rec["type"] == "capex"
-    assert rec["company"] == "SAMSUNG SDI"
-    assert rec["date"] == "2026-02-11"
-    assert rec["ref"] == "신규시설투자등"
-    assert rec["url"] == "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260211000123"
-    assert rec["rcept_no"] == "20260211000123"
+    assert rec["company"] == "LGES"
+    assert rec["date"] == "2025-04-01"
+    assert rec["ref"] == "유형자산취득결정(종속회사의주요경영사항)"
+    assert rec["url"] == "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250401000123"
+    assert rec["rcept_no"] == "20250401000123"
     assert rec["source"] == "DART"
 
 
@@ -190,6 +203,29 @@ def test_tech_keyword_allows_auto_pass():
     assert rec["grade"] == "strong"
     assert "전극" in rec["keywords"]
     assert rec["needs_review"] is False
+
+
+# ── 원문 정제 ──────────────────────────────────────────────────────
+def test_clean_document_strips_style_body():
+    """실제 DART 공시는 앞머리에 대형 <style> 블록이 있다.
+
+    태그만 지우면 CSS 가 요약문을 통째로 차지한다(실호출에서 확인된 결함).
+    """
+    raw = ('<html><head><style type="text/css">.xforms * { font-family: 돋움체;} '
+           '.xforms table { font-size: 10px; }</style></head>'
+           '<body><p>유형자산 취득결정</p><p>전극 코팅 라인 신설</p>'
+           '<script>var a=1;</script></body></html>')
+    out = clean_document_html(raw)
+    assert "font-family" not in out
+    assert "xforms" not in out
+    assert "var a" not in out
+    assert "유형자산 취득결정" in out
+    assert "전극 코팅 라인 신설" in out
+
+
+def test_clean_document_unescapes_entities():
+    assert clean_document_html("<p>A&nbsp;B&amp;C</p>").replace("\xa0", " ") == "A B&C"
+    assert clean_document_html("") == ""
 
 
 # ── 응답 상태 처리 ─────────────────────────────────────────────────
