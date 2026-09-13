@@ -44,7 +44,9 @@ with sync_playwright() as pw:
     val = [x.strip() for x in pg.locator(".kpi .v").all_inner_texts()]
     for l, v in zip(lab, val):
         print(f"     {l} = {v}")
-    ck("열위/동등/우위/범위", lab == ["열위 기술", "동등 기술", "우위 기술", "경쟁사 범위"], str(lab))
+    ck("KPI 라벨 6종(수준 5 + 경쟁사)",
+       lab == ["열위 기술", "동등 기술", "우위 기술", "확인 필요", "근거 부족", "경쟁사 범위"],
+       str(lab))
     fs = pg.evaluate("()=>getComputedStyle(document.querySelector('.kpi .v')).fontSize")
     ck("KPI 숫자 48px 이상", float(fs.replace("px", "")) >= 48, fs)
     c1 = pg.evaluate("()=>getComputedStyle(document.querySelector('.kpi.k-behind .v')).color")
@@ -199,6 +201,42 @@ with sync_playwright() as pw:
     ck("기술당 자사 특허 규모 제시",
        bool(_re2.search(r"평균\s*[\d,]+여?\s*건", sn)),
        (_re2.search(r"평균[^.]{0,20}", sn) or [""])[0])
+
+    print("-- V6 총계 정합: 상단 KPI 가 전량을 센다 --")
+    ksum = " ".join(pg.locator(".kpi-sum").inner_text().split())
+    ck("합계 줄 존재", bool(ksum), ksum[:70])
+    ck("합계 불일치 표시 없음", "불일치" not in ksum, ksum[:70])
+    kn = pg.evaluate("""() => {
+      const v=[...document.querySelectorAll('.kpi .v')].map(e=>+e.textContent);
+      return {tiles:v.length, five:v.slice(0,5).reduce((a,b)=>a+b,0)};
+    }""")
+    ck("KPI 타일 6개(수준 5 + 경쟁사)", kn["tiles"] == 6, str(kn["tiles"]))
+    ck("수준 5개 합 = 카드 수", kn["five"] == n_all, f"{kn['five']} / {n_all}")
+    ck("부제 기술 수도 데이터 기준",
+       pg.evaluate("()=>+document.querySelector('#deckN').textContent") == n_all)
+
+    print("-- V6 '확인 필요' vs '근거 부족' — 뜻과 형태가 갈린다 --")
+    ck("확인 필요 = 경쟁사 있음 · 자사 미확인",
+       "경쟁사 근거 확보 · 자사 보유 현황 미확인" in body)
+    ck("근거 부족 = 자사 확인 · 경쟁사 없음",
+       "자사 현황 확인 · 경쟁사 근거 미확보" in body)
+    shape = pg.evaluate("""() => {
+      const h=document.querySelector('.pc.lv-hold'), n=document.querySelector('.pc.lv-none');
+      if(!h||!n) return null;
+      const H=getComputedStyle(h), N=getComputedStyle(n);
+      const hb=getComputedStyle(h.querySelector('.pc-lv')),
+            nb=getComputedStyle(n.querySelector('.pc-lv'));
+      return {hBg:H.backgroundColor, nBg:N.backgroundColor,
+              nDashed:N.borderTopStyle, hBadge:hb.backgroundColor, nBadge:nb.backgroundColor};
+    }""")
+    ck("두 카드 배경이 다르다", shape and shape["hBg"] != shape["nBg"],
+       f"{shape['hBg']} vs {shape['nBg']}" if shape else "")
+    ck("근거 부족은 점선 테두리", shape and shape["nDashed"] == "dashed",
+       shape["nDashed"] if shape else "")
+    ck("확인 필요 배지는 채움 · 근거 부족은 속 빈 배지",
+       shape and shape["hBadge"] != shape["nBadge"]
+       and "0, 0, 0, 0" in shape["nBadge"],
+       f"{shape['hBadge']} vs {shape['nBadge']}" if shape else "")
 
     print("-- V6 조사 요약 · 근거 신뢰도 · 대응 기준선 --")
     ps = pg.locator("#posList").inner_text()

@@ -61,7 +61,7 @@ h1 .en{display:block;font-family:var(--mono);font-size:13px;font-weight:500;lett
 .tab[disabled]{cursor:not-allowed;opacity:.55}
 .tab .ph{font-family:var(--mono);font-size:12px;letter-spacing:.09em;margin-left:8px}
 
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:28px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:28px}
 .kpi{background:var(--panel);padding:18px 20px 20px;border-top:3px solid transparent}
 .kpi .eyebrow{font-size:14px;font-weight:700;letter-spacing:-.01em;color:var(--ink2);
   font-family:var(--sans);text-transform:none}
@@ -287,8 +287,8 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .ps-mix .m-behind{background:var(--behind)}
 .ps-mix .m-even{background:var(--even)}
 .ps-mix .m-ahead{background:var(--ahead)}
-.ps-mix .m-hold{background:#5A6672}
-.ps-mix .m-none{background:var(--g1)}
+.ps-mix .m-hold{background:#44515E}
+.ps-mix .m-none{background:repeating-linear-gradient(90deg,#B6BEC6 0 2px,transparent 2px 5px)}
 .ps-cnt{font-family:var(--mono);font-size:11.5px;color:var(--ink2);font-weight:500;margin-top:5px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ps-en{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:block;margin-top:3px}
 .ps-b{padding:11px 11px 0;display:flex;flex-direction:column;gap:7px}
@@ -318,11 +318,16 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .pc.lv-ahead{background:var(--ahead-bg);box-shadow:inset 0 0 0 1px var(--ahead-line);padding-left:12px}
 .pc.lv-ahead::before{background:var(--ahead);width:3px}
 .pc.lv-ahead .pc-n{font-weight:600}
-/* 확인 필요 — 아직 판정하지 않은 상태. 우위(초록)로도 열위(적)로도 보이면 안 된다. */
-.pc.lv-hold{background:#F4F6F7;box-shadow:inset 0 0 0 1px #CBD3D9;padding-left:12px}
-.pc.lv-hold::before{background:#5A6672;width:3px}
-.pc.lv-hold .pc-n{font-weight:600;color:var(--ink2)}
-.pc.lv-none{background:var(--panel);box-shadow:inset 0 0 0 1px var(--rule);padding-left:12px}
+/* 확인 필요 — 경쟁사 근거는 있고 자사 쪽이 비었다. 채운 형태로 '정보 있음'을 표시한다. */
+.pc.lv-hold{background:#EDF1F4;box-shadow:inset 0 0 0 1px #B9C4CD;padding-left:12px}
+.pc.lv-hold::before{background:#44515E;width:4px}
+.pc.lv-hold .pc-n{font-weight:700;color:var(--ink)}
+/* 근거 부족 — 경쟁사 쪽이 비었다. 점선·빈 바탕으로 '관측 자체가 없음'을 표시한다.
+   확인 필요와 같은 무채색이라 음영만으로는 구별되지 않으므로 형태를 다르게 쓴다. */
+.pc.lv-none{background:var(--panel);box-shadow:none;padding-left:12px;
+  border:1px dashed #B6BEC6}
+.pc.lv-none::before{background:transparent;width:4px;
+  background-image:repeating-linear-gradient(180deg,#B6BEC6 0 3px,transparent 3px 7px)}
 .pc.lv-none::before{background:var(--g1);width:3px}
 .pc.lv-none .pc-n{font-weight:600;color:var(--ink2)}
 .pc.sel{outline:2px solid var(--ink);outline-offset:1px;z-index:2}
@@ -333,8 +338,10 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .pc-lv.lv-behind{background:var(--behind);color:#fff}
 .pc-lv.lv-even{background:var(--even);color:#fff}
 .pc-lv.lv-ahead{background:var(--ahead);color:#fff}
-.pc-lv.lv-hold{background:#5A6672;color:#fff}
-.pc-lv.lv-none{background:var(--g1);color:#fff}
+.pc-lv.lv-hold{background:#44515E;color:#fff}
+/* 속 빈 배지 — 채운 배지(확인 필요)와 한눈에 갈린다. */
+.pc-lv.lv-none{background:transparent;color:#6B747C;
+  box-shadow:inset 0 0 0 1px #B6BEC6}
 .pc-urg{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink2);
   margin-left:auto;white-space:nowrap}
 
@@ -430,6 +437,15 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .conflict b{font-weight:700}
 .conflict span{display:block;margin-top:6px;color:var(--ink2);font-size:14px}
 .kpi.alert .v{color:var(--mark)}
+.kpi.k-hold{border-top-color:#44515E} .kpi.k-hold .v{color:#44515E}
+.kpi.k-none{border-top-color:#B6BEC6} .kpi.k-none .v{color:#6B747C}
+/* 다섯 구분의 합이 전체와 같은지 화면에서 바로 확인되게 적어 둔다. */
+.kpi-sum{grid-column:1/-1;padding:10px 14px;border-top:1px solid var(--rule);
+  background:var(--panel);font-size:13.5px;color:var(--ink2);line-height:1.5}
+.kpi-sum b{color:var(--ink)}
+.kpi-sum.bad{background:var(--behind-bg);color:var(--behind)}
+@media (max-width:1400px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
 /* -- 연결 상태 카드 (V4) -- */
 .sources{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:1px;background:var(--rule);
   border:1px solid var(--rule);flex:none}
@@ -524,8 +540,8 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .pb-behind{background:var(--behind);color:#fff}
 .pb-even{background:var(--even);color:#fff}
 .pb-ahead{background:var(--ahead);color:#fff}
-.pb-hold{background:#5A6672;color:#fff}
-.pb-none{background:var(--g1);color:#fff}
+.pb-hold{background:#44515E;color:#fff}
+.pb-none{background:transparent;color:#6B747C;box-shadow:inset 0 0 0 1px #B6BEC6}
 .posrow .pn{flex:1;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .posrow .posn{font-family:var(--mono);font-size:12.5px;color:var(--muted);flex:0 0 auto;white-space:nowrap}
 /* 판정 기준 등급 배너 — 등급 목록 위에 '이 기술은 여기'를 먼저 적는다. */
@@ -564,9 +580,9 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .lvbar{display:flex;height:8px;margin:2px 15px 12px;background:#EDF0F1;overflow:hidden}
 .lvbar i{height:100%}
 .lvbar .m-behind{background:var(--behind)} .lvbar .m-even{background:var(--even)}
-.lvbar .m-ahead{background:var(--ahead)}   .lvbar .m-hold{background:#5A6672}
+.lvbar .m-ahead{background:var(--ahead)}   .lvbar .m-hold{background:#44515E}
 .lvrow .posbadge{display:block;text-align:center;white-space:nowrap}
-.lvbar .m-none{background:var(--g1)}
+.lvbar .m-none{background:repeating-linear-gradient(90deg,#B6BEC6 0 2px,transparent 2px 5px)}
 .lvlist{display:grid}
 .lvrow{display:grid;grid-template-columns:78px 62px 1fr auto;align-items:center;gap:10px;
   padding:11px 15px;border-top:1px solid var(--rule-soft)}
@@ -588,8 +604,8 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .tcell.tc-behind{background:var(--behind);color:#fff}
 .tcell.tc-even{background:var(--even);color:#fff}
 .tcell.tc-ahead{background:var(--ahead);color:#fff}
-.tcell.tc-hold{background:#5A6672;color:#fff}
-.tcell.tc-none{background:var(--g1);color:#fff}
+.tcell.tc-hold{background:#44515E;color:#fff}
+.tcell.tc-none{background:transparent;color:#6B747C;box-shadow:inset 0 0 0 1px #B6BEC6}
 @media (max-width:900px){.sumgrid{grid-template-columns:minmax(0,1fr)}}
 /* -- 핵심만 3줄, 더 보려면 팝업 (V4) -- */
 .fold{position:relative}
@@ -681,7 +697,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   </div>
   <p class="deck">
     <span><b>특허를 핵심 기준</b>으로 경쟁사 기술 수준을 판정하고, 설비투자 공시·기술발표를 보조 근거로 교차 검증함.</span>
-    <span><b>배터리 공정기술 57개 전량</b>에 대한 자사 수준을 <b class="g-behind">열위</b>·<b class="g-even">동등</b>·<b class="g-ahead">우위</b>로 구분하여 보완 우선순위를 도출함.</span>
+    <span><b>배터리 공정기술 <span id="deckN">57</span>개 전량</b>에 대한 자사 수준을 <b class="g-behind">열위</b>·<b class="g-even">동등</b>·<b class="g-ahead">우위</b>로 구분하여 보완 우선순위를 도출함.</span>
     <span>경쟁사의 실제 수율·원가는 확보 불가하므로, <b>겉으로 드러나는 3가지</b> — 특허·설비투자 공시·기술발표 — 로 격차를 대신 추정함.</span>
     <span>경쟁사 발표를 <b>그대로 믿은 값</b>과 <b>과장을 걷어낸 값</b>을 함께 제시하여, 판정이 흔들릴 수 있는 폭을 숨기지 않고 표기함.</span>
   </p>
@@ -1078,12 +1094,24 @@ function renderKpis(){
   const behind=C("열위");
   const eq=C("동등")+C("동등-우위")+C("동등-열위");
   const ahead=C("우위");
+  const hold=C("확인 필요");
+  const none=C("판정 불가");
+  const total=SEQ.length;
+  // 다섯 구분의 합이 전체와 같아야 한다. 어긋나면 화면에 그대로 드러내 놓는다.
+  const sum=behind+eq+ahead+hold+none;
   $("#kpis").innerHTML=[
    {l:"열위 기술",v:behind,c:"k-behind",s:"자사 미보유 · 경쟁사 보유 — 최우선 보완 대상"},
    {l:"동등 기술",v:eq,c:"k-even",s:"자사 일부 보유 — 선점 경쟁 구간, 조기 결정 필요"},
    {l:"우위 기술",v:ahead,c:"k-ahead",s:"자사 라인 적용 · 선행 — 우위 유지 관리"},
+   {l:"확인 필요",v:hold,c:"k-hold",s:"경쟁사 근거 확보 · 자사 보유 현황 미확인"},
+   {l:"근거 부족",v:none,c:"k-none",s:"자사 현황 확인 · 경쟁사 근거 미확보"},
    {l:"경쟁사 범위",v:RIVALS.length,c:"k-plain",s:RIVALS.map(r=>SHORT[r]).join(" · ")}
-  ].map(k=>`<div class="kpi ${k.c}"><div class="eyebrow">${k.l}</div><div class="v">${k.v}</div><div class="sub">${esc(k.s)}</div></div>`).join("");
+  ].map(k=>`<div class="kpi ${k.c}"><div class="eyebrow">${k.l}</div><div class="v">${k.v}</div><div class="sub">${esc(k.s)}</div></div>`).join("")
+  + `<div class="kpi-sum${sum===total?"":" bad"}">전 <b>${total}개</b> 기술 = 열위 ${behind}
+     + 동등 ${eq} + 우위 ${ahead} + 확인 필요 ${hold} + 근거 부족 ${none}
+     ${sum===total?"":` <b>(합계 ${sum} — 불일치)</b>`}</div>`;
+  // 부제의 기술 수도 데이터에서 채운다. 박아 두면 분류체계가 늘 때마다 거짓말이 된다.
+  const dn=$("#deckN"); if(dn) dn.textContent=total;
 }
 /* ============ 공정 파이프라인 (V2) =====================================
    기존 renderRail(추상 셀 맵) + renderTree(폴더 트리)를 하나로 합친 것.
@@ -1099,9 +1127,9 @@ const LEVELS = [
   {k:"ahead",  cls:"lv-ahead",  label:"우위",     full:"우위 기술",
    note:"자사 라인 적용 · 경쟁사 대비 선행"},
   {k:"hold",   cls:"lv-hold",   label:"확인 필요", full:"확인 필요",
-   note:"자사 보유 현황 미확인"},
-  {k:"none",   cls:"lv-none",   label:"근거 부족", full:"판정 불가",
-   note:"경쟁사 근거 미확보"},
+   note:"경쟁사 근거 확보 · 자사 보유 현황 미확인"},
+  {k:"none",   cls:"lv-none",   label:"근거 부족", full:"근거 부족",
+   note:"자사 현황 확인 · 경쟁사 근거 미확보"},
 ];
 function levelOf(it){
   const t = (it.pos && it.pos.tech_class) || "";
