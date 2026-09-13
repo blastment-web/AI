@@ -225,6 +225,35 @@ with sync_playwright() as pw:
     }""")
     ck("부제 각 문장 한 줄(1200px 이상)", all(x == 1 for x in dl), str(dl))
 
+    print("-- V6 최우선 검토 기술 필터: 다섯 구분 전량 조회 가능 --")
+    want = {"behind": "열위 기술", "even": "동등 기술", "ahead": "우위 기술",
+            "hold": "확인 필요", "none": "근거 부족"}
+    fsum = 0
+    for key, cls_name in want.items():
+        btn = pg.locator(f'[data-f="{key}"]')
+        if not btn.count():
+            ck(f"'{cls_name}' 필터 존재", False, "버튼 없음")
+            continue
+        btn.click()
+        pg.wait_for_timeout(320)
+        rows = pg.locator("#tbody tr").count()
+        kinds = pg.evaluate(
+            "() => [...new Set([...document.querySelectorAll('#tbody .tcell')]"
+            ".map(e => e.textContent.trim()))]")
+        fsum += rows
+        ck(f"'{cls_name}' 필터가 해당 구분만 표시", kinds == [cls_name],
+           f"{rows}행 {kinds}")
+    pg.locator('[data-f="all"]').click()
+    pg.wait_for_timeout(320)
+    allrows = pg.locator("#tbody tr").count()
+    ck("다섯 필터 합 = 전체 = 카드 수", fsum == allrows == n_all,
+       f"필터합 {fsum} / 전체 {allrows} / 카드 {n_all}")
+    ck("필터 버튼 한 줄", pg.evaluate(
+        """() => new Set([...document.querySelectorAll('#statusSeg button')]
+             .map(b => Math.round(b.getBoundingClientRect().top))).size""") == 1)
+    pg.locator('[data-f="behind"]').click()
+    pg.wait_for_timeout(300)
+
     print("-- V6 '확인 필요' vs '근거 부족' — 뜻과 형태가 갈린다 --")
     ck("확인 필요 = 경쟁사 있음 · 자사 미확인",
        "경쟁사 근거 확보 · 자사 보유 현황 미확인" in body)
