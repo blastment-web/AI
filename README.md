@@ -35,7 +35,7 @@ pipeline/
 tools/make_ppt.py          임원 보고 1장 생성
 docs/SOURCES-REVIEW.md     ★ 창구 심층 검토 · 영향도 분석
 VERSIONS.md                판 관리 · 되돌리는 법
-tests/                     338개. 네트워크 없이 돕니다
+tests/                     344개. 네트워크 없이 돕니다
 ```
 
 `dist/V6-index.html` 은 데이터가 박혀 있어 **더블클릭만 하면 열립니다.**

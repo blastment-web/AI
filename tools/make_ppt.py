@@ -1,10 +1,15 @@
-"""임원 보고용 1장 PPT 생성.
+"""임원 보고용 PPT 생성 (2장).
 
-목적: 이 한 장만 봐도 (1) 정보가 어디서 얼마나 오는지 (2) 지금 완성도가 얼마인지
-(3) 임원에게 무슨 판단을 도와주는지 (4) 한계가 무엇인지를 알 수 있게 한다.
-숫자는 전부 2026-09-12 실측값이다.
+1장 — 이 한 장만 봐도 (1) 정보가 어디서 얼마나 오는지 (2) 지금 완성도가 얼마인지
+       (3) 임원에게 무슨 판단을 도와주는지 (4) 한계가 무엇인지를 알 수 있게 한다.
+2장 — 격차 추정 모델 개요와 예상 질의 방어 논리.
+
+숫자는 박아 두지 않는다. data/tree.json 에서 읽는다 — 화면과 PPT 가 어긋나면
+둘 중 하나는 거짓말이 되기 때문이다.
 """
+import json
 import sys
+from pathlib import Path
 
 from pptx import Presentation
 from pptx.dml.color import RGBColor
@@ -27,6 +32,32 @@ WHITE  = RGBColor(0xFF, 0xFF, 0xFF)
 PANEL  = RGBColor(0xFA, 0xFB, 0xFB)
 
 F = "맑은 고딕"
+
+ROOT = Path(__file__).resolve().parent.parent
+_tree = json.loads((ROOT / "data" / "tree.json").read_text(encoding="utf-8"))
+c = _tree["coverage"]
+co = {x["company"]: x for x in _tree["by_company"]}
+STAMP = _tree.get("collected_at", "")
+
+
+def kor(n: int) -> str:
+    """4만 2,289 형식. 임원 보고 관행에 맞춘다."""
+    return f"{n // 10000}만 {n % 10000:,}" if n >= 10000 else f"{n:,}"
+
+
+def _lv(k: str) -> str:
+    """화면(levelOf)과 같은 기준으로 기술 구분을 묶는다.
+
+    PPT 와 화면이 다른 숫자를 말하면 둘 중 하나는 거짓이 된다. 기준을 하나로 둔다.
+    """
+    return ("behind" if k == "열위" else "even" if k.startswith("동등")
+            else "ahead" if k == "우위" else "none")
+
+
+LV = {"behind": 0, "even": 0, "ahead": 0, "none": 0}
+for _n in _tree["nodes"]:
+    LV[_lv(_n["position"]["tech_class"])] += 1
+SELF_CONFLICT = c.get("self_conflicts", 0)
 
 
 def box(slide, x, y, w, h, fill=None, line=None, lw=0.75):
@@ -111,12 +142,16 @@ def main():
     # ── 흐름 5단계 ─────────────────────────────────────────────
     fy = Inches(1.22)
     fh = Inches(1.02)
+    # 전부 data/tree.json 참조. 숫자를 박아 두면 재수집 후 PPT 만 옛말을 한다.
     flow = [
         ("① 조사 범위", "1억 7,041만 건", "전 세계 특허 문헌", INK),
-        ("② 패밀리 병합", "2만 2,452 건", "특허 4만 1,665건의 국가별 중복 제거분", GREEN),
-        ("③ 기술 배정", "1만 1,060 건", "CPC 국제분류 판독 적용", GREEN),
-        ("④ 판정 기술", "54 / 57 개", "근거 확보 기술 수", GREEN),
-        ("⑤ 완성도", "약 80 %", "창구 6곳 연결 완료", AMBER),
+        ("② 패밀리 병합", f"{kor(c['patent_families'])} 건",
+         f"특허 {kor(c['patent_records'])}건 국가별 중복 제거", GREEN),
+        ("③ 기술 배정", f"{kor(c['assigned'])} 건", "CPC 국제분류 판독 적용", GREEN),
+        ("④ 판정 기술", f"{c['nodes_with_evidence']} / {c['nodes_total']} 개",
+         "근거 확보 기술 수", GREEN),
+        ("⑤ 신뢰도 '상'", f"{c['model_conf']['high']} 개 기술",
+         "이종 2축 교차 검증 성립분", AMBER),
     ]
     gap = Inches(0.09)
     fw = Emu(int((CW - gap * (len(flow) - 1)) / len(flow)))
@@ -148,15 +183,23 @@ def main():
          [("경쟁사별 조사 규모", 12.5, INK, True)])
 
     GREY = RGBColor(0xB6, 0xBD, 0xC3)
+    mx = max(v["total"] for v in co.values()) if co else 1
     sources = [
-        ("자사 (LGES)", "특허 1만 5,990 · 공시 79", "1만 6,069", 100, MARK),
-        ("CATL", "특허 9,826 · 설비투자 공시 27", "9,853", 61, GREEN),
-        ("삼성SDI", "특허 6,717 · 공시 82", "6,799", 42, GREEN),
-        ("파나소닉", "특허 2,991 · 공시 1 — EDINET 미연결", "2,992", 19, AMBER),
-        ("SK온", "특허 2,261 · 공시 62", "2,323", 14, GREEN),
-        ("BYD", "특허 2,215 · 설비투자 원천 부재 확인", "2,222", 14, AMBER),
-        ("테슬라", "특허 169 · SEC 본문검색 연결", "169", 2, AMBER),
-        ("합계", "경쟁사 6사 + 자사", "4만 2,289", 100, INK),
+        ("자사 (LGES)", f"특허 {co['LGES']['patent']:,} · 공시 {co['LGES']['capex']:,}",
+         kor(co["LGES"]["total"]), 100, MARK),
+        ("CATL", f"특허 {co['CATL']['patent']:,} · 설비투자 공시 {co['CATL']['capex']:,}",
+         kor(co["CATL"]["total"]), int(co["CATL"]["total"] / mx * 100), GREEN),
+        ("삼성SDI", f"특허 {co['SAMSUNG SDI']['patent']:,} · 공시 {co['SAMSUNG SDI']['capex']:,}",
+         kor(co["SAMSUNG SDI"]["total"]), int(co["SAMSUNG SDI"]["total"] / mx * 100), GREEN),
+        ("파나소닉", f"특허 {co['PANASONIC']['patent']:,} · EDINET 미연결",
+         kor(co["PANASONIC"]["total"]), int(co["PANASONIC"]["total"] / mx * 100), AMBER),
+        ("BYD", f"특허 {co['BYD']['patent']:,} · 설비투자 원천 부재 확인",
+         kor(co["BYD"]["total"]), int(co["BYD"]["total"] / mx * 100), AMBER),
+        ("SK온", f"특허 {co['SK ON']['patent']:,} · 공시 {co['SK ON']['capex']:,}",
+         kor(co["SK ON"]["total"]), int(co["SK ON"]["total"] / mx * 100), GREEN),
+        ("테슬라", f"특허 {co['TESLA']['patent']:,} · SEC 본문검색 연결",
+         kor(co["TESLA"]["total"]), int(co["TESLA"]["total"] / mx * 100), AMBER),
+        ("합계", "경쟁사 6사 + 자사", kor(sum(v["total"] for v in co.values())), 100, INK),
     ]
     ry = ly + Inches(0.46)
     rh = Inches(0.325)
@@ -188,7 +231,8 @@ def main():
          Emu(int(rw - Inches(0.32))), Inches(0.22),
          [("의사결정 지원 항목", 12.5, INK, True)])
     helps = [
-        "공정기술 57개 전량을 열위 16 · 동등 14 · 우위 20 으로 구분 제시함",
+        f"공정기술 {c['nodes_total']}개 전량을 열위 {LV['behind']} · 동등 {LV['even']} · "
+        f"우위 {LV['ahead']} · 판정 불가 {LV['none']} 로 구분 제시함",
         "시급도 = 기술 격차 × 경쟁사 확산도 × 근거 확실성 — 보완 우선순위 도출",
         "기술 격차를 특허·공시·발표 3축 대리 지표로 추정, 기준·보수 듀얼 트랙 제시함",
         "전 수치에 근거 목록 및 원문 링크 연결 — 원천까지 역추적 가능함",
@@ -207,7 +251,7 @@ def main():
     limits = [
         "경쟁사 수율·제조원가 비공개 — 본 모델 산출 대상에서 명시적 제외함",
         "기존 '미보유' 18건 전량에서 자사 특허 검색됨 — 공정기술팀 재검증 필요함",
-        "설비투자 공시가 공정기술 단위로 미배정 — 신뢰도 '상' 판정 0건 사유임",
+        "설비투자 공시는 공장 단위 정보로 전사 근거로만 반영함 — 기술 단위 배정 불가함",
         "BYD 설비투자 원천 부재 확인 · 파나소닉은 EDINET 키 발급 필요함",
     ]
     for i, t in enumerate(limits):
@@ -220,13 +264,17 @@ def main():
     bh = Inches(1.32)
     steps = [
         ("완료", "3축 격차 추정 모델 적용",
-         "패밀리 병합 4.2만→2.2만건.\n보정 계수·듀얼 트랙 적용 완료.", "추가 비용 없음", GREEN),
+         f"패밀리 병합 {kor(c['patent_records'])}→{kor(c['patent_families'])}건.\n"
+         "보정 계수·듀얼 트랙 적용 완료.", "추가 비용 없음", GREEN),
+        ("완료", "데이터 확충 — 축 2 가동",
+         f"관측 16년치·피인용 확보.\n"
+         f"신뢰도 '상' {c['model_conf']['high']}건 도출.", "BQ 60.6GB(무료분)", GREEN),
         ("1단계", "자사 보유 현황 확정",
-         "'미보유' 18건 재검증 추진.\n공정기술팀 확인 필요함.", "약 3일", AMBER),
-        ("2단계", "공시 본문 확보 — 축 2 가동",
-         "투자 규모·준공 시점 추출로\n신뢰도 '상' 판정 확보.", "약 2일", AMBER),
-        ("3단계", "EDINET·EPO 연결",
-         "파나소닉 설비투자 및 청구항 원문.\n키 발급 후 즉시 적용 가능함.", "약 2일", AMBER),
+         f"'미보유' {SELF_CONFLICT}건 재검증 추진.\n공정기술팀 확인 필요함.",
+         "약 3일", AMBER),
+        ("2단계", "EDINET·EPO 연결",
+         "파나소닉 설비투자 및 청구항 원문.\n키 발급 후 즉시 적용 가능함.",
+         "약 2일", AMBER),
     ]
     gap2 = Inches(0.11)
     bw = Emu(int((CW - gap2 * (len(steps) - 1)) / len(steps)))
@@ -285,10 +333,12 @@ def model_slide(prs):
     axes = [
         ("축 1 · 특허", "R&D 선행 격차", "가중 55%",
          "패밀리 병합 후 선점 시점 격차와\n품질 가중 출원량을 개월로 환산함.\n"
-         "국가 수·등록 여부·최신성 반영함.", "가동 중 · 50개 기술", GREEN),
+         "국가 수·등록·피인용 반영함.",
+         f"가동 중 · {sum(1 for n in _tree['nodes'] for a in n['model']['axes'] if a['key']=='rnd' and a['available'])}개 기술", GREEN),
         ("축 2 · 공시", "양산 진입 격차", "가중 30%",
          "투자 규모·준공 시점으로 SOP\n진입 시점을 추정함.\n"
-         "일정 지연 계수 1.35 적용함.", "본문 확보 필요", AMBER),
+         "일정 지연 계수 1.35 적용함.",
+         f"전사 근거로 가동 · {sum(1 for n in _tree['nodes'] for a in n['model']['axes'] if a['key']=='sop' and a['available'])}개 기술", GREEN),
         ("축 3 · 발표", "스펙 수준 격차", "가중 15%",
          "발표 목표 스펙과 자사 현행\n스펙의 성능 갭을 환산함.\n"
          "마케팅 보정 0.75 적용함.", "표본 확대 필요", AMBER),
@@ -344,7 +394,8 @@ def model_slide(prs):
         "발표·공시는 액면가 미반영함. 마케팅 보정 0.75 및 일정 지연 1.35 적용 기준값과 "
         "액면가 수용 보수값을 병행 제시하며, 양자 차이를 발표 의존도로 표기함.",
         "전 수치는 원문까지 역추적 가능하며, 근거 부족 건은 '판정 불가'로 분리 표기함. "
-        "현 신뢰도 '상' 판정 0건으로 확인 범위를 초과하여 주장하지 않음.",
+        f"신뢰도 '상' 판정은 이종 2축 교차 검증이 성립한 {c['model_conf']['high']}건에 "
+        "한정하며, 확인 범위를 초과하여 주장하지 않음.",
     ]
     for i, t in enumerate(defense):
         text(s, Emu(int(M + Inches(0.22))), Emu(int(vy + Inches(0.44) + i * Inches(0.33))),

@@ -80,8 +80,22 @@ b = G.axis_rnd([pat("R1", "CN", "2026-06")], [pat(f"S{i}", "KR", "2025-01")
                                               for i in range(9)], NOW)
 ck("자사가 앞서면 0으로 하한", b["months"] == 0, str(b["months"]))
 ck("경쟁사 특허 없으면 산출 불가", not G.axis_rnd([], [pat("S1", "KR")], NOW)["available"])
-ck("자사 특허 0건이면 관측창 전체를 격차로",
-   G.axis_rnd([pat("R1", "CN", "2025-01")], [], NOW)["lead_months"] == G.NORM_MONTHS)
+ck("자사 특허 0건이면 선점 상한을 격차로",
+   G.axis_rnd([pat("R1", "CN", "2025-01")], [], NOW)["lead_months"] == G.LEAD_CLAMP_MONTHS)
+
+print("-- 피인용 가중: 영향력이 큰 특허가 더 무겁다 --")
+ck("미확보는 중립 1.0", G.cited_weight(None) == 1.0)
+ck("확인된 0회는 소폭 감산", G.cited_weight(0) < 1.0)
+ck("피인용이 많을수록 무겁다", G.cited_weight(1) < G.cited_weight(20) < G.cited_weight(400))
+ck("상한 준수", G.cited_weight(100000) <= G.CITED_CAP)
+hi = [{**pat("F1", "CN"), "cited_by": 200}]
+lo = [{**pat("F2", "CN"), "cited_by": 0}]
+ck("피인용 많은 1건이 0회 1건보다 무겁다",
+   G.patent_strength(hi, NOW)[0] > G.patent_strength(lo, NOW)[0],
+   f"{G.patent_strength(hi, NOW)[0]:.2f} vs {G.patent_strength(lo, NOW)[0]:.2f}")
+fam = G.merge_families([{**pat("F1", "CN"), "cited_by": 3},
+                        {**pat("F1", "US"), "cited_by": 41}])
+ck("패밀리 대표 피인용은 최대값", fam[0]["cited_by"] == 41, str(fam[0]["cited_by"]))
 
 print("-- 축 2. 양산 진입 격차: 공시 본문이 있으면 SOP 를 뽑는다 --")
 cap = [{"type": "capex", "grade": "strong", "date": "2026-03",

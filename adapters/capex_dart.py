@@ -210,6 +210,9 @@ def to_evidence(row: dict, company_key: str, detail_text: str = "",
         "date": fmt_date(row.get("rcept_dt", "")),
         "ref": report_nm,
         "summary": summary[:400],
+        # 화면은 summary(400자)를 쓰고, 판정 모델은 body(전문)를 읽는다.
+        # 투자 규모·준공 시점은 본문 뒤쪽에 나오는 경우가 많아 앞부분만으로는 못 뽑는다.
+        "body": (detail_text or "").strip(),
         "url": viewer_url(rcept_no),
         "grade": grade,
         # 출처 추적용
@@ -340,9 +343,25 @@ class Dart:
             page += 1
         return rows
 
-    def document_text(self, rcept_no: str) -> str:
-        """공시 원문(ZIP)에서 평문만 뽑는다. --with-detail 에서만 호출된다."""
-        blob = self._get("document.xml", {"rcept_no": rcept_no}, binary=True)
+    def document_text(self, rcept_no: str, retries: int = 4) -> str:
+        """공시 원문(ZIP)에서 평문만 뽑는다. --with-detail 에서만 호출된다.
+
+        빈도 제한은 오류가 아니라 '기다리면 되는 상태'다. 예전에는 그냥 던져서
+        그 건을 버렸고, 201건 중 28건만 남았다. 기다렸다가 다시 부른다.
+        """
+        import time
+
+        blob = None
+        for i in range(retries):
+            try:
+                blob = self._get("document.xml", {"rcept_no": rcept_no}, binary=True)
+                break
+            except RuntimeError as e:
+                if "빈도 제한" not in str(e) or i == retries - 1:
+                    raise
+                time.sleep(min(60, 8 * (i + 1)))
+        if blob is None:
+            return ""
         try:
             with zipfile.ZipFile(io.BytesIO(blob)) as z:
                 names = [n for n in z.namelist() if n.lower().endswith((".xml", ".html", ".htm"))]
@@ -382,9 +401,12 @@ def collect(client: Dart, bgn_de: str, end_de: str, targets: list[dict] = None,
                  sum(1 for _, k in kept if k == "related"))
         for r, tier in kept:
             detail = ""
-            if with_detail and tier == "capex":
+            # 'capex' 로만 분류되는 건은 자사뿐이고, 경쟁사는 전량 'related' 로 잡힌다.
+            # capex 에만 원문을 받으면 경쟁사 본문이 한 건도 안 들어와 투자 규모·
+            # 준공 시점 추출률이 0% 가 된다(2026-09-13 실측). 양쪽 다 받는다.
+            if with_detail:
                 try:
-                    detail = client.document_text(r.get("rcept_no", ""))[:2000]
+                    detail = client.document_text(r.get("rcept_no", ""))[:4000]
                 except Exception as e:
                     log.warning("원문 조회 실패 %s: %s", r.get("rcept_no"), redact(str(e)))
             out.append(to_evidence(r, t["key"], detail, tier))

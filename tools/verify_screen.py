@@ -182,7 +182,11 @@ with sync_playwright() as pw:
     ck("'전량이 아님' 명시", "전량이 아닌" in sn, sn[:46].replace("\n", " "))
     for k in ("선정 기준", "제외 대상", "집계 단위"):
         ck(f"{k} 제시", k in sn)
-    ck("기술당 자사 특허 규모 제시", "280" in sn or "281" in sn)
+    # 수치는 재수집 때마다 바뀐다. 값이 아니라 '제시하고 있는지'를 본다.
+    import re as _re2
+    ck("기술당 자사 특허 규모 제시",
+       bool(_re2.search(r"평균\s*[\d,]+여?\s*건", sn)),
+       (_re2.search(r"평균[^.]{0,20}", sn) or [""])[0])
 
     print("-- V6 3축 격차 모델 --")
     gapbtn = pg.locator("[data-lag]").first

@@ -36,7 +36,12 @@ button{font-family:inherit;color:inherit}
 .masthead{border-bottom:1px solid var(--ink);padding:26px 0 18px;display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap}
 h1{font-size:clamp(26px,3.4vw,42px);font-weight:800;letter-spacing:-.035em;line-height:1.05;margin:6px 0 0}
 h1 .en{display:block;font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.13em;color:var(--label);margin-top:10px}
-.deck{max-width:520px;color:var(--ink2);font-size:15px;margin:12px 0 0}
+/* 부제는 제목·원천 카드 아래 한 줄을 통째로 쓴다. 좁은 칸에 가두면 문장이 잘린다. */
+.deck{flex:1 0 100%;max-width:none;color:var(--ink2);font-size:15px;margin:16px 0 0;
+  display:grid;gap:5px;line-height:1.55}
+.deck span{display:block}
+.deck b{color:var(--ink)}
+@media (min-width:1200px){.deck span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 .sources{display:flex;border:1px solid var(--rule);background:var(--panel);flex-wrap:wrap}
 .src{padding:9px 13px;border-right:1px solid var(--rule-soft);min-width:96px}
 .src:last-child{border-right:0}
@@ -419,7 +424,7 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .conflict span{display:block;margin-top:6px;color:var(--ink2);font-size:14px}
 .kpi.alert .v{color:var(--mark)}
 /* -- 연결 상태 카드 (V4) -- */
-.sources{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:1px;background:var(--rule);
+.sources{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:1px;background:var(--rule);
   border:1px solid var(--rule);flex:none}
 .conn{background:var(--panel);padding:9px 10px 10px;min-width:0}
 .conn.off{background:#F6F7F8}
@@ -432,7 +437,8 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .conn-n{font-family:var(--mono);font-size:15.5px;font-weight:700;letter-spacing:-.02em;margin-top:6px}
 .conn.off .conn-n{font-size:13px;color:#A7AFB6;font-weight:500}
 .conn-g{font-size:12px;color:var(--ink2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:1080px){.sources{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:1480px){.sources{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media (max-width:1080px){.sources{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:560px){.sources{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* -- 조사 요약 (V4) -- */
 /* 이 자료의 근거 위계 — 특허가 핵심이고 나머지는 보조라는 점을 못박는다 */
@@ -606,12 +612,17 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   <div>
     <div class="eyebrow">Competitive Technology Intelligence · Battery Manufacturing</div>
     <h1>AI 기반 경쟁기술 인텔리전스<span class="en">Patents · Capex · Conferences → Technology Gap Radar</span></h1>
-    <p class="deck"><b>특허를 핵심 기준</b>으로 경쟁사 기술 수준을 판정하고, 설비투자 공시·기술발표를 보조 근거로 교차 검증함. <b>배터리 공정기술 57개 전량</b>에 대한 자사 수준을 열위·동등·우위로 구분하여 보완 우선순위를 도출함. 격차는 3축 대리 지표로 추정하며 <b>기준·보수 듀얼 트랙</b>으로 제시함.</p>
   </div>
   <div>
     <div class="sources" id="sources"></div>
     <div class="stamp" id="stamp"></div>
   </div>
+  <p class="deck">
+    <span><b>특허를 핵심 기준</b>으로 경쟁사 기술 수준을 판정하고, 설비투자 공시·기술발표를 보조 근거로 교차 검증함.</span>
+    <span><b>배터리 공정기술 57개 전량</b>에 대한 자사 수준을 <b class="g-behind">열위</b>·<b class="g-even">동등</b>·<b class="g-ahead">우위</b>로 구분하여 보완 우선순위를 도출함.</span>
+    <span>경쟁사의 실제 수율·원가는 확보 불가하므로, <b>겉으로 드러나는 3가지</b> — 특허·설비투자 공시·기술발표 — 로 격차를 대신 추정함.</span>
+    <span>경쟁사 발표를 <b>그대로 믿은 값</b>과 <b>과장을 걷어낸 값</b>을 함께 제시하여, 판정이 흔들릴 수 있는 폭을 숨기지 않고 표기함.</span>
+  </p>
 </header>
 
 <nav class="tabs" role="tablist">
@@ -624,8 +635,8 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 <div class="basis-note">
     <span class="bn-t">판정 기준</span>
     <span class="bn-b"><b>특허를 핵심 기준</b>으로 판정하며, 설비투자 공시·학회 발표·논문은
-      <b>보조 근거</b>로 교차 검증에 한정 적용함. 특허 4만 1,665건은 동일 발명의 국가별
-      중복을 제거하여 <b>패밀리 2만 2,452건</b>으로 집계함. 경쟁사 수율·제조원가는 비공개로
+      <b>보조 근거</b>로 교차 검증에 한정 적용함. 특허 165,650건은 동일 발명의 국가별
+      중복을 제거하여 <b>패밀리 52,482건</b>으로 집계함. 경쟁사 수율·제조원가는 비공개로
       확보 불가하며, <b>본 판정 대상에서 제외</b>함.</span>
   </div>
 
@@ -666,11 +677,11 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
     <ol class="sn-l">
       <li><b>선정 기준</b> — 셀 제조 5대 공정(전극·조립·활성화·Pack·인프라)에서
         <b>경쟁사와 수준 비교가 성립하는 단위</b>로 한정함. 자사 등록·출원 특허
-        1만 6천 건 및 사내 공정 표준의 상위 분류 단위에 해당함.</li>
+        48,138건 및 사내 공정 표준의 상위 분류 단위에 해당함.</li>
       <li><b>제외 대상</b> — 전 사가 동일 수준으로 보유한 범용 요소기술, 개별 설비
         운전조건·레시피 등 사내 노하우 영역, 재료·셀 설계 등 공정 외 영역은
         비교 판별 실익이 낮아 제외함.</li>
-      <li><b>집계 단위</b> — 1개 기술은 평균 <b>280여 건</b>의 자사 특허를 포괄하는
+      <li><b>집계 단위</b> — 1개 기술은 평균 <b>845여 건</b>의 자사 특허를 포괄하는
         상위 단위임. 기술 수는 자사 기술 자산의 규모가 아닌 <b>의사결정 단위의 수</b>를
         의미함.</li>
     </ol>

@@ -205,6 +205,14 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
     nodes, unassigned = [], []
     cutoff = (date.today() - timedelta(days=recent_days)).isoformat()
 
+    # 설비투자 공시는 공장 단위라 개별 공정기술에 배정되지 않는다(실측 590건 전량).
+    # 회사별로 따로 모아 '전사 단위 근거'로 넘긴다. 노드 근거인 척하지 않는다.
+    company_capex = defaultdict(list)
+    for e in evidence:
+        if e.get("type") == "capex":
+            company_capex[company_of(e)].append({**e, "_co": company_of(e)})
+    self_capex = company_capex.get("LGES", [])
+
     # 노드별 용어 사전 미리 계산
     flat = []
     for st in tax["stages"]:
@@ -263,7 +271,9 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
         exec_years, gap_why = judge.execution_years(rival_trl, our_trl)
         # ② 3축 관측 보정 — 특허·공시·발표에서 관측된 선행 정도로 ①을 조정
         gm = gap_model.estimate(rival_ev, self_ev, exec_years,
-                                self_spec=it.get("spec"))
+                                self_spec=it.get("spec"),
+                                company_capex=company_capex,
+                                self_company_capex=self_capex)
         gap_years = gm["base_years"]
 
         top = max(rival_ev, key=lambda e: judge.GRADE_RANK.get(e.get("grade", ""), 0),

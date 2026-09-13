@@ -22,6 +22,7 @@ import logging
 import re
 import sys
 import time
+from io import BytesIO
 from pathlib import Path
 from typing import Optional
 
@@ -126,7 +127,30 @@ def propose_grade(text: str) -> tuple[str, str, bool]:
     return "weak", "", True
 
 
-def to_evidence(ann: dict, company_key: str, org_id: str, code: str) -> dict:
+def pdf_text(url: str, timeout: int = 40, max_pages: int = 6) -> str:
+    """공시 PDF 본문에서 평문을 뽑는다.
+
+    cninfo 목록 API 는 제목만 준다. 투자 규모(亿元)와 준공·양산 시점은 전부
+    PDF 안에 있어서, 본문을 받지 않으면 양산 진입 격차를 산출할 수 없다.
+    앞쪽 몇 쪽에 개요·투자액이 나오므로 전부 읽지 않는다.
+    """
+    import requests
+    from pypdf import PdfReader
+
+    res = requests.get(url, timeout=timeout, headers={"User-Agent": HEADERS["User-Agent"]})
+    res.raise_for_status()
+    rd = PdfReader(BytesIO(res.content))
+    parts = []
+    for pg in rd.pages[:max_pages]:
+        try:
+            parts.append(pg.extract_text() or "")
+        except Exception:
+            continue
+    return re.sub(r"\s+", " ", " ".join(parts)).strip()
+
+
+def to_evidence(ann: dict, company_key: str, org_id: str, code: str,
+                body: str = "") -> dict:
     title = strip_highlight(ann.get("announcementTitle", ""))
     ann_id = str(ann.get("announcementId") or "")
     keywords = extract_keywords(title)
@@ -147,6 +171,8 @@ def to_evidence(ann: dict, company_key: str, org_id: str, code: str) -> dict:
         "sec_code": ann.get("secCode", ""),
         "sec_name": ann.get("secName", ""),
         "pdf_url": pdf_url(ann.get("adjunctUrl", "")),
+        # 판정 모델이 읽는 전문. 화면은 summary(제목)를 그대로 쓴다.
+        "body": body,
         "grade_basis": basis,
         "keywords": keywords,
         "needs_review": review,
@@ -223,7 +249,7 @@ class Cninfo:
 
 
 def collect(client: Cninfo, bgn: str, end: str, keywords: list[str] = None,
-            targets: list[dict] = None) -> list[dict]:
+            targets: list[dict] = None, with_body: bool = False) -> list[dict]:
     """키워드별로 훑어 합치고 announcementId 로 중복 제거한다."""
     targets = targets or TARGETS
     # 실측(2026-09-13): cninfo 는 제목만 검색하고, 키워드 없이 전체를 넘기면
@@ -253,7 +279,14 @@ def collect(client: Cninfo, bgn: str, end: str, keywords: list[str] = None,
                 if not is_capex(title):
                     continue
                 seen.add(aid)
-                out.append(to_evidence(a, t["key"], t["org_id"], t["code"]))
+                rec = to_evidence(a, t["key"], t["org_id"], t["code"])
+                if with_body and rec.get("pdf_url"):
+                    try:
+                        rec["body"] = pdf_text(rec["pdf_url"])
+                        time.sleep(0.6)          # 서버 부담을 줄인다
+                    except Exception as e:
+                        log.warning("PDF 본문 실패 %s: %s", aid, e)
+                out.append(rec)
                 found += 1
         log.info("%s (%s): 설비투자 공고 %d건", t["key"], t["name"], found)
     out.sort(key=lambda r: r["date"], reverse=True)
@@ -273,6 +306,8 @@ def main(argv=None) -> int:
     ap.add_argument("--to", dest="end",
                     default=datetime.date.today().strftime("%Y-%m-%d"))
     ap.add_argument("--out", default="data/evidence_cninfo.jsonl")
+    ap.add_argument("--with-body", action="store_true",
+                    help="공시 PDF 본문까지 받아 투자 규모·준공 시점을 추출")
     ap.add_argument("--check-org", action="store_true",
                     help="하드코딩된 orgId 가 현재도 맞는지 확인")
     a = ap.parse_args(argv)
@@ -287,7 +322,7 @@ def main(argv=None) -> int:
             return 1
         return 0
 
-    recs = collect(client, a.bgn, a.end)
+    recs = collect(client, a.bgn, a.end, with_body=a.with_body)
     write_jsonl(recs, Path(a.out))
     review = sum(1 for r in recs if r["needs_review"])
     print(f"evidence {len(recs)}건 → {a.out}")
