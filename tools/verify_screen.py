@@ -225,6 +225,48 @@ with sync_playwright() as pw:
     }""")
     ck("부제 각 문장 한 줄(1200px 이상)", all(x == 1 for x in dl), str(dl))
 
+    print("-- V6 숫자 정합: 칸 · 팝업 · 판정 결과가 같은 값을 말한다 --")
+    # 예전에는 한 칸에 '근거 840건'(판정)과 '특허 9'(사내 기록값)가 나란히 찍히고
+    # 팝업은 또 '특허 19건'(표시분)을 말해, 셋이 서로 맞을 수 없었다.
+    pg.locator('[data-f="ahead"]').click()
+    pg.wait_for_timeout(350)
+    pg.locator("#tbody tr").first.click()
+    pg.wait_for_timeout(550)
+    cells = pg.locator(".matrix .mcol")
+    mism = []
+    for i in range(cells.count()):
+        txt = " ".join(cells.nth(i).inner_text().split())
+        co = txt.split(" ")[0]
+        mj = _re.search(r"판정 ([\d,만]+)건", txt)
+        mp = _re.search(r"특허 ([\d,만]+)", txt)
+        if not mj:
+            continue
+        def num(x):
+            x = x.replace(",", "")
+            return int(x.split("만")[0]) * 10000 + int(x.split("만")[1] or 0)                 if "만" in x else int(x)
+        cells.nth(i).click()
+        pg.wait_for_timeout(450)
+        pm = pg.locator(".modal").inner_text()
+        got = _re.search(r"판정에 쓴 근거 ([\d,만]+)건 \(특허 ([\d,만]+)", pm)
+        if not got:
+            mism.append(f"{co}: 팝업에 판정 건수 표기 없음")
+        else:
+            if num(got.group(1)) != num(mj.group(1)):
+                mism.append(f"{co}: 판정 칸 {mj.group(1)} ≠ 팝업 {got.group(1)}")
+            if mp and num(got.group(2)) != num(mp.group(1)):
+                mism.append(f"{co}: 특허 칸 {mp.group(1)} ≠ 팝업 {got.group(2)}")
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(180)
+    ck("매트릭스 칸 = 팝업 판정 건수(전 칸)", not mism, "; ".join(mism[:3]))
+    mtxt = pg.locator(".matrix").inner_text()
+    ck("칸에 사내 기록값(self.pat)을 섞지 않는다",
+       "판정" in mtxt and mtxt.count("특허") >= 1)
+
+    print("-- V6 조사 요약: 표 합과 총계의 차를 밝힌다 --")
+    cf = " ".join(pg.locator(".cofoot").inner_text().split())
+    ck("차액 설명 존재", "차" in cf and "판정 사용" in cf, cf[:60])
+    ck("차액 귀속처 명시", "출원인" in cf)
+
     print("-- V6 매트릭스 팝업: 특허가 위, 보조 근거가 아래 --")
     pg.locator(".pc").first.click()
     pg.wait_for_timeout(450)

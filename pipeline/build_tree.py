@@ -263,10 +263,19 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
         for e in rival_ev:
             by_co[company_of(e)].append(e)
 
+        # 유형별로 나눠 센다. '특허 몇 건 · 보조 근거 몇 건'을 화면이 바로 쓸 수 있어야
+        # 한 칸 안에서 숫자가 어긋나지 않는다.
+        def split_types(lst):
+            p = sum(1 for e in lst if e.get("type") == "patent")
+            c = sum(1 for e in lst if e.get("type") == "capex")
+            t = sum(1 for e in lst if e.get("type") in ("paper", "talk", "conference"))
+            return {"patent": p, "capex": c, "paper": t, "total": len(lst)}
+
         rivals = {}
         for co, lst in by_co.items():
             rivals[co] = {"status": "have" if judge.rival_holds(lst) else "part",
-                          "evidence_count": len(lst)}
+                          "evidence_count": len(lst),
+                          "judged": split_types(lst)}
 
         rival_trl, trl_why = judge.estimate_trl(rival_ev)
         our_trl, our_why = judge.self_trl(self_info)
@@ -279,6 +288,8 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
                                 self_company_capex=self_capex)
         gap_years = gm["base_years"]
 
+        # 화면에 실을 근거를 먼저 고른다. 아래에서 '판정 vs 표시'를 같이 내야 한다.
+        shown_ev = pick_evidence(evs)
         top = max(rival_ev, key=lambda e: judge.GRADE_RANK.get(e.get("grade", ""), 0),
                   default=None)
         recent = sum(1 for e in rival_ev if (e.get("date") or "") >= cutoff)
@@ -302,7 +313,8 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
                      "project": self_info.get("prj", "—"),
                      "note": self_info.get("note", ""),
                      "trl": our_trl, "trl_basis": our_why,
-                     "evidence_count": len(self_ev)},
+                     "evidence_count": len(self_ev),
+                     "judged": split_types(self_ev)},
             "rivals": rivals,
             "lag": ({"gap": judge.fmt_band(gm["base_years"], gm["cons_years"]),
                      "gap_years": gap_years,
@@ -346,13 +358,17 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             "self_conflict": (self_info.get("status") == "none"
                               and (len(self_ev) + sum(1 for e in rel
                                                       if company_of(e) == "LGES")) > 0),
+            # 화면에 실제로 실은 건수 — 회사별·유형별. 표시 상한이 걸리므로
+            # 판정 건수와 다를 수 있고, 그 차이를 화면이 그대로 밝혀야 한다.
+            "shown": {co: split_types([e for e in shown_ev if company_of(e) == co])
+                      for co in {company_of(e) for e in shown_ev}},
             "evidence": [{"type": e.get("type"), "company": company_of(e),
                           "date": e.get("date"), "ref": e.get("ref"),
                           "summary": (e.get("summary") or "")[:300],
                           "url": e.get("url", ""), "grade": e.get("grade"),
                           "source": e.get("source", ""),
                           "needs_review": bool(e.get("needs_review"))}
-                         for e in pick_evidence(evs)],
+                         for e in shown_ev],
             "limit": it.get("limit", ""),
         })
 
