@@ -86,8 +86,9 @@ h2 small{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--ink2);align-items:center}
 .legend i{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px}
 .sw-have{background:var(--graphite)}
-.sw-part{background:var(--amber-soft);border:1px solid var(--amber)}
-.sw-gap{background:var(--panel);border:1.5px solid var(--mark)}
+.sw-part{background:var(--even-bg);border:1px solid var(--even)}
+.sw-gap{background:var(--behind-bg);border:1.5px solid var(--behind)}
+.sw-ahead{background:var(--ahead-bg);border:1px solid var(--ahead)}
 
 .grid{border:1px solid var(--rule);background:var(--rule);margin-top:28px}
 .pane{background:var(--panel);min-width:0}
@@ -245,6 +246,11 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .pipe-tally i{display:inline-block;width:11px;height:11px;margin-right:6px}
 .pipe-tally b{font-family:var(--mono);font-size:12.5px;font-weight:700;margin-left:5px;letter-spacing:-.02em}
 .btn.ghost[aria-pressed="true"]{background:var(--ink);color:#fff}
+.pipe-guide{font-size:12px;color:var(--ink2);line-height:1.65;padding:10px 13px;
+  background:#FAFBFB;border:1px solid var(--rule);border-bottom:0}
+.pipe-guide b{color:var(--ink)}
+.g-behind{color:var(--behind)!important} .g-even{color:var(--even)!important}
+.g-ahead{color:var(--ahead)!important}
 .pipe-wrap{border:1px solid var(--rule);background:var(--panel);overflow-x:auto}
 .pipe{display:flex;align-items:stretch;min-width:1180px}
 .pipe-stage{flex:1 1 0;min-width:0;position:relative;display:flex;flex-direction:column;padding-bottom:16px}
@@ -258,8 +264,16 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .ps-h{padding:13px 13px 11px;border-bottom:1px solid var(--rule-soft);background:#FAFBFB}
 .ps-t{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .ps-n{font-size:14.5px;font-weight:800;letter-spacing:-.03em}
-.ps-gap{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--mark);white-space:nowrap}
+.ps-gap{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--behind);white-space:nowrap}
 .ps-gap.zero{color:var(--muted);font-weight:400}
+/* 공정별 수준 분포 — 한 줄 막대로 이 공정이 어떤 상태인지 즉시 보인다 */
+.ps-mix{display:flex;height:4px;margin-top:7px;background:#EDF0F1;overflow:hidden}
+.ps-mix i{height:100%}
+.ps-mix .m-behind{background:var(--behind)}
+.ps-mix .m-even{background:var(--even)}
+.ps-mix .m-ahead{background:var(--ahead)}
+.ps-mix .m-none{background:var(--g1)}
+.ps-cnt{font-family:var(--mono);font-size:8.5px;color:var(--muted);margin-top:5px;letter-spacing:.02em}
 .ps-en{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:block;margin-top:3px}
 .ps-b{padding:11px 11px 0;display:flex;flex-direction:column;gap:7px}
 .ps-sec{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
@@ -277,20 +291,37 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .pc-m{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:7px}
 .pc-lag{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--mark);white-space:nowrap}
 .pc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
-.pc.gap{box-shadow:inset 0 0 0 2px var(--mark);background:#fff}
-.pc.gap::before{background:var(--mark)}
-.pc.part{background:var(--amber-soft);box-shadow:inset 0 0 0 1px var(--amber);padding-left:12px}
-.pc.part::before{background:var(--amber);width:3px}
-.pc.part .pc-n{font-weight:600}
+/* 카드 색은 KPI·기술 구분과 같은 체계를 쓴다.
+   열위=적색 / 동등=황토 / 우위=녹색 / 근거부족=회색. 화면 어디서나 같은 뜻. */
+.pc.lv-behind{background:var(--behind-bg);box-shadow:inset 0 0 0 2px var(--behind-line)}
+.pc.lv-behind::before{background:var(--behind)}
+.pc.lv-behind .pc-n{font-weight:800}
+.pc.lv-even{background:var(--even-bg);box-shadow:inset 0 0 0 1px var(--even-line);padding-left:12px}
+.pc.lv-even::before{background:var(--even);width:3px}
+.pc.lv-ahead{background:var(--ahead-bg);box-shadow:inset 0 0 0 1px var(--ahead-line);padding-left:12px}
+.pc.lv-ahead::before{background:var(--ahead);width:3px}
+.pc.lv-ahead .pc-n{font-weight:600}
+.pc.lv-none{background:var(--panel);box-shadow:inset 0 0 0 1px var(--rule);padding-left:12px}
+.pc.lv-none::before{background:var(--g1);width:3px}
+.pc.lv-none .pc-n{font-weight:600;color:var(--ink2)}
 .pc.sel{outline:2px solid var(--ink);outline-offset:1px;z-index:2}
 
-/* 보유 기술 — 배경 없는 회색 칩 (기본 숨김) */
-.ps-have{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-.pc.have{width:auto;padding:4px 7px;background:transparent;box-shadow:inset 0 0 0 1px var(--rule);
-  font-size:10.5px;font-weight:500;color:var(--muted);line-height:1.3}
-.pc.have::before{display:none}
-.pc.have:hover{color:var(--ink);box-shadow:inset 0 0 0 1px var(--muted);transform:none}
-.pc.have.sel{outline:2px solid var(--ink);outline-offset:1px;color:var(--ink)}
+/* 카드 안의 수준 표기 */
+.pc-lv{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.04em;
+  padding:2px 5px;white-space:nowrap}
+.pc-lv.lv-behind{background:var(--behind);color:#fff}
+.pc-lv.lv-even{background:var(--even);color:#fff}
+.pc-lv.lv-ahead{background:var(--ahead);color:#fff}
+.pc-lv.lv-none{background:var(--g1);color:#fff}
+.pc-urg{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--ink2);
+  margin-left:auto;white-space:nowrap}
+
+/* 구간 머리 — 색 점으로 어느 수준 묶음인지 즉시 알게 한다 */
+.ps-sec i{width:8px;height:8px;flex:0 0 auto}
+.ps-sec.s-behind{color:var(--behind)} .ps-sec.s-behind i{background:var(--behind)}
+.ps-sec.s-even{color:var(--even)}     .ps-sec.s-even i{background:var(--even)}
+.ps-sec.s-ahead{color:var(--ahead)}   .ps-sec.s-ahead i{background:var(--ahead)}
+.ps-sec.s-none{color:var(--muted)}    .ps-sec.s-none i{background:var(--g1)}
 
 @media (max-width:720px){.pipe{min-width:900px}.ps-n{font-size:13px}}
 /* ── 수집 파이프라인 현황 (V3) ── */
@@ -394,6 +425,14 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 @media (max-width:1080px){.sources{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:560px){.sources{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* -- 조사 요약 (V4) -- */
+/* 이 자료의 근거 위계 — 특허가 핵심이고 나머지는 보조라는 점을 못박는다 */
+.basis-note{display:flex;align-items:stretch;gap:0;margin-top:30px;border:1px solid var(--ink);background:var(--panel)}
+.basis-note .bn-t{flex:0 0 auto;background:var(--ink);color:#fff;font-family:var(--mono);
+  font-size:9.5px;font-weight:700;letter-spacing:.1em;padding:11px 13px;display:flex;align-items:center;white-space:nowrap}
+.basis-note .bn-b{padding:11px 14px;font-size:12.5px;line-height:1.65;color:var(--ink2)}
+.basis-note .bn-b b{color:var(--ink)}
+@media (max-width:700px){.basis-note{flex-direction:column}
+  .basis-note .bn-t{justify-content:flex-start}}
 .sum-block{margin-top:30px}
 .sumgrid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:1px;
   background:var(--rule);border:1px solid var(--rule)}
@@ -419,10 +458,10 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .posrow{display:flex;align-items:center;gap:10px;padding:9px 15px;border-bottom:1px solid var(--rule-soft)}
 .posrow:last-child{border-bottom:0}
 .posbadge{font-family:var(--mono);font-size:9px;font-weight:700;padding:3px 7px;flex:0 0 auto;white-space:nowrap}
-.pb-behind{background:var(--mark);color:#fff}
-.pb-race{background:var(--amber-soft);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
-.pb-eq{background:#E4EFE9;color:var(--g3)}
-.pb-ahead{background:#EDF0F1;color:var(--muted)}
+.pb-behind{background:var(--behind);color:#fff}
+.pb-even{background:var(--even);color:#fff}
+.pb-ahead{background:var(--ahead);color:#fff}
+.pb-none{background:var(--g1);color:#fff}
 .posrow .pn{flex:1;min-width:0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .posrow .posn{font-family:var(--mono);font-size:10px;color:var(--muted);flex:0 0 auto;white-space:nowrap}
 .posmore{padding:8px 15px;font-size:11px;color:var(--muted)}
@@ -458,9 +497,25 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .tc-none{background:#F1F3F4;color:var(--muted);border-color:var(--rule)}
 .tclass-d{font-size:11.5px;color:var(--ink2);margin-top:7px;line-height:1.55}
 
+/* -- 강도 음영 --------------------------------------------------------
+   위협도·난이도·근거강도를 배경 진하기로 읽게 한다.
+   다섯 단계 모두 본문색은 var(--ink) 로 두어 시인성을 해치지 않는다.
+   진할수록 '자사에 불리하다'는 뜻이며, 방향은 화면 전체에서 동일하다. */
+.sh{color:var(--ink)}
+.sh-1{background:#FDF6F5} .sh-2{background:#F9E6E3} .sh-3{background:#F3D2CD}
+.sh-4{background:#ECBBB3} .sh-5{background:#E3A197}
+.sh-n1{background:#F6F7F8} .sh-n2{background:#EDF0F1} .sh-n3{background:#E3E7E9}
+.sh-n4{background:#D8DDE0} .sh-n5{background:#CBD2D6}
+/* 음영 범례 */
+.shleg{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:11px;color:var(--muted)}
+.shleg .bar{display:flex;flex:0 0 auto}
+.shleg .bar i{width:22px;height:11px;display:block}
+.shleg b{color:var(--ink2);font-weight:600}
+
 /* -- 시급도 곱셈식 -- */
 .ueq{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
 .ueq .f{flex:1 1 130px;min-width:0;border:1px solid var(--rule);background:var(--panel);padding:10px 12px}
+.ueq .f.sh-1,.ueq .f.sh-2,.ueq .f.sh-3,.ueq .f.sh-4,.ueq .f.sh-5{border-color:var(--behind-line)}
 .ueq .f .fl{font-size:11px;color:var(--muted)}
 .ueq .f .fv{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1.1;margin-top:4px}
 .ueq .f .fw{font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.45}
@@ -476,6 +531,8 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .gsteps td{padding:10px 12px;border-bottom:1px solid var(--rule-soft);font-size:12px;vertical-align:top}
 .gsteps tr:last-child td{border-bottom:0}
 .gsteps .yy{font-family:var(--mono);font-weight:700;white-space:nowrap;color:var(--behind)}
+.gsteps tr.sh-1 td,.gsteps tr.sh-2 td,.gsteps tr.sh-3 td,
+.gsteps tr.sh-4 td,.gsteps tr.sh-5 td{color:var(--ink)}
 .gsteps .wh{color:var(--ink2);line-height:1.55}
 .gsum{margin-top:12px;padding:11px 13px;background:var(--behind-bg);
   border-left:3px solid var(--behind);font-size:12.5px;line-height:1.65;color:var(--ink)}
@@ -492,7 +549,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   <div>
     <div class="eyebrow">Competitive Technology Intelligence · Battery Manufacturing</div>
     <h1>AI 기반 경쟁기술 인텔리전스<span class="en">Patents · Capex · Conferences → Technology Gap Radar</span></h1>
-    <p class="deck">경쟁사 특허·설비투자·컨퍼런스 발표를 상시 수집·분석해, 공정별 기술 트리 위에서 <b>자사에 없는 기술</b>을 근거와 함께 매일 드러냅니다.</p>
+    <p class="deck"><b>특허를 핵심 기준</b>으로 경쟁사 기술 수준을 판정하고, 설비투자 공시·기술발표를 보조 근거로 교차 검증함. <b>배터리 공정기술 57개 전량</b>에 대한 자사 수준을 열위·동등·우위로 구분하여 보완 우선순위를 도출함.</p>
   </div>
   <div>
     <div class="sources" id="sources"></div>
@@ -501,15 +558,21 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 </header>
 
 <nav class="tabs" role="tablist">
-  <button class="tab" role="tab" aria-selected="true">GAP 진단<span class="ph">PHASE 1</span></button>
+  <button class="tab" role="tab" aria-selected="true">기술 수준 진단<span class="ph">PHASE 1</span></button>
   <button class="tab" role="tab" aria-selected="false" disabled>로드맵 대조 · TRL 격차<span class="ph">PHASE 2</span></button>
 </nav>
 
 <section class="kpis" id="kpis"></section>
 
-<section class="sum-block">
+<div class="basis-note">
+    <span class="bn-t">판정 기준</span>
+    <span class="bn-b"><b>특허를 핵심 기준</b>으로 판정하며, 설비투자 공시·학회 발표·논문은
+      <b>보조 근거</b>로 교차 검증에 한정 적용함. 근거 4만 2천 건 중 특허가 99% 를 차지함.</span>
+  </div>
+
+  <section class="sum-block">
   <div class="block-head">
-    <h2>조사 요약<small>Survey Summary · 무엇을 어디서 얼마나 조사했는가</small></h2>
+    <h2>조사 요약<small>Survey Summary · 조사 범위 및 규모</small></h2>
     <div class="ctrl"><span class="pipe-tally" id="sumTotal"></span></div>
   </div>
   <div class="sumgrid">
@@ -519,7 +582,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
     </div>
     <div class="sumpane">
       <div class="sumpane-h">경쟁사 대비 자사 수준<button class="whybtn" data-why="class" title="기술 구분 기준">?</button><small>Level</small></div>
-      <div class="trlhint">수준은 <b>TRL</b>(기술 성숙도, 1~9단계)로 비교합니다. 9는 양산, 7은 파일럿, 4는 출원 단계입니다.<button class="whybtn" data-why="trl" title="TRL 이 무엇이고 어떻게 정했는가">?</button></div>
+      <div class="trlhint">수준 비교 기준은 <b>TRL</b>(기술 성숙도 1~9단계)임. 9=양산 적용 · 7=파일럿 가동 · 4=출원 단계.<button class="whybtn" data-why="trl" title="TRL 이 무엇이고 어떻게 정했는가">?</button></div>
       <div id="posList"></div>
     </div>
   </div>
@@ -527,20 +590,24 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 
 <section class="pipe-block">
   <div class="block-head">
-    <h2>공정 파이프라인<small>Process Pipeline · 전극 → 조립 → 활성화 → Pack → 인프라</small></h2>
+    <h2>자사 기술 포트폴리오<small>Process Portfolio · 전극 → 조립 → 활성화 → Pack → 인프라</small></h2>
     <div class="ctrl">
-      <span class="pipe-tally"><i class="sw-gap"></i>미보유 <b id="tallyGap">0</b></span>
-      <span class="pipe-tally"><i class="sw-part"></i>일부 <b id="tallyPart">0</b></span>
-      <button class="btn ghost" id="haveToggle" aria-pressed="true">보유 기술 <b id="tallyHave">0</b>건 숨기기</button>
+      <span class="pipe-tally"><i class="sw-gap"></i>열위 <b id="tallyGap">0</b></span>
+      <span class="pipe-tally"><i class="sw-part"></i>동등 <b id="tallyPart">0</b></span>
+      <span class="pipe-tally"><i class="sw-ahead"></i>우위 <b id="tallyHave">0</b></span>
+      <button class="btn ghost" id="haveToggle" aria-pressed="true">우위 기술 접기</button>
       <input type="search" id="q" placeholder="기술 검색" aria-label="기술 검색">
     </div>
   </div>
+  <div class="pipe-guide">전 공정 <b>57개 기술 전량</b>을 공정 순서로 배치하고, 경쟁사 대비
+    <b class="g-behind">열위</b> · <b class="g-even">동등</b> · <b class="g-ahead">우위</b>로 구분함.
+    구간 내 정렬은 시급도 내림차순이며, 상단부터 보완 우선순위에 해당함.</div>
   <div class="pipe-wrap"><div class="pipe" id="pipe"></div></div>
 </section>
 
 <section class="grid">
   <div class="pane">
-    <div class="pane-h"><h2>기술 상세<small>What it is · Why it matters · Evidence</small></h2>
+    <div class="pane-h"><h2>기술 상세<small>기술 개요 · 전략적 중요성 · 판정 근거</small></h2>
       <div class="ctrl"><button class="btn ghost" id="prevBtn">◀ 이전</button><button class="btn ghost" id="nextBtn">다음 ▶</button></div></div>
     <div id="detail" class="det"></div>
   </div>
@@ -548,7 +615,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 
 <section>
   <div class="block-head" style="margin-top:34px">
-    <h2>최우선 검토 기술<small>Gap Backlog · 시급도 높은 순</small></h2>
+    <h2>최우선 검토 기술<small>Priority Backlog · 시급도 내림차순</small></h2>
     <div class="ctrl">
       <div class="seg" id="statusSeg">
         <button aria-pressed="true" data-f="gap">열위</button>
@@ -569,7 +636,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 
 <section class="src-block">
   <div class="block-head">
-    <h2>수집 파이프라인 현황<small>Data Pipeline Status · 2026-09-12 실측</small></h2>
+    <h2>수집 파이프라인 현황<small>Data Pipeline Status · 창구별 수집 현황</small></h2>
     <div class="legend">
       <span><i class="sw-have" style="background:var(--g3)"></i>연결됨</span>
       <span><i class="sw-part" style="background:var(--amber);border:0"></i>부분</span>
@@ -616,7 +683,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   </div>
 </div>
 
-<footer><span><span id="ver" class="vchip"></span><span id="engine" class="engchip off"></span> LG ENERGY SOLUTION · 기술전략 / 내부 검토용 프로토타입</span><span id="foot"></span></footer>
+<footer><span><span id="ver" class="vchip"></span><span id="engine" class="engchip off"></span> LG ENERGY SOLUTION · 기술전략 / 내부 검토용</span><span id="foot"></span></footer>
 </div>
 
 <script>
@@ -755,10 +822,10 @@ async function boot(){
   if(!TREE.length){
     document.querySelector(".wrap").innerHTML =
       `<div style="padding:60px 20px;text-align:center">
-         <h1 style="font-size:20px;margin:0 0 14px">표시할 데이터가 없습니다</h1>
+         <h1 style="font-size:20px;margin:0 0 14px">표시 데이터 없음</h1>
          <p style="font-size:13px;color:#414A52;line-height:1.8;margin:0">
-           이 파일은 화면 틀만 들어 있습니다. 아래 둘 중 하나로 여십시오.<br>
-           <b>1.</b> <code>dist/V4-index.html</code> — 데이터가 들어 있어 바로 열립니다<br>
+           본 파일은 화면 틀 단독 구성분임. 아래 2개 방식 중 택일 필요함.<br>
+           <b>1.</b> <code>dist/V4-index.html</code> — 데이터 내장분, 즉시 실행 가능<br>
            <b>2.</b> <code>run.bat</code> 실행 후 <code>http://127.0.0.1:8000</code></p></div>`;
     return;
   }
@@ -790,7 +857,8 @@ const SOURCE_ORDER = [
   {key:"EPO",      label:"EPO",         org:"유럽 특허청",     gets:"청구항 원문"},
   {key:"USPTO",    label:"USPTO",       org:"미국 특허청",     gets:"미국 청구항"},
   {key:"SEC",      label:"SEC",         org:"미국 증권위",     gets:"미국 설비투자"},
-  {key:"CONF",     label:"컨퍼런스",     org:"CIBF·AABC",     gets:"기술세션 발표"},
+  {key:"OpenAlex", label:"학회·논문",    org:"OpenAlex",       gets:"기술세션 발표"},
+  {key:"HKEX",     label:"HKEX",        org:"홍콩거래소",      gets:"중화권 설비투자"},
 ];
 function renderSources(){
   const got = {};
@@ -832,9 +900,9 @@ function renderKpis(){
   const eq=C("동등")+C("동등-우위")+C("동등-열위");
   const ahead=C("우위");
   $("#kpis").innerHTML=[
-   {l:"열위 기술",v:behind,c:"k-behind",s:"자사에 없고 경쟁사는 가진 기술. 가장 먼저 본다."},
-   {l:"동등 기술",v:eq,c:"k-even",s:"자사도 일부 가진 기술. 지금 결정이 순위를 가른다."},
-   {l:"우위 기술",v:ahead,c:"k-ahead",s:"자사가 라인에 적용했고 앞선 기술. 지킨다."},
+   {l:"열위 기술",v:behind,c:"k-behind",s:"자사 미보유 · 경쟁사 보유 — 최우선 보완 대상"},
+   {l:"동등 기술",v:eq,c:"k-even",s:"자사 일부 보유 — 선점 경쟁 구간, 조기 결정 필요"},
+   {l:"우위 기술",v:ahead,c:"k-ahead",s:"자사 라인 적용 · 선행 — 우위 유지 관리"},
    {l:"경쟁사 범위",v:RIVALS.length,c:"k-plain",s:RIVALS.map(r=>SHORT[r]).join(" · ")}
   ].map(k=>`<div class="kpi ${k.c}"><div class="eyebrow">${k.l}</div><div class="v">${k.v}</div><div class="sub">${esc(k.s)}</div></div>`).join("");
 }
@@ -843,18 +911,43 @@ function renderKpis(){
    컬럼 = 공정(L1), 컬럼 안은 미보유 → 일부 → 보유 순. 각 구간은 시급도 내림차순.
    세부공정(L2)은 카드 윗줄에 작게. 보유는 기본 숨김(showHave).
 ====================================================================== */
+/* 수준 4구간. 화면 전체가 같은 순서·같은 색을 쓴다. */
+const LEVELS = [
+  {k:"behind", cls:"lv-behind", label:"열위",     full:"열위 기술",
+   note:"자사 미보유 · 경쟁사 보유"},
+  {k:"even",   cls:"lv-even",   label:"동등",     full:"동등 기술",
+   note:"자사 일부 보유"},
+  {k:"ahead",  cls:"lv-ahead",  label:"우위",     full:"우위 기술",
+   note:"자사 라인 적용 · 경쟁사 대비 선행"},
+  {k:"none",   cls:"lv-none",   label:"근거 부족", full:"판정 불가",
+   note:"경쟁사 근거 미확보"},
+];
+function levelOf(it){
+  const t = (it.pos && it.pos.tech_class) || "";
+  if(t==="열위") return LEVELS[0];
+  if(t.indexOf("동등")===0) return LEVELS[1];
+  if(t==="우위") return LEVELS[2];
+  return LEVELS[3];
+}
 function pipeCard(it){
-  const cls = it.status==="gap" ? "gap" : it.status==="part" ? "part" : "have";
-  const on  = sel && sel.id===it.id ? "sel" : "";
-  const body = it.status==="ok" ? esc(it.n) : `
+  const lv = levelOf(it);
+  const on = sel && sel.id===it.id ? "sel" : "";
+  const rivals = visibleRivals(it);
+  return `<button class="pc ${lv.cls} ${on}" data-id="${it.id}"
+      title="${esc(it.n)} — ${esc(lv.full)} · 시급도 ${it.score}">
       <span class="pc-grp">${esc(it.grp)}</span>
       <span class="pc-n">${esc(it.n)}</span>
       <span class="pc-m">
-        ${visibleRivals(it).slice(0,3).map(r=>`<span class="chip">${SHORT[r]}</span>`).join("")}
-        ${it.lag?`<span class="pc-lag">${esc(it.lag.t)} 뒤짐</span>`:""}
-      </span>`;
-  return `<button class="pc ${cls} ${on}" data-id="${it.id}" title="${esc(it.n)}${it.pos?" — "+esc(it.pos.display):""}">${body}</button>`;
+        <span class="pc-lv ${lv.cls}">${esc(lv.label)}</span>
+        ${rivals.slice(0,2).map(r=>`<span class="chip">${SHORT[r]}</span>`).join("")}
+        ${it.lag?`<span class="pc-lag">${esc(it.lag.t)}</span>`:""}
+        <span class="pc-urg">시급 ${it.score}</span>
+      </span>
+    </button>`;
 }
+/* 공정별로 자사 기술 전체를 놓고 수준별로 묶는다.
+   '없는 것 목록'이 아니라 '보유 포트폴리오와 그 안의 우선순위'를 보여 준다.
+   구간 안은 시급도 내림차순이라, 위에서부터 읽으면 그게 보완 순서다. */
 function renderPipeline(){
   const q = query.trim().toLowerCase();
   const hit = it => !q || (it.n+" "+it.en+" "+it.grp).toLowerCase().includes(q);
@@ -863,33 +956,51 @@ function renderPipeline(){
   $("#pipe").innerHTML = TREE.map(st=>{
     const all   = st.g.flatMap(g=>g.items);
     const shown = all.filter(hit);
-    const gaps  = shown.filter(i=>i.status==="gap" && isVisible(i)).sort(byScore);
-    const parts = shown.filter(i=>i.status==="part").sort(byScore);
-    const haves = shown.filter(i=>i.status==="ok");
-    const gapAll = all.filter(i=>i.status==="gap" && isVisible(i)).length;
+    const bucket = {};
+    LEVELS.forEach(l => bucket[l.k] = []);
+    shown.forEach(i => bucket[levelOf(i).k].push(i));
+    LEVELS.forEach(l => bucket[l.k].sort(byScore));
+
+    const nAll = {};
+    LEVELS.forEach(l => nAll[l.k] = all.filter(i=>levelOf(i).k===l.k).length);
+    const tot = all.length || 1;
 
     let body = "";
-    if(gaps.length)  body += `<div class="ps-sec">미보유 ${gaps.length}</div>` + gaps.map(pipeCard).join("");
-    if(parts.length) body += `<div class="ps-sec">일부 ${parts.length}</div>` + parts.map(pipeCard).join("");
-    if(showHave && haves.length)
-      body += `<div class="ps-sec">보유 ${haves.length}</div>`
-            + `<div class="ps-have">${haves.map(pipeCard).join("")}</div>`;
-    if(!body) body = `<div class="ps-empty">${q ? "검색 결과 없음" : "표시할 항목 없음"}</div>`;
+    LEVELS.forEach(l=>{
+      const list = bucket[l.k];
+      if(!list.length) return;
+      // 우위는 목록이 길어 기본으로 접을 수 있게 둔다(토글은 헤더에 있음)
+      if(l.k==="ahead" && !showHave){
+        body += `<div class="ps-sec s-${l.k}"><i></i>${l.label} ${list.length}</div>`
+              + `<div class="ps-empty">${list.length}건 접힘 — 위 버튼으로 펼침</div>`;
+        return;
+      }
+      body += `<div class="ps-sec s-${l.k}"><i></i>${l.label} ${list.length}</div>`
+            + list.map(pipeCard).join("");
+    });
+    if(!body) body = `<div class="ps-empty">${q ? "검색 결과 없음" : "해당 없음"}</div>`;
+
+    const mix = LEVELS.map(l => nAll[l.k]
+      ? `<i class="m-${l.k}" style="width:${(nAll[l.k]/tot*100).toFixed(1)}%"></i>` : "").join("");
+    const cnt = LEVELS.filter(l=>nAll[l.k]).map(l=>`${l.label} ${nAll[l.k]}`).join(" · ");
 
     return `<div class="pipe-stage">
       <div class="ps-h">
         <div class="ps-t"><span class="ps-n">${esc(st.n)}</span>
-          <span class="ps-gap ${gapAll?"":"zero"}">${gapAll?"GAP "+gapAll:"—"}</span></div>
+          <span class="ps-gap ${nAll.behind?"":"zero"}">${nAll.behind?"열위 "+nAll.behind:"열위 없음"}</span></div>
         <span class="ps-en">${esc(st.en)}</span>
+        <div class="ps-mix">${mix}</div>
+        <div class="ps-cnt">보유 기술 ${all.length}건 — ${cnt}</div>
       </div>
       <div class="ps-b">${body}</div>
     </div>`;
   }).join("");
 
   $("#pipe").querySelectorAll(".pc").forEach(b=>b.onclick=()=>select(b.dataset.id));
-  $("#tallyGap").textContent  = GAPS.filter(isVisible).length;
-  $("#tallyPart").textContent = PARTS.length;
-  $("#tallyHave").textContent = SEQ.filter(i=>i.status==="ok").length;
+  const N = k => SEQ.filter(i=>levelOf(i).k===k).length;
+  if($("#tallyGap"))  $("#tallyGap").textContent  = N("behind");
+  if($("#tallyPart")) $("#tallyPart").textContent = N("even");
+  if($("#tallyHave")) $("#tallyHave").textContent = N("ahead");
 }
 function gradeOf(it,co){
   const evs=it.ev.filter(e=>e.w===co);
@@ -941,7 +1052,7 @@ function originOf(e){
           dedup:"—", map:"수집 당시 출처가 기록되지 않음"};
 }
 function lineage(it){
-  if(!it.ev.length) return `<div class="linsum">수집 신호가 없어 계보를 그릴 수 없습니다.</div>`;
+  if(!it.ev.length) return `<div class="linsum">수집 근거 없음 — 계보 표시 불가함.</div>`;
   const rows=it.ev.map(e=>{const o=originOf(e);
     return `<tr>
       <td><span class="okind ${o.k==="api"?"k-api":"k-parse"}">${o.k==="api"?"공식 API":"문서 파싱"}</span><br>
@@ -958,9 +1069,8 @@ function lineage(it){
   return `<div class="lin"><table><thead><tr>
       <th>원천 (Source)</th><th></th><th>수집 레코드</th><th></th><th>정제 · 기술매핑</th><th></th><th>등급</th>
     </tr></thead><tbody>${rows}</tbody></table></div>
-    <div class="linsum">이 노드의 판정은 근거 <b>${it.ev.length}건</b>으로 구성되며, 그중 <b>${api}건</b>이 공식 API에서
-      자동 수집된 것이고 <b>${it.ev.length-api}건</b>은 문서 파싱분입니다.
-      화면의 모든 판정은 이 표의 각 행을 거슬러 올라가 원문까지 추적할 수 있습니다.</div>`;
+    <div class="linsum">본 항목 판정 근거 <b>${it.ev.length}건</b> — 공식 API 자동수집 <b>${api}건</b> ·
+      문서 파싱 <b>${it.ev.length-api}건</b>. 전 판정 항목은 상기 표를 통해 원문까지 역추적 가능함.</div>`;
 }
 function ladder(it){
   const order=["verified","strong","medium","weak"];
@@ -970,12 +1080,12 @@ function ladder(it){
     return `<div class="rung ${on?"":"off"}">
       <div class="lv"><i style="background:${on?GRADE[g].c:"#D6DBDF"}"></i>${GRADE[g].l}</div>
       <div class="desc">${GRADE[g].d}</div>
-      <div class="hits">${on?hits.map(h=>`<div><span class="who">${esc(SHORT[h.w]||h.w||"?")}</span>${esc(h.s)} — ${esc(h.x)}</div>`).join(""):"해당 근거 없음"}</div>
+      <div class="hits">${on?hits.map(h=>`<div><span class="who">${esc(SHORT[h.w]||h.w||"?")}</span>${esc(h.s)} — ${esc(h.x)}</div>`).join(""):"해당 등급 근거 없음"}</div>
     </div>`;}).join("");
   const top=it.top?GRADE[it.top.g]:null;
   const srcKinds=new Set(it.ev.map(e=>e.t)).size;
-  const rule = !it.ev.length ? "수집 신호 0건 — 판정 근거 없음(미관측)"
-    : `최고 등급 <b>${top.l}</b> (${esc(SHORT[it.top.w]||it.top.w||"?")}) · 소스 ${srcKinds}종 ${srcKinds>=2?"교차 확인 ✓":"단일 — 신뢰도 주의"} → 판정: <b>${it.status==="gap"?"경쟁사 보유 / 자사 미보유":it.status==="part"?"경쟁사 앞섬 / 자사 일부":"양측 보유"}</b>`;
+  const rule = !it.ev.length ? "근거 0건 — 판정 불가(미관측)"
+    : `최상위 등급 <b>${top.l}</b> (${esc(SHORT[it.top.w]||it.top.w||"?")}) · 소스 ${srcKinds}종 ${srcKinds>=2?"교차 검증 완료":"단일 소스 — 신뢰도 유의"} → 판정: <b>${esc((it.pos&&it.pos.tech_name)||"—")}</b>`;
   return `<div class="ladder">${rows}</div><div class="rule-note">${rule}</div>`;
 }
 /* 근거 블록은 핵심 3줄까지만 보여 주고, 나머지는 팝업으로 넘긴다.
@@ -1010,9 +1120,9 @@ function renderDetail(){
   <div class="detact"><button class="btn ghost" id="searchThis">이 기술로 특허 검색 ↓</button></div>
 
   <div class="explain">
-    <div class="lbl">이 기술은</div>
+    <div class="lbl">기술 개요</div>
     <p>${esc(it.d)}</p>
-    ${it.w?`<div class="why"><b>왜 중요한가 —</b> ${esc(it.w)}</div>`:""}
+    ${it.w?`<div class="why"><b>전략적 중요성 —</b> ${esc(it.w)}</div>`:""}
   </div>
 
   <div class="verdict3">
@@ -1028,22 +1138,22 @@ function renderDetail(){
       <div class="n">${it.lag?`${esc(it.lag.r)}<br>자사: ${esc(it.lag.m)}`:"격차 산정 대상 아님"}</div></div>
   </div>
 
-  <div class="trlhint">각 칸의 <b>TRL</b> 은 기술 성숙도(1~9단계)입니다. 9는 양산, 7은 파일럿, 4는 출원 단계입니다.<button class="whybtn" data-why="trl" title="TRL 이 무엇이고 어떻게 정했는가">?</button></div>
-  <div class="sec-t">보유 현황 매트릭스<span>칸 아래는 최고 근거 등급과 건수 — 눌러서 목록을 봅니다</span></div>
+  <div class="trlhint">각 칸의 <b>TRL</b> 은 기술 성숙도(1~9단계)임. 9=양산 적용 · 7=파일럿 가동 · 4=출원 단계.<button class="whybtn" data-why="trl" title="TRL 이 무엇이고 어떻게 정했는가">?</button></div>
+  <div class="sec-t">보유 현황 매트릭스<span>칸 하단은 최상위 근거 등급 및 건수 — 클릭 시 목록 조회</span></div>
   <div class="matrix">${statusCell("LGES",it.own,true,it)}
     ${RIVALS.map(r=>statusCell(r,it.r.includes(r)?"have":it.p.includes(r)?"part":"none",false,it)).join("")}</div>
 
-  <div class="sec-t">근거 사다리<span>어느 강도의 증거가 있어서 이렇게 판정했는가</span></div>
+  <div class="sec-t">근거 강도별 분포<span>판정 근거의 등급별 구성 — 특허가 핵심 기준</span></div>
   ${fold("ladder", ladder(it))}
 
-  <div class="sec-t">자사 측 확인<span>같은 4개 채널로 대칭 확인</span></div>
+  <div class="sec-t">자사 보유 현황<span>동일 4개 채널 대칭 검증</span></div>
   <div class="selfgrid">${ch.map(([k,v])=>{
     const zero=(v===0||v==="없음");
     const clk = k==="특허" ? ' clickable" data-selfev="1' : '';
     return `<div class="sg ${zero?"zero":""}${clk}" ${k==="특허"?'title="자사 특허 근거 보기"':""}><div class="k">${k}</div><div class="v">${v===0?"0":esc(v)}</div></div>`;}).join("")}</div>
   ${it.s.note?`<div class="selfnote"><b>판정 근거 —</b> ${esc(it.s.note)}</div>`:""}
 
-  <div class="sec-t">출처 계보<span>이 판정이 어느 원천에서 어떤 경로로 만들어졌는가</span></div>
+  <div class="sec-t">근거 출처 계보<span>원천 → 수집 → 정제 → 등급 부여 경로</span></div>
   ${fold("lineage", lineage(it))}
 
   <div class="sec-t">수집 근거 원문<span class="cnt">${it.ev.length}건</span></div>
@@ -1051,26 +1161,26 @@ function renderDetail(){
       <span class="gbadge" style="background:${GRADE[e.g].c}">${GRADE[e.g].l}</span>
       <span class="tag ${e.t==="patent"?"t-pat":e.t==="capex"?"t-cap":"t-conf"}">${e.t==="patent"?"특허":e.t==="capex"?"설비투자":"컨퍼런스"}</span>
       <div class="body"><div class="ttl">${e.url?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.x)} ↗</a>`:esc(e.x)}</div><div class="meta">${SHORT[e.w]||esc(e.w)} · ${esc(e.s)} · ${e.d} · ${esc(e.src||originOf(e).n)}</div></div></div>`).join("")
-    :`<div style="font-size:12px;color:var(--muted);padding:10px 0">개별 수집 근거 없음 — 보유 판정은 기존 등록 특허군과 내부 확인 기준.</div>`)}
+    :`<div style="font-size:12px;color:var(--muted);padding:10px 0">개별 수집 근거 없음 — 기존 등록 특허군 및 내부 확인 기준 판정분임.</div>`)}
 
   ${it.conflict?`<div class="conflict">
-    <b>자사 보유 여부를 다시 확인해야 합니다.</b>
-    기존 기록은 <b>미보유</b>지만, 자사 명의 특허가 검색되었습니다
-    (판정에 쓴 근거 ${it.selfEv}건 · 관련 가능성 ${it.relSelf}건).
-    기존 기록이 오래되었거나, 검색이 다른 기술의 특허를 잘못 집었을 수 있습니다.
-    <span>위 매트릭스의 <b>LGES</b> 칸을 눌러 어떤 특허인지 확인하십시오.</span>
+    <b>자사 보유 현황 재검증 필요.</b>
+    기존 기록상 <b>미보유</b>이나 자사 명의 특허 검색됨
+    (판정 적용 근거 ${it.selfEv}건 · 관련 가능성 ${it.relSelf}건).
+    기록 시점 경과 또는 타 기술 특허 오분류 가능성 존재함.
+    <span>상단 매트릭스 <b>LGES</b> 칸 클릭 시 해당 특허 목록 조회 가능함.</span>
   </div>`:""}
 
-  <div class="sec-t">이 판정의 한계</div>
+  <div class="sec-t">판정 한계 및 유의사항</div>
   <div class="limits">
     <ul>
-      ${it.rel?`<li><b>관련 가능성만 있는 근거 ${it.rel.toLocaleString()}건은 판정에서 제외</b>했습니다.
-        용어는 겹치지만 정말 이 기술의 것인지 확신할 수 없어, 숫자를 부풀리지 않으려고 뺐습니다.</li>`:""}
-      ${it.ev.length===0?`<li><b>판정에 쓸 근거가 아직 없습니다.</b> 이 기술은 위 숫자로 판단하지 마십시오.</li>`:""}
+      ${it.rel?`<li><b>관련 가능성 근거 ${it.rel.toLocaleString()}건 판정 제외함.</b>
+        용어 중복에 그쳐 해당 기술 귀속 확정 불가. 수치 과대계상 방지 목적으로 배제함.</li>`:""}
+      ${it.ev.length===0?`<li><b>판정 적용 근거 미확보.</b> 상기 수치 기준 판단 불가함.</li>`:""}
       ${it.lim?`<li>${esc(it.lim)}</li>`:""}
-      <li>자사 보유 여부는 공정기술팀 확인값입니다. 사내 비공개 파일럿이 있으면 판정이 바뀝니다.</li>
-      ${it.ev.length===0?`<li><b>조사된 근거가 없습니다.</b> 이 기술은 판정 대상에서 빠져 있습니다.</li>`:""}
-      ${new Set(it.ev.map(e=>e.t)).size<2&&it.ev.length?`<li>단일 소스 근거입니다. 다른 소스에서 교차 확인되기 전까지 TRL 추정은 상한 7로 봅니다.</li>`:""}
+      <li>자사 보유 여부는 공정기술팀 확인값 기준임. 사내 비공개 파일럿 존재 시 판정 변경됨.</li>
+      ${it.ev.length===0?`<li><b>조사 근거 없음.</b> 판정 대상에서 제외된 항목임.</li>`:""}
+      ${new Set(it.ev.map(e=>e.t)).size<2&&it.ev.length?`<li>단일 소스 근거임. 이종 소스 교차 검증 전까지 TRL 추정 상한 7 적용함.</li>`:""}
     </ul>
   </div>`;
   $("#detail").querySelectorAll("[data-foldopen]").forEach(b=>{
@@ -1097,7 +1207,7 @@ function renderTable(){
       ${it.p.filter(r=>activeRivals.has(r)).map(r=>`<span class="chip p">${SHORT[r]}</span>`).join("")}</div></td>
     <td style="font-family:var(--mono);font-size:11px;color:${it.lag?"var(--mark)":"var(--muted)"}">${it.lag?`<button class="linkbtn" data-lag="${it.id}">${it.lag.t}</button>`:"—"}</td>
     <td><div class="score"><div class="score-bar"><i style="width:${it.score}%"></i></div><button class="linkbtn" data-urg="${it.id}">${it.score}</button></div></td>
-  </tr>`).join("")||`<tr><td colspan="7" style="padding:26px;text-align:center;color:var(--muted)">조건에 해당하는 항목이 없습니다.</td></tr>`;
+  </tr>`).join("")||`<tr><td colspan="7" style="padding:26px;text-align:center;color:var(--muted)">해당 조건 항목 없음.</td></tr>`;
   $("#tbody").querySelectorAll("tr[data-id]").forEach(tr=>tr.onclick=()=>{select(tr.dataset.id);window.scrollTo({top:0,behavior:"smooth"});});
   $("#tbody").querySelectorAll("[data-urg]").forEach(b=>b.onclick=e=>{
     e.stopPropagation(); const it=SEQ.find(x=>x.id===b.dataset.urg); if(it) openUrgencyDetail(it);});
@@ -1115,30 +1225,41 @@ function renderRivalSel(){
    2026-09-12 실호출로 측정한 값. 추정치가 아니다.
    docs/REVIEW-V3.md 의 표와 같은 수치를 쓴다.
 ====================================================================== */
-const SOURCES = {
+/* 수집 현황은 실데이터에서 만든다.
+   예전에는 여기에 숫자를 박아 두어, 실제로 4만 건을 수집한 뒤에도 화면이
+   '실제 수집 127건 · 완성도 40%'라고 적고 있었다. 화면이 스스로를 속이면 안 된다. */
+const SRC_SPEC = {
   pat: [
-    {n:"Google Patents", en:"BigQuery · 전 관할", st:"on",   vol:"170.4M", unit:"보유 건수", pct:35,
-     note:"연결됐으나 적재 안 함"},
-    {n:"KIPRIS Plus",    en:"국내 특허·실용",     st:"on",   vol:"88,306", unit:"이차전지",   pct:40},
-    {n:"EPO OPS",        en:"EP · WO(PCT)",      st:"off",  vol:"—",      unit:"미연결",    pct:0},
-    {n:"USPTO ODP",      en:"US 청구항",          st:"off",  vol:"—",      unit:"BQ로 대체", pct:0},
+    {key:"BigQuery", n:"구글 특허 DB", en:"전 세계 특허청 · 경쟁사 특허"},
+    {key:"KIPRIS",   n:"KIPRIS Plus",  en:"한국 특허청 · 국내 특허"},
+    {key:"EPO",      n:"EPO OPS",      en:"유럽 특허청 · 청구항 원문", need:"키 발급 대기"},
+    {key:"USPTO",    n:"USPTO ODP",    en:"미국 특허청 · 구글 특허 DB로 대체"},
   ],
   cap: [
-    {n:"cninfo",         en:"CATL · BYD",        st:"part", vol:"6",      unit:"수집 건수",  pct:30,
-     note:"BYD 0건 — HKEX로 이탈"},
-    {n:"DART",           en:"삼성SDI · SK온",     st:"part", vol:"2",      unit:"수집 건수",  pct:25,
-     note:"경쟁사 0건 — 원천에 없음"},
-    {n:"SEC EDGAR",      en:"TESLA",             st:"off",  vol:"—",      unit:"미구현",    pct:0},
-    {n:"컨퍼런스 프로그램", en:"CIBF · AABC 등",    st:"off",  vol:"—",      unit:"미구현",    pct:0},
+    {key:"SEC",      n:"SEC EDGAR",    en:"미국 증권위 · 본문 전문검색"},
+    {key:"DART",     n:"DART",         en:"금융감독원 · 국내 설비투자"},
+    {key:"cninfo",   n:"cninfo",       en:"중국 증권거래소 · CATL"},
+    {key:"HKEX",     n:"HKEX",         en:"홍콩거래소 · 공시 3,390건 전수 확인, 설비투자 0건", verified:1},
+    {key:"OpenAlex", n:"학회·논문",     en:"OpenAlex · 기술세션 발표"},
   ],
 };
-const FLOW = [
-  {n:"원천 보유", v:"1억 7,041만", d:"BigQuery 전체 특허 문헌"},
-  {n:"경쟁사 6사", v:"54만+",      d:"법인명 통합 전 기준"},
-  {n:"실제 수집",  v:"127건",      d:"KIPRIS 119 · cninfo 6 · DART 2", bad:1},
-  {n:"화면 표시",  v:"61건",       d:"아직 목업 — 실데이터 미연결", bad:1},
-  {n:"완성도",     v:"약 40%",     d:"뼈대는 섰고 적재·매핑이 남음", bad:1},
-];
+function srcRows(spec){
+  const got = {};
+  (SRC.items||[]).forEach(x=>{ if(x.key) got[x.key] = x.n; });
+  // 막대는 묶음 안에서 상대 비교한다. 전체 최대값(구글 특허 4만)으로 나누면
+  // 특허 외 창구가 전부 3% 로 눌려 서로 구분되지 않는다.
+  const max = Math.max(1, ...spec.map(x=>got[x.key]||0));
+  return spec.map(x=>{
+    const n = got[x.key];
+    const on = n != null && n > 0;
+    // 확인을 마치고 0건인 창구와, 아직 연결하지 않은 창구는 다르다
+    const done = x.verified && n == null;
+    return {n:x.n, en:x.en, st:on?"on":(done?"part":"off"),
+            vol:on?korNum(n):(done?"0":"미연결"),
+            unit:on?"수집 건수":(done?"확인 완료":(x.need||"미연결")),
+            pct:on?Math.max(4,Math.round(n/max*100)):0};
+  });
+}
 
 function srcRow(x){
   const cls = x.pct>=60 ? "" : x.pct>=25 ? "mid" : "low";
@@ -1152,9 +1273,17 @@ function srcRow(x){
 }
 function renderSourceStatus(){
   if(!$("#srcPat")) return;
-  $("#srcPat").innerHTML = SOURCES.pat.map(srcRow).join("");
-  $("#srcCap").innerHTML = SOURCES.cap.map(srcRow).join("");
-  $("#flowLine").innerHTML = FLOW.map(f=>`<div class="fstep ${f.bad?"bad":""}">
+  $("#srcPat").innerHTML = srcRows(SRC_SPEC.pat).map(srcRow).join("");
+  $("#srcCap").innerHTML = srcRows(SRC_SPEC.cap).map(srcRow).join("");
+  const c = COVERAGE;
+  const flow = c ? [
+    {n:"조사 범위",   v:"1억 7,041만", d:"전 세계 특허 문헌"},
+    {n:"수집 완료",   v:korNum(c.evidence_total), d:"창구 6곳 실수집분"},
+    {n:"기술 배정",   v:korNum(c.assigned),       d:"CPC 국제분류 판독"},
+    {n:"판정 기술",   v:`${c.nodes_with_evidence} / ${c.nodes_total}`, d:"근거 확보 기술"},
+    {n:"재검증 대상", v:`${c.self_conflicts}건`,  d:"자사 보유 현황 확인 필요", bad:1},
+  ] : [];
+  $("#flowLine").innerHTML = flow.map(f=>`<div class="fstep ${f.bad?"bad":""}">
     <div class="fn">${esc(f.n)}</div><div class="fv">${esc(f.v)}</div>
     <div class="fd">${esc(f.d)}</div></div>`).join("");
 }
@@ -1164,6 +1293,13 @@ function renderSourceStatus(){
    숫자만 보여주면 믿을 수 없다. 어떤 기준으로 나온 값인지, 그리고
    "특허 N건"이 구체적으로 어떤 특허인지 눌러서 볼 수 있어야 한다.
 ====================================================================== */
+/* 음영이 무엇을 뜻하는지 팝업마다 한 줄로 밝힌다.
+   색만 칠하고 뜻을 안 적으면 읽는 사람이 제멋대로 해석한다. */
+function shadeLegend(what){
+  const bars = [1,2,3,4,5].map(i=>'<i class="sh-'+i+'"></i>').join("");
+  return '<div class="shleg"><b>'+esc(what)+'</b> 낮음 <span class="bar">'+bars+'</span> 높음'
+       + ' — 음영 진할수록 자사 대응 우선순위 높음</div>';
+}
 function modalOpen(title, html){
   $("#modalTitle").textContent = title;
   $("#modalBody").innerHTML = html;
@@ -1173,55 +1309,90 @@ function modalClose(){ $("#modal").classList.remove("on"); }
 
 /* 샘플 데이터로 볼 때도 기준 설명은 보여야 하므로 기본값을 둔다 */
 const CRITERIA_FALLBACK = {
-  trl:{title:"TRL 을 어떻게 정했는가",
-    intro:"경쟁사가 어디까지 갔는지를 관측된 근거만으로 추정합니다. 추측은 숫자로 바꾸지 않습니다.",
-    rows:[{level:9,name:"양산 중",rule:"양산 가동 확인 + 서로 다른 소스 2종"},
-          {level:8,name:"양산 준비·초기",rule:"양산 가동 확인 1건 또는 착공·양산일정 2건"},
+  trl:{title:"TRL 산정 기준",
+    intro:"경쟁사 도달 수준은 관측 근거에 한정하여 추정함. 판정의 핵심 기준은 특허이며, 설비투자 공시·기술발표는 보조 근거로 교차 검증에 한정 적용함.",
+    rows:[{level:9,name:"양산 적용",rule:"양산 가동 확인 및 이종 소스 2종 교차 검증"},
+          {level:8,name:"양산 준비",rule:"양산 가동 확인 1건 또는 착공·양산일정 2건"},
           {level:7,name:"파일럿 가동",rule:"파일럿 신설·착공 1건"},
-          {level:6,name:"실증·검증",rule:"등록특허 공정조건 또는 기술세션 2건"},
+          {level:6,name:"실증 완료",rule:"등록특허 공정조건 또는 기술세션 2건"},
           {level:5,name:"요소기술 확보",rule:"등록특허 공정조건 1건"},
-          {level:4,name:"출원 단계",rule:"공개특허만 관측"},
-          {level:3,name:"미관측",rule:"근거 없음"}],
-    note:"TRL 8 이상은 특허·설비투자·발표 중 서로 다른 2종이 교차 확인될 때만 부여합니다."},
-  lag:{title:"기술 격차를 어떻게 계산했는가",
-    intro:"경쟁사가 도달한 단계까지 자사가 올라가는 데 걸리는 기간입니다. 단계마다 해야 할 일이 달라서 기간도 다릅니다.",
-    rows:[{level:"0.5년",name:"요소기술 확보 → 실증",rule:"랩에서 공정조건을 찾아 재현한다. 장비를 새로 사지 않아 가장 빠르다."},
-          {level:"0.75년",name:"실증 → 검증 완료",rule:"파일럿 장비를 빌리거나 개조해 조건을 재현한다."},
-          {level:"1.0년",name:"검증 → 파일럿 가동",rule:"전용 장비를 발주한다. 코터·프레스 납기가 6~12개월이다."},
-          {level:"1.25년",name:"파일럿 → 양산 준비",rule:"양산 라인을 개조하고 수율을 올린다. 라인을 세워야 한다."},
-          {level:"1.5년",name:"양산 준비 → 전 라인 양산",rule:"전 공장으로 넓히고 고객 품질 승인을 받는다."}],
-    note:"자사 단계는 라인 적용=9, 파일럿=7, 출원만 있음=4, 미착수=3 으로 봅니다."},
-  urgency:{title:"시급도를 어떻게 매겼는가",
-    intro:"세 가지를 곱합니다. 얼마나 뒤졌나 × 몇 개사가 가졌나 × 근거가 단단한가. 각 1~5점이라 최대 125점입니다.",
-    rows:[{level:"1~5점",name:"얼마나 뒤졌나",rule:"TRL 단계 차이. 차이 없음 1점 → 4단계 이상 5점"},
-          {level:"1~5점",name:"몇 개사가 가졌나",rule:"보유가 확인된 경쟁사 수. 0개사 1점 → 5개사 이상 5점"},
-          {level:"1~5점",name:"근거가 단단한가",rule:"미관측 1점 · 공개특허 2점 · 등록특허 3점 · 착공 4점 · 양산확인 5점"}],
-    note:"더하지 않고 곱합니다. 셋 중 하나라도 약하면 지금 손댈 일이 아니기 때문입니다."},
-  class:{title:"기술 구분을 어떻게 나눴는가",
-    intro:"자사가 가졌는지를 먼저 보고, 그다음 경쟁사보다 앞서는지를 봅니다.",
-    rows:[{level:"열위 기술",name:"자사에는 없고 경쟁사는 가진 기술",rule:""},
-          {level:"동등 기술(열위)",name:"자사도 일부 가졌지만, 경쟁사가 더 앞선 기술",rule:""},
-          {level:"동등 기술",name:"자사도 일부 가졌고, 경쟁사와 같은 수준인 기술",rule:""},
-          {level:"동등 기술(우위)",name:"자사도 일부 가졌고, 경쟁사보다 앞선 기술",rule:""},
-          {level:"우위 기술",name:"자사가 라인에 적용했고 경쟁사보다 앞선 기술",rule:""},
-          {level:"판정 불가",name:"경쟁사 근거가 없어 비교할 수 없는 기술",rule:""}],
-    note:"'일부 보유'는 좋은 건지 나쁜 건지 알 수 없어 쓰지 않습니다. 이름 안에 수준을 담았습니다."},
+          {level:4,name:"출원 단계",rule:"공개특허 단독 관측"},
+          {level:3,name:"미관측",rule:"근거 미확보"}],
+    note:"TRL 8 이상은 특허·설비투자·기술발표 중 이종 2종 교차 검증 시에만 부여함."},
+  lag:{title:"기술 격차 산정 기준",
+    intro:"경쟁사 도달 수준까지의 자사 소요기간 산정치임. 단계별 수행 과업 상이로 소요기간 차등 적용함.",
+    rows:[{level:"0.5년",name:"요소기술 확보 → 실증",rule:"랩 스케일 공정조건 도출 및 재현. 신규 설비 투자 미수반."},
+          {level:"0.75년",name:"실증 → 검증 완료",rule:"파일럿 설비 임차·개조를 통한 조건 재현."},
+          {level:"1.0년",name:"검증 → 파일럿 가동",rule:"전용 설비 발주 필요. 코터·프레스 납기 6~12개월 소요."},
+          {level:"1.25년",name:"파일럿 → 양산 준비",rule:"양산 라인 개조 및 수율 안정화. 라인 정지 손실 수반."},
+          {level:"1.5년",name:"양산 준비 → 전 라인 양산",rule:"전 공장 확대 적용 및 고객 품질 승인."}],
+    note:"자사 단계 산정 기준 — 전 라인 적용 9 · 파일럿 7 · 출원 단독 4 · 미착수 3."},
+  urgency:{title:"시급도 산정 기준",
+    intro:"3개 인자의 곱으로 산정함. 기술 격차 × 경쟁사 확산도 × 근거 확실성. 각 인자 1~5점, 최대 125점임.",
+    rows:[{level:"1~5점",name:"기술 격차",rule:"경쟁사 대비 TRL 단계 차이. 격차 없음 1점 → 4단계 이상 5점"},
+          {level:"1~5점",name:"경쟁사 확산도",rule:"보유 확인 경쟁사 수. 0개사 1점 → 5개사 이상 5점"},
+          {level:"1~5점",name:"근거 확실성",rule:"미관측 1점 · 공개특허 2점 · 등록특허 3점 · 착공 4점 · 양산확인 5점"}],
+    note:"합산이 아닌 곱셈 적용 사유 — 3개 인자 중 1개라도 낮을 경우 대응 우선순위에서 제외되어야 함."},
+  class:{title:"기술 구분 기준",
+    intro:"자사 보유 여부를 1차 기준으로, 경쟁사 대비 수준을 2차 기준으로 구분함.",
+    rows:[{level:"열위 기술",name:"자사 미보유 · 경쟁사 보유 확인 — 최우선 보완 대상",rule:""},
+          {level:"동등 기술(열위)",name:"자사 일부 보유 · 경쟁사 선행 — 추격 투자 필요",rule:""},
+          {level:"동등 기술",name:"자사 일부 보유 · 경쟁사 동일 수준 — 선점 경쟁 구간",rule:""},
+          {level:"동등 기술(우위)",name:"자사 일부 보유 · 경쟁사 대비 선행 — 격차 확대 추진",rule:""},
+          {level:"우위 기술",name:"자사 라인 적용 · 경쟁사 대비 선행 — 우위 유지 관리",rule:""},
+          {level:"판정 불가",name:"경쟁사 근거 미확보 — 비교 판정 불가",rule:""}],
+    note:"'일부 보유' 표현은 판단 방향성이 불명확하여 미사용함. 구분 명칭에 경쟁사 대비 수준을 직접 반영함."},
   hold:{title:"'보유' 판정 기준",
-    intro:"STRONG 1건, MEDIUM 2건, WEAK 3건 이상이면 보유로 봅니다.",
+    intro:"STRONG 1건 · MEDIUM 2건 · WEAK 3건 이상 충족 시 보유로 판정함.",
     rows:[{level:"VERIFIED",name:"양산 가동 확인",rule:"공시 등 1차 출처로 확인"},
           {level:"STRONG",name:"착공·양산일정",rule:"파일럿 신설 또는 일정 공표"},
           {level:"MEDIUM",name:"등록특허·기술세션",rule:"공정조건이 적힌 등록특허"},
           {level:"WEAK",name:"공개특허·포스터",rule:"출원 공개 단계"}],
-    note:"조사한 창구에서 나오지 않으면 '근거 없음'으로 적습니다. 조사 범위 밖일 수 있습니다."},
+    note:"적용 창구 내 미검출 시 '근거 없음'으로 표기함. 조사 범위 외 존재 가능성 있음."},
 };
 function openCriteria(key){
   const c = (CRITERIA && CRITERIA[key]) || CRITERIA_FALLBACK[key];
   if(!c) return;
-  const rows = (c.rows||[]).map(r=>'<tr><td class="lv">'+esc(String(r.level))+'</td><td class="nm">'
-    +esc(r.name||"")+'</td><td>'+esc(r.rule||"")+'</td></tr>').join("");
+  // 표의 각 행에 강도 음영을 준다. 무엇이 '진한가'는 표마다 다르므로 key 로 가른다.
+  const n = (c.rows||[]).length || 1;
+  const shadeOf = (r, i) => {
+    if(key==="trl"){                       // 도달 단계가 높을수록 위협적
+      const lv = parseInt(r.level, 10);
+      return isNaN(lv) ? 0 : Math.max(1, Math.min(5, Math.round((lv-3)/6*4)+1));
+    }
+    if(key==="hold"){                      // 근거가 셀수록 확실 → 진하게
+      return 5 - Math.min(4, i);
+    }
+    if(key==="class"){                     // 열위가 가장 불리
+      const t = String(r.level);
+      if(t.indexOf("열위")===0) return 5;
+      if(t.indexOf("동등 기술(열위)")===0) return 4;
+      if(t.indexOf("동등")===0) return 3;
+      if(t.indexOf("우위")===0) return 1;
+      return 0;
+    }
+    if(key==="lag"){                       // 소요기간이 길수록 난이도 높음
+      const y = parseFloat(String(r.level));
+      return isNaN(y) ? 0 : (y>=1.5?5 : y>=1.25?4 : y>=1?3 : y>=0.75?2 : 1);
+    }
+    if(key==="urgency"){                   // 인자 점수가 높을수록 불리
+      const v = parseInt(String(r.level), 10);
+      return isNaN(v) ? 0 : Math.max(1, Math.min(5, v));
+    }
+    return 0;
+  };
+  const rows = (c.rows||[]).map((r,i)=>{
+    const sh = shadeOf(r, i);
+    return '<tr class="'+(sh?("sh sh-"+sh):"")+'"><td class="lv">'+esc(String(r.level))
+      +'</td><td class="nm">'+esc(r.name||"")+'</td><td>'+esc(r.rule||"")+'</td></tr>';
+  }).join("");
+  const legendFor = {trl:"경쟁사 도달 수준", hold:"근거 확실성", class:"자사 영향도",
+                     lag:"단계 난이도", urgency:"자사 영향도"};
   modalOpen(c.title, '<p class="modal-intro">'+esc(c.intro||"")+'</p>'
-    +'<table class="crit"><thead><tr><th>구분</th><th>뜻</th><th>부여 조건</th></tr></thead><tbody>'
-    +rows+'</tbody></table>'+(c.note?'<div class="modal-note">'+esc(c.note)+'</div>':''));
+    +'<table class="crit"><thead><tr><th>구분</th><th>정의</th><th>부여 조건</th></tr></thead><tbody>'
+    +rows+'</tbody></table>'
+    +(legendFor[key] ? shadeLegend(legendFor[key]) : "")
+    +(c.note?'<div class="modal-note">'+esc(c.note)+'</div>':''));
 }
 /* 시급도 = 얼마나 뒤졌나 × 몇 개사가 가졌나 × 근거가 단단한가.
    세 칸과 곱셈 기호를 그대로 그려 준다. 한 번에 읽히는 게 목적이다. */
@@ -1229,23 +1400,28 @@ function openUrgencyDetail(it){
   const b = it.urg && it.urg.breakdown;
   if(!b || !b.length){ openCriteria("urgency"); return; }
   const max = (it.urg && it.urg.max) || 125;
-  const cells = b.map(r=>'<div class="f"><div class="fl">'+esc(r.label)+'</div>'
+  // 점수(1~5)를 그대로 음영 단계로 쓴다. 진할수록 자사에 불리하다.
+  const cells = b.map(r=>'<div class="f sh sh-'+r.got+'"><div class="fl">'+esc(r.label)+'</div>'
     +'<div class="fv">'+r.got+'</div><div class="fw">'+esc(r.why)+'</div></div>').join('<div class="op">×</div>');
   modalOpen("시급도 "+it.score+"점 — "+it.n,
-    '<p class="modal-intro">세 가지를 <b>곱합니다</b>. 각 1~5점이므로 최대 '+max+'점입니다.</p>'
+    '<p class="modal-intro">3개 인자의 <b>곱</b>으로 산정함. 각 인자 1~5점, 최대 '+max+'점임.</p>'
     +'<div class="ueq">'+cells+'<div class="op">=</div>'
     +'<div class="tot"><div class="fl">시급도</div><div class="fv">'+it.score+'</div>'
     +'<div class="fw">'+max+'점 만점</div></div></div>'
-    +'<div class="modal-note">더하지 않고 곱하는 이유는, 셋 중 하나라도 약하면 지금 손댈 일이 '
-    +'아니기 때문입니다. 아무리 뒤져 있어도 경쟁사 한 곳만 갖고 있고 근거가 공개특허뿐이면 '
-    +'급하지 않습니다. 더하기로는 그런 건도 중간 점수가 나와 순위가 흐려집니다.</div>');
+    + shadeLegend("자사 영향도")
+    +'<div class="modal-note">합산이 아닌 곱셈 적용 사유 — 3개 인자 중 1개라도 낮을 경우 '
+    +'대응 우선순위에서 제외되어야 함. 격차가 크더라도 경쟁사 1개사 보유 및 공개특허 수준 '
+    +'근거에 그칠 경우 즉시 대응 대상 아님. 합산 방식은 해당 건에도 중간 점수를 부여하여 '
+    +'우선순위 변별력이 저하됨.</div>');
 }
 /* 기술 격차 — 'N년'만 보여 주면 체감이 오지 않는다.
    그 기간에 실제로 무슨 일을 해야 하는지를 단계별로 적는다. */
 function openLagDetail(it){
   if(!it.lag){ openCriteria("lag"); return; }
   const steps = it.lag.steps || [];
-  const rows = steps.map(x=>'<tr><td class="yy">'+x.years+'년</td>'
+  // 소요기간이 길수록 진하게 — 난이도가 눈으로 먼저 읽히게 한다
+  const lvl = y => y>=1.5?5 : y>=1.25?4 : y>=1?3 : y>=0.75?2 : 1;
+  const rows = steps.map(x=>'<tr class="sh sh-'+lvl(x.years)+'"><td class="yy">'+x.years+'년</td>'
     +'<td><b>'+esc(x.name||("TRL "+x.from+" → "+x.to))+'</b></td>'
     +'<td class="wh">'+esc(x.why||"")+'</td></tr>').join("");
   const table = rows
@@ -1253,27 +1429,28 @@ function openLagDetail(it){
       +'<th>왜 그만큼 걸리는가</th></tr></thead><tbody>'+rows+'</tbody></table>'
     : "";
   const sum = steps.length
-    ? '<div class="gsum">경쟁사는 이미 <b>'+esc(String(it.trl||"–"))+'단계</b>에 있고 자사는 <b>'
-      +esc(String(it.selfTrl||"–"))+'단계</b>입니다. 위 '+steps.length+'개 단계를 모두 밟아야 따라잡습니다. '
-      +'다 더하면 <b>'+esc(it.lag.t)+'</b>입니다.</div>'
+    ? '<div class="gsum">경쟁사 <b>'+esc(String(it.trl||"–"))+'단계</b> 도달 · 자사 <b>'
+      +esc(String(it.selfTrl||"–"))+'단계</b>. 상기 '+steps.length+'개 단계 전량 이행 필요하며, '
+      +'총 소요기간 <b>'+esc(it.lag.t)+'</b> 산정됨.</div>'
     : "";
   modalOpen("기술 격차 "+it.lag.t+" — "+it.n,
-    '<p class="modal-intro">단계를 하나 올릴 때마다 해야 할 일이 다르고, 그래서 걸리는 기간도 '
-    +'다릅니다. 뒤 단계일수록 장비를 사고 라인을 세워야 해서 오래 걸립니다.</p>'
+    '<p class="modal-intro">단계별 수행 과업 상이로 소요기간 차등 적용함. '
+    +'후행 단계일수록 설비 투자 및 라인 정지 수반으로 기간 증가함.</p>'
     + table + sum
     +'<div class="mine"><span class="lbl">경쟁사</span><span class="wy">'+esc(it.lag.r||"")+'</span></div>'
     +'<div class="mine"><span class="lbl">자사</span><span class="wy">'+esc(it.lag.m||"")+'</span></div>'
-    +'<div class="modal-note">기간은 배터리 공정기술 통상치입니다. 사내 실제 소요기간이 있으면 '
-    +'그 값으로 바꿔야 더 정확해집니다.</div>');
+    + shadeLegend("단계 난이도")
+    +'<div class="modal-note">소요기간은 배터리 공정기술 통상치 적용분임. 사내 실적 데이터 '
+    +'확보 시 해당 값으로 대체 적용 예정임.</div>');
 }
 function openEvidenceList(it, company){
   const list = it.ev.filter(function(e){ return !company || e.w === company; });
   const who = company || "전체";
   if(!list.length){
     modalOpen(who+" — "+it.n,
-      '<p class="modal-intro">'+esc(who)+' 근거가 <b>없습니다.</b></p>'
-      +'<div class="modal-note">이 기술은 아직 조사 범위에 들어오지 않았습니다. '
-      +'조사한 창구(구글 특허·KIPRIS·중국/한국 공시)에서 나오지 않았다는 뜻입니다.</div>');
+      '<p class="modal-intro">'+esc(who)+' 근거 <b>0건</b>.</p>'
+      +'<div class="modal-note">조사 범위 내 미검출 항목임. 적용 창구(구글 특허·KIPRIS·'
+      +'국내외 공시·학회)에서 해당 근거가 확인되지 않음을 의미하며, 부재를 확정하는 것은 아님.</div>');
     return;
   }
   const g = {};
@@ -1289,11 +1466,11 @@ function openEvidenceList(it, company){
       +'</div>'; }).join("");
   const total = (it.cnt && it.cnt[company]!=null) ? it.cnt[company] : list.length;
   const more = total>list.length
-    ? ' 수집된 <b>'+total+'건</b> 중 근거가 센 것부터 <b>'+list.length+'건</b>을 실었습니다.'
+    ? ' 수집 <b>'+total+'건</b> 중 근거 강도 상위 <b>'+list.length+'건</b> 표시함.'
     : "";
   modalOpen(who+" 근거 "+total+"건 — "+it.n,
-    '<p class="modal-intro">'+esc(sum)+(list.length>60?" · 상위 60건만 표시":"")
-    +'. 오른쪽 <b>원문</b> 을 눌러 출처를 직접 확인할 수 있습니다.'+more+'</p>'
+    '<p class="modal-intro">'+esc(sum)+(list.length>60?" · 상위 60건 표시":"")
+    +'. 우측 <b>원문</b> 클릭 시 출처 직접 확인 가능함.'+more+'</p>'
     +'<div class="plist">'+rows+'</div>');
 }
 function wireModal(){
@@ -1314,8 +1491,8 @@ function wireModal(){
 ====================================================================== */
 const CO_LABEL = {"CATL":"CATL","BYD":"BYD","SAMSUNG SDI":"삼성SDI","SK ON":"SK온",
                   "TESLA":"테슬라","PANASONIC":"파나소닉","LGES":"자사(LGES)"};
-const POS_CLASS = {"열위":"pb-behind","경합":"pb-race","동등":"pb-eq",
-                   "우위":"pb-ahead","판정 불가":"pb-ahead"};
+/* 배지 색은 파이프라인·KPI 와 같은 체계를 쓴다. */
+const POS_CLASS = {"behind":"pb-behind","even":"pb-even","ahead":"pb-ahead","none":"pb-none"};
 
 function renderSummary(){
   if(!$("#coTable")) return;
@@ -1338,16 +1515,18 @@ function renderSummary(){
       <td class="num">${korNum(r.judged)}</td></tr>`).join("")}
     </tbody></table>` : `<div class="posmore">집계 없음</div>`;
 
-  const order = {"열위":0,"경합":1,"동등":2,"우위":3,"판정 불가":4};
+  const ord = {behind:0, even:1, ahead:2, none:3};
   const list = SEQ.filter(i=>i.pos).sort((a,b)=>
-    (order[a.pos.label]??9)-(order[b.pos.label]??9) || b.score-a.score);
-  const show = list.filter(i=>["열위","경합","동등"].includes(i.pos.label)).slice(0,12);
-  $("#posList").innerHTML = show.map(i=>`<div class="posrow" data-id="${i.id}">
-      <span class="posbadge ${POS_CLASS[i.pos.label]||""}">${esc(i.pos.label_shown||i.pos.label)}</span>
+    (ord[levelOf(a).k]??9)-(ord[levelOf(b).k]??9) || b.score-a.score);
+  const show = list.filter(i=>levelOf(i).k!=="ahead").slice(0,12);
+  $("#posList").innerHTML = show.map(i=>{
+    const lv = levelOf(i);
+    return `<div class="posrow" data-id="${i.id}">
+      <span class="posbadge ${POS_CLASS[lv.k]}">${esc(lv.label)}</span>
       <span class="pn">${esc(i.n)}</span>
-      <span class="posn">${visibleRivals(i).length}사 보유</span>
-    </div>`).join("") + (list.length>show.length
-      ? `<div class="posmore">우위·판정불가 ${list.length-show.length}건은 아래 표에서 확인</div>`:"");
+      <span class="posn">${visibleRivals(i).length}사 보유 · 시급 ${i.score}</span>
+    </div>`;}).join("") + (list.length>show.length
+      ? `<div class="posmore">우위 기술 ${list.length-show.length}건은 하단 포트폴리오에서 확인 가능함.</div>`:"");
   $("#posList").querySelectorAll(".posrow").forEach(r=>{
     r.style.cursor="pointer";
     r.onclick=()=>{select(r.dataset.id);
@@ -1363,7 +1542,7 @@ $("#q").oninput=e=>{query=e.target.value;renderPipeline();};
 $("#haveToggle").onclick=()=>{
   showHave=!showHave;
   $("#haveToggle").setAttribute("aria-pressed",String(showHave));
-  $("#haveToggle").innerHTML=`보유 기술 <b id="tallyHave">${SEQ.filter(i=>i.status==="ok").length}</b>건 ${showHave?"숨기기":"표시"}`;
+  $("#haveToggle").textContent = showHave ? "우위 기술 접기" : "우위 기술 펼침";
   renderPipeline();
 };
 $("#statusSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{
@@ -1409,20 +1588,20 @@ function pQS(){
 async function pFetch(path){
   let res;
   try{ res=await fetch(API_BASE+path,{headers:{Accept:"application/json"}}); }
-  catch(e){ throw Object.assign(new Error("백엔드에 연결하지 못했습니다."),{code:"offline"}); }
+  catch(e){ throw Object.assign(new Error("백엔드 미연결 상태임."),{code:"offline"}); }
   let j={};
   try{ j=await res.json(); }
-  catch(e){ throw Object.assign(new Error("응답을 해석할 수 없습니다 (HTTP "+res.status+")"),{code:"bad_json"}); }
+  catch(e){ throw Object.assign(new Error("응답 해석 불가 (HTTP "+res.status+")"),{code:"bad_json"}); }
   if(!res.ok) throw Object.assign(new Error(j.message||("HTTP "+res.status)),{code:j.error||"http_"+res.status,detail:j});
   return j;
 }
 function pErr(e){
   if(e.code==="offline")
-    return pMeta("백엔드에 연결하지 못했습니다. 터미널에서 서버를 먼저 띄우십시오."+
+    return pMeta("백엔드 미연결 상태임. 서버 기동 선행 필요함."+
       "<span class='hint'><code>cd AI &amp;&amp; ./run.sh</code> 실행 후 <code>http://127.0.0.1:8000</code> 로 접속</span>",1);
   if(e.code==="bigquery_unconfigured")
-    return pMeta("서버는 떠 있으나 BigQuery 자격증명이 없습니다. — "+esc(e.message)+
-      "<span class='hint'><code>server/.env.example</code> 를 <code>.env</code> 로 복사해 키 경로와 프로젝트 ID를 채우십시오.</span>",1);
+    return pMeta("서버 기동 완료, BigQuery 자격증명 미설정 상태임. — "+esc(e.message)+
+      "<span class='hint'><code>server/.env.example</code> 를 <code>.env</code> 로 복사 후 키 경로 및 프로젝트 ID 입력 필요함.</span>",1);
   if(e.code==="scan_too_large")
     return pMeta(esc(e.message)+"<span class='hint'>기간(공개연도)·국가·CPC 를 좁히거나 '제목만' 모드로 바꾸면 스캔량이 크게 줄어듭니다.</span>",1);
   if(e.code==="tree_snapshot_missing") return;
@@ -1443,7 +1622,7 @@ function pCard(r){
 async function pSearch(){
   if(PS.busy)return;
   const q=($("#pq").value||"").trim();
-  if(!q){ pMeta("검색어를 입력하십시오.",1); return; }
+  if(!q){ pMeta("검색어 입력 필요함.",1); return; }
   pBusy(1); pMeta("조회 중…"); $("#pcards").innerHTML="";
   try{
     const j=await pFetch("/api/patents/search?"+pQS());
@@ -1454,21 +1633,21 @@ async function pSearch(){
       (j.cached?" · <b>로컬 캐시</b> (BigQuery 재조회 없음)"
               :` · 스캔 <b>${c.estimated_gb}GB</b> / 청구 <b>${c.billed_gb}GB</b>`+
                 (c.bq_cache_hit?" (BigQuery 캐시)":""))+
-      (j.count===0?"<span class='hint'>결과가 없습니다. 특허 제목은 영문이므로 영어 검색어가 유리합니다.</span>":""));
+      (j.count===0?"<span class='hint'>검색 결과 없음. 특허 제목 영문 표기 기준, 영문 검색어 권장함.</span>":""));
   }catch(e){ pErr(e); }
   finally{ pBusy(0); }
 }
 async function pEstimate(){
   if(PS.busy)return;
   const q=($("#pq").value||"").trim();
-  if(!q){ pMeta("검색어를 입력하십시오.",1); return; }
+  if(!q){ pMeta("검색어 입력 필요함.",1); return; }
   pBusy(1); pMeta("견적 계산 중…");
   try{
     const j=await pFetch("/api/patents/estimate?"+pQS());
     pMeta(`스캔 예상 <b>${j.estimated_gb}GB</b> / 상한 <b>${j.cap_gb}GB</b> — `+
-      (j.within_cap?"실행 가능합니다.":"<b>상한 초과</b>로 실행되지 않습니다.")+
-      "<span class='hint'>dry-run 이라 이 견적 자체에는 과금되지 않습니다. "+
-      "BigQuery 는 스캔한 바이트만큼 과금되며 월 1TB 무료 구간이 있습니다.</span>", !j.within_cap);
+      (j.within_cap?"실행 가능함.":"<b>상한 초과</b> — 실행 불가함.")+
+      "<span class='hint'>dry-run 방식으로 견적 산출 자체에는 과금 미발생함. "+
+      "BigQuery 는 스캔 바이트 기준 과금되며, 월 1TB 무료 구간 적용됨.</span>", !j.within_cap);
   }catch(e){ pErr(e); }
   finally{ pBusy(0); }
 }
@@ -1476,10 +1655,10 @@ function seedPatentSearch(it){
   $("#pq").value = it.en || it.n;
   $("#patentSec").scrollIntoView({behavior:"smooth",block:"start"});
   $("#pq").focus();
-  pMeta(`<b>${esc(it.n)}</b> 의 영문 명칭을 검색어로 넣었습니다. `+
-    "검색을 누르면 BigQuery 를 조회합니다."+
-    "<span class='hint'>비용이 걱정되면 먼저 '비용 견적'으로 스캔량을 확인하십시오. "+
-    "CPC 에 <code>H01M</code>(전지) 을 넣으면 스캔량과 노이즈가 함께 줄어듭니다.</span>");
+  pMeta(`<b>${esc(it.n)}</b>  영문 명칭을 검색어로 적용함. `+
+    "검색 실행 시 BigQuery 조회됨."+
+    "<span class='hint'>비용 확인 필요 시 '비용 견적' 선행 실행 권장함. "+
+    "CPC 에 <code>H01M</code>(전지) 적용 시 스캔량 및 노이즈 동시 감소함.</span>");
 }
 async function pHealth(){
   const el=$("#bqState"); if(!el)return;
@@ -1487,7 +1666,7 @@ async function pHealth(){
   // 백엔드 없이 화면만 보는 정상 사용이므로 조용히 표시만 바꾼다.
   if(location.protocol==="file:"){
     el.className="bqstate wait"; el.textContent="파일 열람";
-    el.title="백엔드 없이 화면만 보는 중입니다. 특허 검색은 서버 실행 후 사용하십시오.";
+    el.title="백엔드 미연결 — 화면 조회 전용 모드임. 특허 검색은 서버 기동 후 사용 가능함.";
     return;
   }
   try{
@@ -1496,7 +1675,7 @@ async function pHealth(){
     else{ el.className="bqstate off"; el.textContent="BQ 미설정";
           el.title=j.reason||""; }
   }catch(e){ el.className="bqstate off"; el.textContent="서버 꺼짐";
-             el.title="./run.sh 로 백엔드를 실행하십시오."; }
+             el.title="run.bat 실행을 통한 백엔드 기동 필요함."; }
 }
 function wirePatentSearch(){
   if(!$("#patentSec"))return;
@@ -1506,8 +1685,8 @@ function wirePatentSearch(){
   $("#pmode").querySelectorAll("button").forEach(b=>b.onclick=()=>{
     PS.mode=b.dataset.m;
     $("#pmode").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));
-    if(PS.mode==="full")pMeta("초록까지 스캔합니다. 같은 조건에서 제목만 모드보다 스캔량이 크게 늘어납니다."+
-      "<span class='hint'>먼저 '비용 견적'으로 확인하는 것을 권합니다.</span>");
+    if(PS.mode==="full")pMeta("초록까지 스캔함. 동일 조건 기준 제목 전용 모드 대비 스캔량 대폭 증가함."+
+      "<span class='hint'>'비용 견적' 선행 확인 권장함.</span>");
   });
   pHealth();
 }
