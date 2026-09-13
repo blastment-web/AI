@@ -161,6 +161,9 @@ h2 small{font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing
 .sg .k{font-size:13px;color:var(--muted)}
 .sg .v{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:6px;letter-spacing:-.03em}
 .sg.zero .v{color:var(--mark)}
+.sgk2{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.05em;
+  color:#fff;background:var(--graphite);padding:2px 5px;margin-left:6px;vertical-align:2px}
+.sgs{font-size:12.5px;color:var(--ink2);margin-top:5px}
 .selfnote{margin-top:10px;font-size:14px;line-height:1.6;color:var(--ink2);padding:10px 12px;border:1px dashed var(--rule)}
 .selfnote b{color:var(--ink)}
 
@@ -1378,7 +1381,10 @@ function renderDetail(){
   const best=vr.map(c=>({c,g:gradeOf(it,c)})).filter(x=>x.g).sort((a,b)=>GRADE[b.g].r-GRADE[a.g].r)[0];
   const selfLabel=it.own==="have"?"특허 보유":it.own==="part"?"특허 일부 보유":"특허 미보유";
   const v1cls=it.own==="none"?"bad":it.own==="part"?"mid":"";
-  const ch=[["특허",it.s.pat],["라인 적용",it.s.line],["대외 발표",it.s.talk],["내부 과제",it.s.prj]];
+  const JS = (it.judged && it.judged.LGES) || null;
+  const jpat = JS ? JS.patent : 0;
+  const ch=[["특허", jpat, `사내 기록 ${it.s.pat}건`],
+            ["라인 적용",it.s.line],["대외 발표",it.s.talk],["내부 과제",it.s.prj]];
 
   $("#detail").innerHTML=`
   <div class="crumb">${it.stage} / ${it.grp}</div>
@@ -1414,10 +1420,11 @@ function renderDetail(){
   ${fold("ladder", ladder(it))}
 
   <div class="sec-t">자사 보유 현황<span>사내 기록 4개 채널 — 위 매트릭스의 근거 건수와 다른 값임</span></div>
-  <div class="selfgrid">${ch.map(([k,v])=>{
+  <div class="selfgrid">${ch.map(([k,v,sub])=>{
     const zero=(v===0||v==="없음");
     const clk = k==="특허" ? ' clickable" data-selfev="1' : '';
-    return `<div class="sg ${zero?"zero":""}${clk}" ${k==="특허"?'title="자사 특허 근거 보기"':""}><div class="k">${k}</div><div class="v">${v===0?"0":esc(v)}</div></div>`;}).join("")}</div>
+    const tip = k==="특허" ? `판정 특허 ${v}건 목록 보기 — 사내 기록값과 별개임` : "";
+    return `<div class="sg ${zero?"zero":""}${clk}" ${tip?`title="${esc(tip)}"`:""}><div class="k">${k}${k==="특허"?'<span class="sgk2">판정 기준</span>':""}</div><div class="v">${v===0?"0":esc(v)}</div>${sub?`<div class="sgs">${esc(sub)}</div>`:""}</div>`;}).join("")}</div>
   ${it.s.note?`<div class="selfnote"><b>판정 근거 —</b> ${esc(it.s.note)}</div>`:""}
 
   <div class="sec-t">근거 출처<span>원천 → 수집 → 정제 → 등급 부여 경로</span></div>
