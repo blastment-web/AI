@@ -25,5 +25,6 @@ Thumbs.db
 .vscode/
 .idea/
 data/tree.json
+data/tree_v5.json
 data/state.json
 dist/

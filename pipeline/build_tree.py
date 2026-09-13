@@ -25,6 +25,21 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from pipeline import classifier, judge  # noqa: E402
 
+# 판독기는 갈아 끼울 수 있다. V4 는 규칙만, V5 는 규칙 + LLM 재판독.
+# 나머지 파이프라인은 어느 쪽이든 똑같이 돈다.
+ENGINE = classifier
+
+
+def use_engine(name: str):
+    """'rule' 또는 'llm'. 없는 걸 고르면 규칙으로 돌아간다."""
+    global ENGINE
+    if name == "llm":
+        from pipeline import classifier_llm
+        ENGINE = classifier_llm
+    else:
+        ENGINE = classifier
+    return ENGINE
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 
@@ -137,9 +152,12 @@ def load_evidence(paths: list[str]) -> list[dict]:
                 r = json.loads(line)
             except json.JSONDecodeError:
                 continue
+            # 창구마다 고유 식별자 이름이 다르다. 하나라도 빠뜨리면 서로 다른 근거가
+            # ref 문자열이 같다는 이유로 한 건으로 합쳐진다(SEC 366→92 로 줄던 원인).
             key = (r.get("source", ""),
                    r.get("application_number") or r.get("announcement_id")
-                   or r.get("rcept_no") or r.get("ref", ""))
+                   or r.get("rcept_no") or r.get("accession") or r.get("openalex_id")
+                   or r.get("url") or r.get("ref", ""))
             if key in seen:
                 continue
             seen.add(key)
@@ -152,6 +170,35 @@ def company_of(ev: dict) -> str:
     if c in SELF_KEYS or "엘지에너지솔루션" in (ev.get("company") or ""):
         return "LGES"
     return c if c in RIVALS else (ev.get("company") or "")
+
+
+def pick_evidence(evs: list[dict], per_company: int = 4, cap: int = 48) -> list[dict]:
+    """화면에 실을 근거를 고른다.
+
+    그냥 최신순 40건으로 자르면, 근거가 오래된 회사는 매트릭스에 '보유'로 뜨는데
+    근거 목록은 0건이 된다. 칸과 팝업이 어긋나 보이는 원인이 이것이었다.
+    회사마다 가장 센 근거를 먼저 확보한 뒤, 남는 자리를 최신순으로 채운다.
+    """
+    def rank(e):
+        return (judge.GRADE_RANK.get(e.get("grade", ""), 0), e.get("date", ""))
+
+    picked, seen = [], set()
+    by_co = defaultdict(list)
+    for e in evs:
+        by_co[company_of(e)].append(e)
+    for co in sorted(by_co):
+        for e in sorted(by_co[co], key=rank, reverse=True)[:per_company]:
+            if id(e) not in seen:
+                seen.add(id(e))
+                picked.append(e)
+    for e in sorted(evs, key=lambda x: x.get("date", ""), reverse=True):
+        if len(picked) >= cap:
+            break
+        if id(e) not in seen:
+            seen.add(id(e))
+            picked.append(e)
+    picked.sort(key=lambda x: x.get("date", ""), reverse=True)
+    return picked
 
 
 def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
@@ -171,15 +218,20 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
     buckets = defaultdict(list)          # 확정·추정 — 판정에 쓴다
     related = defaultdict(list)          # 관련 — 참고로만
     conf_count = defaultdict(int)
-    for ev in evidence:
-        name, conf, sc, why = classifier.classify(ev, node_names)
+    # LLM 판독기는 묶어서 물어야 싸고 빠르다. 규칙 판독기는 건별과 결과가 같다.
+    if hasattr(ENGINE, "classify_all"):
+        verdicts = ENGINE.classify_all(evidence, node_names)
+    else:
+        verdicts = [ENGINE.classify(ev, node_names) for ev in evidence]
+    for ev, (name, conf, sc, why) in zip(evidence, verdicts):
         conf_count[conf] += 1
         if name is None:
             unassigned.append({**ev, "_score": 0})
             continue
         ev = {**ev, "_conf": conf, "_why": why, "_score": sc}
         i = idx_of[name]
-        if conf in ("확정", "추정"):
+        # LLM 판독은 '확정(LLM)' 처럼 꼬리표가 붙는다. 앞글자로 본다.
+        if conf.startswith("확정") or conf.startswith("추정"):
             buckets[i].append(ev)
         elif conf == "관련":
             related[i].append(ev)
@@ -235,10 +287,14 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             "lag": ({"gap": judge.fmt_gap(gap_years),
                      "gap_years": gap_years,
                      "basis": gap_why,
+                     # 단계마다 실제로 무엇을 해야 해서 그만큼 걸리는지
+                     "steps": judge.gap_breakdown(rival_trl, our_trl),
                      "rival_milestone": f"경쟁사 TRL {rival_trl} — {trl_why}",
                      "self_state": f"자사 TRL {our_trl} — {our_why}"}
                     if gap_years > 0 else None),
-            "urgency": {"score": score, "breakdown": breakdown},
+            "urgency": {"score": score, "breakdown": breakdown,
+                        "formula": judge.urgency_formula(breakdown),
+                        "max": judge.URGENCY_MAX},
             "position": judge.position(
                 our_trl, rival_trl, self_info.get("status", "none"), len(self_ev),
                 rival_source_kinds=len({e.get("type") for e in rival_ev if e.get("type")}),
@@ -257,8 +313,7 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
                           "url": e.get("url", ""), "grade": e.get("grade"),
                           "source": e.get("source", ""),
                           "needs_review": bool(e.get("needs_review"))}
-                         for e in sorted(evs, key=lambda x: x.get("date", ""),
-                                         reverse=True)[:40]],
+                         for e in pick_evidence(evs)],
             "limit": it.get("limit", ""),
         })
 
@@ -294,7 +349,8 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             "nodes_with_evidence": sum(1 for n in nodes if n["evidence"]),
             "nodes_total": len(nodes),
             "self_conflicts": sum(1 for n in nodes if n.get("self_conflict")),
-            "method": classifier.stats_header(),
+            "method": ENGINE.stats_header(),
+            "engine": getattr(ENGINE, "__name__", "").rsplit(".", 1)[-1],
         },
         "by_company": by_company,
         "by_source": by_source,
@@ -308,7 +364,10 @@ def main(argv=None) -> int:
     ap.add_argument("--tax", default=str(DATA / "tech_tree.json"))
     ap.add_argument("--evidence", default=str(DATA / "evidence_*.jsonl"))
     ap.add_argument("--out", default=str(DATA / "tree.json"))
+    ap.add_argument("--engine", choices=["rule", "llm"], default="rule",
+                    help="rule=V4(규칙만) · llm=V5(규칙+LLM 재판독)")
     a = ap.parse_args(argv)
+    use_engine(a.engine)
 
     tax = json.loads(Path(a.tax).read_text(encoding="utf-8"))
     paths = sorted(p for p in glob.glob(a.evidence) if "_detail" not in p)

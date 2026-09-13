@@ -67,6 +67,15 @@ TARGETS = [
 # 7건이 합작법인 지분거래·공급계약이었다.
 REPORT_PATTERNS = [r"신규\s*시설\s*투자", r"시설\s*투자", r"유형자산\s*(취득|양수)"]
 
+# 2차 필터 — 설비투자를 '암시'하지만 단정할 수 없는 공시.
+# 실측(2018~2026, 3사)에서 1차 필터는 3건뿐인데 이 패턴이 189건을 더 잡는다.
+# 다만 이 중엔 지분거래·공급계약도 섞이므로 등급을 medium 이상으로 올리지 않고
+# needs_review 를 항상 켠다. 숫자를 늘리려고 사실을 끌어올리지는 않는다.
+RELATED_PATTERNS = [
+    r"타법인\s*주식.*취득", r"단일판매[·ㆍ]?\s*공급계약", r"기타\s*경영사항",
+    r"영업\s*양수", r"출자", r"투자판단",
+]
+
 # 등급 제안 규칙. GRADE 사다리(index.html)의 capex 정의를 그대로 옮긴 것.
 GRADE_RULES = [
     ("verified", [r"양산\s*가동", r"가동\s*중", r"양산\s*개시", r"기존\s*라인.{0,10}증설", r"상업\s*생산"]),
@@ -76,7 +85,7 @@ GRADE_RULES = [
 # 노드 매핑 단계에 넘길 기술 키워드 (매핑 자체는 이 어댑터 범위 밖)
 TECH_KEYWORDS = [
     "전극", "양극", "음극", "슬러리", "믹싱", "코팅", "건식", "무용매", "건조", "압연", "롤프레스",
-    "슬리팅", "노칭", "적층", "스태킹", "와인딩", "조립", "화성", "에이징", "주액", "디게싱",
+    "슬리팅", "노칭", "적층", "스태킹", "와인딩", "조립", "화성", "활성화", "에이징", "주액", "디게싱",
     "드라이룸", "파우치", "원통", "각형", "46파이", "4680", "분리막", "전해액", "CTP", "CTC",
     "LFP", "NCM", "전고체", "리튬", "배터리", "이차전지", "셀", "모듈", "팩",
 ]
@@ -168,7 +177,16 @@ def propose_grade(text: str) -> tuple[str, str, bool]:
     return "weak", "", True
 
 
-def to_evidence(row: dict, company_key: str, detail_text: str = "") -> dict:
+def matches_related(report_nm: str) -> bool:
+    """설비투자로 단정할 수는 없지만 함께 봐야 할 공시인가."""
+    n = report_nm or ""
+    if matches_report(n):
+        return False
+    return any(re.search(p, n) for p in RELATED_PATTERNS)
+
+
+def to_evidence(row: dict, company_key: str, detail_text: str = "",
+                tier: str = "capex") -> dict:
     """DART list.json 의 한 행 → evidence 레코드."""
     report_nm = (row.get("report_nm") or "").strip()
     corp_name = (row.get("corp_name") or "").strip()
@@ -181,9 +199,13 @@ def to_evidence(row: dict, company_key: str, detail_text: str = "") -> dict:
     if not keywords:
         review = True
     summary = detail_text.strip() or report_nm
+    if tier == "related":
+        # 설비투자라고 단정하지 않는다. 등급 상한을 weak 으로 눌러 둔다.
+        grade, review = "weak", True
     return {
         # tree.sample.json 의 evidence 계약
         "type": "capex",
+        "tier": tier,
         "company": company_key,
         "date": fmt_date(row.get("rcept_dt", "")),
         "ref": report_nm,
@@ -341,18 +363,31 @@ def collect(client: Dart, bgn_de: str, end_de: str, targets: list[dict] = None,
         if not code:
             log.warning("corp_code 미해결 — %s (별칭: %s)", t["key"], ", ".join(t["aliases"]))
             continue
-        rows = client.filings(code, bgn_de, end_de, pblntf_ty)
-        kept = [r for r in rows if matches_report(r.get("report_nm", ""))]
-        log.info("%s (%s): 공시 %d건 중 시설투자 %d건",
-                 t["key"], info.get("corp_name", ""), len(rows), len(kept))
-        for r in kept:
+        # DART list.json 은 한 조회당 상한이 있어(실측 500건) 넓은 기간을 한 번에
+        # 부르면 최근 것만 남고 조용히 잘린다. 연 단위로 잘라 부른다.
+        rows = []
+        for y in range(int(bgn_de[:4]), int(end_de[:4]) + 1):
+            lo, hi = max(bgn_de, f"{y}0101"), min(end_de, f"{y}1231")
+            if lo > hi:
+                continue
+            try:
+                rows.extend(client.filings(code, lo, hi, pblntf_ty, max_pages=10))
+            except Exception as e:
+                log.warning("%s %d년 조회 실패: %s", t["key"], y, redact(str(e)))
+        kept = [(r, "capex") for r in rows if matches_report(r.get("report_nm", ""))]
+        kept += [(r, "related") for r in rows if matches_related(r.get("report_nm", ""))]
+        log.info("%s (%s): 공시 %d건 중 시설투자 %d건 · 관련공시 %d건",
+                 t["key"], info.get("corp_name", ""), len(rows),
+                 sum(1 for _, k in kept if k == "capex"),
+                 sum(1 for _, k in kept if k == "related"))
+        for r, tier in kept:
             detail = ""
-            if with_detail:
+            if with_detail and tier == "capex":
                 try:
                     detail = client.document_text(r.get("rcept_no", ""))[:2000]
                 except Exception as e:
                     log.warning("원문 조회 실패 %s: %s", r.get("rcept_no"), redact(str(e)))
-            out.append(to_evidence(r, t["key"], detail))
+            out.append(to_evidence(r, t["key"], detail, tier))
     return out, resolved
 
 

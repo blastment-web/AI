@@ -25,6 +25,7 @@ def main(argv=None) -> int:
     ap.add_argument("--src", default=str(ROOT / "index.html"))
     ap.add_argument("--data", default=str(ROOT / "data" / "tree.json"))
     ap.add_argument("--out", default=str(ROOT / "dist" / "index.html"))
+    ap.add_argument("--version", default="", help="화면에 찍을 판 이름 (예: v4, v5)")
     a = ap.parse_args(argv)
 
     html = Path(a.src).read_text(encoding="utf-8")
@@ -41,6 +42,14 @@ def main(argv=None) -> int:
     blob = blob.replace("</", "<\\/")
     html = html.replace(PLACEHOLDER, f"const TREE_DATA = {blob};")
 
+    # 판 이름을 박아 둔다. V4(규칙)와 V5(규칙+LLM)를 화면에서 구분해야 한다.
+    if a.version:
+        old = 'const APP_VERSION = "v4";'
+        if old not in html:
+            print(f"경고: APP_VERSION 자리를 찾지 못해 판 이름을 바꾸지 못했습니다.")
+        else:
+            html = html.replace(old, f'const APP_VERSION = "{a.version}";')
+
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
@@ -51,6 +60,7 @@ def main(argv=None) -> int:
     print(f"  근거 {c.get('evidence_total',0):,}건 · 배정 {c.get('assigned',0):,}건 "
           f"· 근거가 붙은 기술 {c.get('nodes_with_evidence',0)}/{c.get('nodes_total',0)}")
     print(f"  수집 시각 {tree.get('collected_at','')}")
+    print(f"  판독기 {c.get('engine','?')}  |  {c.get('method','')[:90]}")
     return 0
 
 

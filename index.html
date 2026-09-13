@@ -15,6 +15,10 @@
   --rule:#D6DBDF; --rule-soft:#E6E9EB; --graphite:#262D34;
   --mark:#E5007D; --mark-soft:#FDE8F3; --amber:#B9821A; --amber-soft:#FBF2DF; --foil:#DCE1E4;
   --g4:#123D31; --g3:#2C6B52; --g2:#6B6A3A; --g1:#8A929A;
+  /* 경쟁사 대비 수준 — 열위/동등/우위. 셋이 서로 겹치지 않게 색상환에서 떨어뜨렸다. */
+  --behind:#C0392B; --behind-bg:#FBECEA; --behind-line:#E8B4AE;
+  --even:#A17414;   --even-bg:#FAF3E2;   --even-line:#DFC98C;
+  --ahead:#2C6B52;  --ahead-bg:#E7F0EB;  --ahead-line:#A9C8B8;
   --sans:"Pretendard Variable",Pretendard,"Segoe UI","Malgun Gothic","맑은 고딕",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
   --mono:"JetBrains Mono","Cascadia Mono",Consolas,D2Coding,ui-monospace,"SFMono-Regular",Menlo,monospace;
 }
@@ -50,10 +54,30 @@ h1 .en{display:block;font-family:var(--mono);font-size:11px;font-weight:500;lett
 .tab .ph{font-family:var(--mono);font-size:9px;letter-spacing:.14em;margin-left:8px}
 
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:28px}
-.kpi{background:var(--panel);padding:16px 18px 18px}
-.kpi .v{font-family:var(--mono);font-size:34px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-top:10px}
-.kpi.alert .v{color:var(--mark)}
-.kpi .sub{font-size:11px;color:var(--muted);margin-top:8px}
+.kpi{background:var(--panel);padding:18px 20px 20px;border-top:3px solid transparent}
+.kpi .eyebrow{font-size:12px;font-weight:700;letter-spacing:-.01em;color:var(--ink2);
+  font-family:var(--sans);text-transform:none}
+.kpi .v{font-family:var(--mono);font-size:48px;font-weight:700;letter-spacing:-.04em;
+  line-height:1;margin-top:12px;color:var(--ink)}
+.kpi .sub{font-size:12.5px;color:var(--ink2);margin-top:10px;line-height:1.5}
+/* 수준별로 윗줄과 숫자에만 색을 준다. 배경까지 칠하면 네 장이 서로 싸운다. */
+.kpi.k-behind{border-top-color:var(--behind)} .kpi.k-behind .v{color:var(--behind)}
+.kpi.k-behind .eyebrow{color:var(--behind)}
+.kpi.k-even{border-top-color:var(--even)}     .kpi.k-even .v{color:var(--even)}
+.kpi.k-even .eyebrow{color:var(--even)}
+.kpi.k-ahead{border-top-color:var(--ahead)}   .kpi.k-ahead .v{color:var(--ahead)}
+.kpi.k-ahead .eyebrow{color:var(--ahead)}
+.kpi.k-plain{border-top-color:var(--rule)}
+.kpi .sub b{color:inherit}
+/* 판정 카드 — 기술 구분과 기술 격차는 수준 색을 따른다. 분홍 한 가지로는 뜻이 안 보인다. */
+.verdict3 .v3.lv-behind{background:var(--behind-bg);border-color:var(--behind-line)}
+.verdict3 .v3.lv-behind .m{color:var(--behind)}
+.verdict3 .v3.lv-even{background:var(--even-bg);border-color:var(--even-line)}
+.verdict3 .v3.lv-even .m{color:var(--even)}
+.verdict3 .v3.lv-ahead{background:var(--ahead-bg);border-color:var(--ahead-line)}
+.verdict3 .v3.lv-ahead .m{color:var(--ahead)}
+.verdict3 .v3.lv-gap{background:var(--behind-bg);border-color:var(--behind-line)}
+.verdict3 .v3.lv-gap .m,.verdict3 .v3.lv-gap .m .linkbtn{color:var(--behind)}
 
 .rail-block{margin-top:36px}
 .block-head{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:12px}
@@ -403,6 +427,58 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .posrow .posn{font-family:var(--mono);font-size:10px;color:var(--muted);flex:0 0 auto;white-space:nowrap}
 .posmore{padding:8px 15px;font-size:11px;color:var(--muted)}
 @media (max-width:900px){.sumgrid{grid-template-columns:minmax(0,1fr)}}
+/* -- 핵심만 3줄, 더 보려면 팝업 (V4) -- */
+.fold{position:relative}
+.fold .fold-body{max-height:none}
+.fold.clipped .fold-body{max-height:104px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,#000 66px,transparent);
+  mask-image:linear-gradient(180deg,#000 66px,transparent)}
+.fold-more{margin-top:6px}
+.morebtn{font-family:var(--mono);font-size:10px;letter-spacing:.06em;border:1px solid var(--rule);
+  background:var(--panel);color:var(--ink2);padding:5px 11px;cursor:pointer}
+.morebtn:hover{border-color:var(--ink2);background:#F7F8F9}
+.sec-t .cnt{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:6px}
+
+.engchip{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:3px 8px;
+  border:1px solid var(--rule);color:var(--muted);margin-left:6px;white-space:nowrap}
+.engchip.on{border-color:var(--ahead);color:var(--ahead);background:var(--ahead-bg)}
+
+/* -- TRL 한 줄 안내 — 작게, 그러나 눈에 닿는 자리에 -- */
+.trlhint{font-size:11.5px;color:var(--ink2);background:#FAFBFB;border-top:1px solid var(--rule-soft);
+  border-bottom:1px solid var(--rule-soft);padding:8px 15px;line-height:1.6}
+.trlhint b{color:var(--ink)}
+#detail .trlhint{border:1px solid var(--rule-soft);padding:8px 12px;margin:16px 0 0}
+
+/* -- 기술 구분 배지 -- */
+.tclass{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:700;
+  letter-spacing:-.01em;padding:5px 10px;border:1px solid transparent}
+.tc-behind{background:var(--behind-bg);color:var(--behind);border-color:var(--behind-line)}
+.tc-even{background:var(--even-bg);color:var(--even);border-color:var(--even-line)}
+.tc-ahead{background:var(--ahead-bg);color:var(--ahead);border-color:var(--ahead-line)}
+.tc-none{background:#F1F3F4;color:var(--muted);border-color:var(--rule)}
+.tclass-d{font-size:11.5px;color:var(--ink2);margin-top:7px;line-height:1.55}
+
+/* -- 시급도 곱셈식 -- */
+.ueq{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
+.ueq .f{flex:1 1 130px;min-width:0;border:1px solid var(--rule);background:var(--panel);padding:10px 12px}
+.ueq .f .fl{font-size:11px;color:var(--muted)}
+.ueq .f .fv{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1.1;margin-top:4px}
+.ueq .f .fw{font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.45}
+.ueq .op{align-self:center;font-family:var(--mono);font-size:20px;color:var(--muted);flex:0 0 auto}
+.ueq .tot{flex:1 1 130px;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:10px 12px}
+.ueq .tot .fl{color:#B6BDC3} .ueq .tot .fv{color:#fff}
+@media (max-width:700px){.ueq .op{display:none}.ueq .f,.ueq .tot{flex:1 1 100%}}
+
+/* -- 기술 격차 단계 풀이 -- */
+.gsteps{border:1px solid var(--rule);border-collapse:collapse;width:100%;margin-top:12px}
+.gsteps th{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);
+  text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule);font-weight:500;background:#FAFBFB}
+.gsteps td{padding:10px 12px;border-bottom:1px solid var(--rule-soft);font-size:12px;vertical-align:top}
+.gsteps tr:last-child td{border-bottom:0}
+.gsteps .yy{font-family:var(--mono);font-weight:700;white-space:nowrap;color:var(--behind)}
+.gsteps .wh{color:var(--ink2);line-height:1.55}
+.gsum{margin-top:12px;padding:11px 13px;background:var(--behind-bg);
+  border-left:3px solid var(--behind);font-size:12.5px;line-height:1.65;color:var(--ink)}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 @media (max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:0 16px 56px}
   .verdict3{grid-template-columns:1fr}.selfgrid{grid-template-columns:repeat(2,1fr)}.rung{flex-wrap:wrap}.rung .desc{flex:1 1 100%}}
@@ -442,7 +518,8 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
       <div id="coTable"></div>
     </div>
     <div class="sumpane">
-      <div class="sumpane-h">경쟁사 대비 우리 위치<small>Position</small></div>
+      <div class="sumpane-h">경쟁사 대비 자사 수준<button class="whybtn" data-why="class" title="기술 구분 기준">?</button><small>Level</small></div>
+      <div class="trlhint">수준은 <b>TRL</b>(기술 성숙도, 1~9단계)로 비교합니다. 9는 양산, 7은 파일럿, 4는 출원 단계입니다.<button class="whybtn" data-why="trl" title="TRL 이 무엇이고 어떻게 정했는가">?</button></div>
       <div id="posList"></div>
     </div>
   </div>
@@ -454,7 +531,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
     <div class="ctrl">
       <span class="pipe-tally"><i class="sw-gap"></i>미보유 <b id="tallyGap">0</b></span>
       <span class="pipe-tally"><i class="sw-part"></i>일부 <b id="tallyPart">0</b></span>
-      <button class="btn ghost" id="haveToggle" aria-pressed="false">보유 기술 <b id="tallyHave">0</b>건 표시</button>
+      <button class="btn ghost" id="haveToggle" aria-pressed="true">보유 기술 <b id="tallyHave">0</b>건 숨기기</button>
       <input type="search" id="q" placeholder="기술 검색" aria-label="기술 검색">
     </div>
   </div>
@@ -471,7 +548,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 
 <section>
   <div class="block-head" style="margin-top:34px">
-    <h2>우선 검토 기술<small>Gap Backlog</small></h2>
+    <h2>최우선 검토 기술<small>Gap Backlog · 시급도 높은 순</small></h2>
     <div class="ctrl">
       <div class="seg" id="statusSeg">
         <button aria-pressed="true" data-f="gap">열위</button>
@@ -485,7 +562,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   <div class="tbl-wrap"><table>
     <thead><tr><th style="width:40px">#</th><th style="width:140px">공정</th><th>세부기술</th>
       <th style="width:110px">근거 등급<button class="whybtn" data-why="hold" title="판정 기준">?</button></th><th style="width:180px">경쟁사 보유</th>
-      <th style="width:110px">따라잡는 시간<button class="whybtn" data-why="lag" title="산정 근거">?</button></th><th style="width:150px">시급도<button class="whybtn" data-why="urgency" title="산정 근거">?</button></th></tr></thead>
+      <th style="width:110px">기술 격차<button class="whybtn" data-why="lag" title="산정 근거">?</button></th><th style="width:150px">시급도<button class="whybtn" data-why="urgency" title="산정 근거">?</button></th></tr></thead>
     <tbody id="tbody"></tbody>
   </table></div>
 </section>
@@ -539,7 +616,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   </div>
 </div>
 
-<footer><span><span id="ver" class="vchip"></span> LG ENERGY SOLUTION · 기술전략 / 내부 검토용 프로토타입</span><span id="foot"></span></footer>
+<footer><span><span id="ver" class="vchip"></span><span id="engine" class="engchip off"></span> LG ENERGY SOLUTION · 기술전략 / 내부 검토용 프로토타입</span><span id="foot"></span></footer>
 </div>
 
 <script>
@@ -585,7 +662,7 @@ const API_BASE = "";        // 같은 오리진이면 빈 문자열. 예: "http:
 const USE_API  = true;      // /api/tree 에서 실수집 데이터를 읽는다
 
 let TREE=[], SEQ=[], GAPS=[], PARTS=[], sel=null;
-let activeRivals=new Set(RIVALS), filter="gap", query="", showHave=false;
+let activeRivals=new Set(RIVALS), filter="gap", query="", showHave=true;
 let SRC={live:false, at:"예시 데이터", err:"", items:[]};
 
 /* API 응답(flat nodes) → 화면 내부 구조(nested tree) 변환 */
@@ -595,21 +672,24 @@ function adaptApi(j){
     if(!byL1.has(nd.l1)) byL1.set(nd.l1,{id:nd.l1,n:nd.l1,en:nd.l1_en||"",g:[],_m:new Map()});
     const st=byL1.get(nd.l1);
     if(!st._m.has(nd.l2)){const g={id:nd.l2,n:nd.l2,items:[]}; st._m.set(nd.l2,g); st.g.push(g);}
-    const self=nd.self||{}, r=[], p=[];
+    const self=nd.self||{}, r=[], p=[], cnt={};
     Object.entries(nd.rivals||{}).forEach(([co,v])=>{
       const s2=(v&&v.status)||v; if(s2==="have")r.push(co); else if(s2==="part")p.push(co);
+      cnt[co]=(v&&v.evidence_count)||0;
     });
+    cnt["LGES"]=self.evidence_count||0;
     st._m.get(nd.l2).items.push({
       n:nd.name, en:nd.name_en||"", d:nd.desc||"", w:nd.why||"",
       own:self.status||nd.self_status||"none", r:r, p:p, trl:nd.est_trl||null,
       s:{pat:self.patents!=null?self.patents:0, line:self.line!=null?self.line:0,
          talk:self.talks!=null?self.talks:0, prj:self.project||"—", note:self.note||""},
       lag: nd.lag?{t:nd.lag.gap, r:nd.lag.rival_milestone, m:nd.lag.self_state,
-                   basis:nd.lag.basis||"", years:nd.lag.gap_years||0}:null,
+                   basis:nd.lag.basis||"", years:nd.lag.gap_years||0,
+                   steps:nd.lag.steps||[]}:null,
       trlWhy: nd.trl_basis||"", selfTrl: self.trl||null, selfTrlWhy: self.trl_basis||"",
       urg: nd.urgency||null,
       rel: nd.related_count||0, relSelf: nd.related_self||0, relRiv: nd.related_rivals||0,
-      conflict: !!nd.self_conflict, selfEv: self.evidence_count||0,
+      conflict: !!nd.self_conflict, selfEv: self.evidence_count||0, cnt:cnt,
       pos: nd.position||null,
       ev:(nd.evidence||[]).map(e=>({
         t:e.type==="patent"?"patent":e.type==="capex"?"capex":"conf",
@@ -644,8 +724,10 @@ function buildIndex(){
       : Math.min(100, it.r.length*11 + it.p.length*3 + it.recent*8 + (it.own==="none"?18:0) + gb*6 + (it.trl||0));
     SEQ.push(it);
   })));
-  GAPS=SEQ.filter(i=>i.status==="gap").sort((a,b)=>b.score-a.score);
-  PARTS=SEQ.filter(i=>i.status==="part").sort((a,b)=>b.score-a.score);
+  // 화면의 모든 목록은 시급도 내림차순이다. 임원이 위에서부터 읽으면 그게 순서다.
+  SEQ.sort((a,b)=>b.score-a.score);
+  GAPS=SEQ.filter(i=>i.status==="gap");
+  PARTS=SEQ.filter(i=>i.status==="part");
   sel=GAPS[0]||SEQ[0]||null;
 }
 
@@ -728,20 +810,33 @@ function renderSources(){
     ? `조사 ${korNum(c.evidence_total)}건 · 기술 판정에 사용 ${korNum(c.assigned)}건 · 근거 확보 기술 ${c.nodes_with_evidence}/${c.nodes_total} | ${esc(SRC.at)}`
     : esc(SRC.at);
   $("#foot").textContent="판정 규칙  STRONG 1건 · MEDIUM 2건 · WEAK 3건 이상 = 보유  |  TRL 8 이상은 서로 다른 소스 2종 교차 시에만 부여";
+  /* 어떤 판독기로 만든 화면인지 감추지 않는다. V4=규칙, V5=규칙+LLM. */
+  const eng=$("#engine");
+  if(eng && c){
+    const llm = (c.engine||"")==="classifier_llm";
+    const on  = llm && !/미연결/.test(c.method||"");
+    eng.className = "engchip "+(on?"on":"off");
+    eng.textContent = on ? "AI 판독 · 규칙 + LLM 재판독"
+                         : (llm ? "AI 판독 · 규칙만 (LLM 키 미설정)" : "AI 판독 · CPC 국제분류 규칙");
+    eng.title = c.method||"";
+  }
   const vb=$("#ver");
   if(vb){ vb.textContent = APP_VERSION.toUpperCase()+" · "+APP_BUILT+(APP_FROZEN?" · 보관본":" · 작업본");
           vb.className = APP_FROZEN?"vchip frozen":"vchip"; }
 }
 function renderKpis(){
-  const conflicts=SEQ.filter(i=>i.conflict).length;
-  const P=k=>SEQ.filter(i=>i.pos&&i.pos.label===k).length;
-  const eq=P("동등"), race=P("경합"), behind=P("열위");
+  /* 상세 패널의 '기술 구분'과 같은 기준으로 센다.
+     예전에는 KPI 가 pos.label 을, 상세가 tech_class 를 써서 숫자가 어긋났다. */
+  const C=k=>SEQ.filter(i=>i.pos&&(i.pos.tech_class||"")===k).length;
+  const behind=C("열위");
+  const eq=C("동등")+C("동등-우위")+C("동등-열위");
+  const ahead=C("우위");
   $("#kpis").innerHTML=[
-   {l:"열위 기술",v:behind,s:"경쟁사가 2단계 이상 앞섬 — 최우선 검토",a:1},
-   {l:"경합 기술",v:race,s:"1단계 차이 — 지금 결정이 순위를 가름",a:race?1:0},
-   {l:"동등 기술",v:eq,s:"경쟁사와 같은 수준"},
-   {l:"경쟁사 범위",v:RIVALS.length,s:RIVALS.map(r=>SHORT[r]).join(" · ")}
-  ].map(k=>`<div class="kpi ${k.a?"alert":""}"><div class="eyebrow">${k.l}</div><div class="v">${k.v}</div><div class="sub">${esc(k.s)}</div></div>`).join("");
+   {l:"열위 기술",v:behind,c:"k-behind",s:"자사에 없고 경쟁사는 가진 기술. 가장 먼저 본다."},
+   {l:"동등 기술",v:eq,c:"k-even",s:"자사도 일부 가진 기술. 지금 결정이 순위를 가른다."},
+   {l:"우위 기술",v:ahead,c:"k-ahead",s:"자사가 라인에 적용했고 앞선 기술. 지킨다."},
+   {l:"경쟁사 범위",v:RIVALS.length,c:"k-plain",s:RIVALS.map(r=>SHORT[r]).join(" · ")}
+  ].map(k=>`<div class="kpi ${k.c}"><div class="eyebrow">${k.l}</div><div class="v">${k.v}</div><div class="sub">${esc(k.s)}</div></div>`).join("");
 }
 /* ============ 공정 파이프라인 (V2) =====================================
    기존 renderRail(추상 셀 맵) + renderTree(폴더 트리)를 하나로 합친 것.
@@ -801,44 +896,49 @@ function gradeOf(it,co){
   if(!evs.length)return null;
   return evs.reduce((a,b)=>GRADE[b.g].r>GRADE[a.g].r?b:a).g;
 }
-function statusCell(co,st,self,it){
-  const cls=st==="have"?"have":st==="part"?"part":"none";
+function statusCell(full,st,self,it){
+  const co  = self ? "LGES" : (SHORT[full] || full);
+  const cls = st==="have"?"have":st==="part"?"part":"none";
   const label=st==="have"?"보유":st==="part"?"일부":"—";
+  const n   = (it.cnt && it.cnt[full]!=null) ? it.cnt[full]
+                                            : it.ev.filter(e=>e.w===full).length;
   let note="";
   if(self){
-    note = st==="none" ? "근거 0" : `특허 ${it.s.pat}`;
+    note = n ? `근거 ${n}건<br>특허 ${it.s.pat}` : (it.s.pat?`특허 ${it.s.pat}`:"근거 0건");
   }else{
-    const g=gradeOf(it,co);
-    note = g?`${GRADE[g].l}<br>TRL ${it.trl||"–"}`:(st==="none"?"신호 없음":"기보유");
+    const g=gradeOf(it,full);
+    note = g ? `${GRADE[g].l} · ${n}건<br>TRL ${it.trl||"–"}`
+             : (n ? `근거 ${n}건` : "근거 0건");
   }
-  const full = self ? "LGES" : (RIVALS.find(r=>SHORT[r]===co) || co);
-  return `<div class="mcol clickable ${self?"self":""}" data-co="${esc(full)}" title="${esc(co)} 근거 보기">
+  return `<div class="mcol clickable ${self?"self":""}" data-co="${esc(full)}" title="${esc(co)} 근거 ${n}건 보기">
     <div class="co">${co}</div>
     <div class="st ${cls} ${self&&st==="none"?"self":""}">${label}</div><div class="gr">${note}</div></div>`;
 }
 /* ============ 출처 계보: 근거 1건이 어느 원천에서 어떤 경로로 왔는가 ============ */
-const KR=["SAMSUNG SDI","SK ON"], CN=["CATL","BYD"], JP=["PANASONIC"], US=["TESLA"];
+/* 근거마다 실제로 어느 창구에서 왔는지는 e.src 에 들어 있다.
+   예전에는 회사 국적으로 창구를 '추정'해 적었는데, 연결하지도 않은 EPO·EDINET 이
+   화면에 찍혔다. 지어내지 않고 수집 당시 기록된 값을 그대로 쓴다. */
+const SRC_META = {
+  "BigQuery": {n:"Google Patents (BigQuery)", k:"api",   tier:"1차 (특허원부)",
+               dedup:"공개번호 기준 중복 제거",       map:"CPC 국제분류 판독 → 기술 배정"},
+  "KIPRIS":   {n:"KIPRIS Plus Open API",      k:"api",   tier:"1차 (특허원부)",
+               dedup:"출원번호 기준 중복 제거",       map:"CPC·IPC 판독 → 기술 배정"},
+  "DART":     {n:"DART 오픈API",              k:"api",   tier:"1차 (법정공시)",
+               dedup:"접수번호 기준 중복 제거",       map:"공시명·본문 키워드 → 기술 배정"},
+  "cninfo":   {n:"巨潮资讯(cninfo) 공고 검색", k:"parse", tier:"1차 (거래소 공시)",
+               dedup:"공고 ID 기준 중복 제거",        map:"공고 제목 키워드 → 기술 배정"},
+  "HKEX":     {n:"HKEX 공시 검색",            k:"parse", tier:"1차 (거래소 공시)",
+               dedup:"공시 문서 경로 기준 중복 제거", map:"제목·PDF 본문 키워드 → 기술 배정"},
+  "SEC":      {n:"SEC EDGAR 전문검색",        k:"api",   tier:"1차 (법정공시)",
+               dedup:"접수번호(accession) 기준",     map:"본문 기술어 일치 → 기술 배정"},
+  "OpenAlex": {n:"OpenAlex 학술 색인",        k:"api",   tier:"2차 (학회·논문)",
+               dedup:"논문 ID 기준 중복 제거",        map:"기술어 검색 + 저자 소속 대조"},
+};
 function originOf(e){
-  if(e.t==="patent"){
-    if(KR.indexOf(e.w)>=0) return {n:"KIPRIS Plus Open API",k:"api",tier:"1차 (특허원부)",
-      dedup:"INPADOC Family ID",map:"CPC 필터 → 청구항 LLM 매핑"};
-    if(CN.indexOf(e.w)>=0) return {n:"Google Patents (BigQuery)",k:"api",tier:"1차 (특허원부)",
-      dedup:"Family ID → 우선권번호",map:"CPC 필터 → 초록·청구항 LLM 매핑"};
-    return {n:"EPO OPS API",k:"api",tier:"1차 (특허원부)",
-      dedup:"INPADOC Family ID (마스터)",map:"CPC 필터 → 청구항 LLM 매핑"};
-  }
-  if(e.t==="capex"){
-    if(US.indexOf(e.w)>=0) return {n:"SEC EDGAR (8-K)",k:"api",tier:"1차 (법정공시)",
-      dedup:"프로젝트 생애주기 매칭",map:"Line_Type·Technology_Keywords 추출 → 노드 매핑"};
-    if(KR.indexOf(e.w)>=0) return {n:"DART 오픈API (신규시설투자)",k:"api",tier:"1차 (법정공시)",
-      dedup:"프로젝트 생애주기 매칭",map:"Line_Type·Technology_Keywords 추출 → 노드 매핑"};
-    if(JP.indexOf(e.w)>=0) return {n:"EDINET API v2 / TDnet",k:"api",tier:"1차 (법정공시)",
-      dedup:"프로젝트 생애주기 매칭",map:"Line_Type·Technology_Keywords 추출 → 노드 매핑"};
-    return {n:"巨潮资讯(cninfo) 공告 파싱",k:"parse",tier:"1차 (거래소 공시)",
-      dedup:"프로젝트 생애주기 매칭",map:"Line_Type·Technology_Keywords 추출 → 노드 매핑"};
-  }
-  return {n:"컨퍼런스 프로그램 파싱 (PDF/웹)",k:"parse",tier:"2차 (주최측 공개자료)",
-    dedup:"행사·연사·세션 해시 Upsert",map:"세션 초록 청킹 → LLM 매핑"};
+  const m = SRC_META[e.src];
+  if(m) return m;
+  return {n:(e.src||"출처 미기록"), k:"parse", tier:"확인 필요",
+          dedup:"—", map:"수집 당시 출처가 기록되지 않음"};
 }
 function lineage(it){
   if(!it.ev.length) return `<div class="linsum">수집 신호가 없어 계보를 그릴 수 없습니다.</div>`;
@@ -847,7 +947,8 @@ function lineage(it){
       <td><span class="okind ${o.k==="api"?"k-api":"k-parse"}">${o.k==="api"?"공식 API":"문서 파싱"}</span><br>
           <b>${o.n}</b><br><span style="color:var(--muted)">${o.tier}</span></td>
       <td class="arrow">→</td>
-      <td>${SHORT[e.w]} · ${e.d}<br><span style="color:var(--muted)">${esc(e.s)}</span></td>
+      <td>${esc(SHORT[e.w]||e.w||"회사 미상")} · ${esc(e.d||"날짜 미상")}<br>
+          <span style="color:var(--muted)">${esc(e.s||"")}</span></td>
       <td class="arrow">→</td>
       <td>${o.dedup}<br><span style="color:var(--muted)">${o.map}</span></td>
       <td class="arrow">→</td>
@@ -869,13 +970,31 @@ function ladder(it){
     return `<div class="rung ${on?"":"off"}">
       <div class="lv"><i style="background:${on?GRADE[g].c:"#D6DBDF"}"></i>${GRADE[g].l}</div>
       <div class="desc">${GRADE[g].d}</div>
-      <div class="hits">${on?hits.map(h=>`<div><span class="who">${SHORT[h.w]}</span>${esc(h.s)} — ${esc(h.x)}</div>`).join(""):"해당 근거 없음"}</div>
+      <div class="hits">${on?hits.map(h=>`<div><span class="who">${esc(SHORT[h.w]||h.w||"?")}</span>${esc(h.s)} — ${esc(h.x)}</div>`).join(""):"해당 근거 없음"}</div>
     </div>`;}).join("");
   const top=it.top?GRADE[it.top.g]:null;
   const srcKinds=new Set(it.ev.map(e=>e.t)).size;
   const rule = !it.ev.length ? "수집 신호 0건 — 판정 근거 없음(미관측)"
-    : `최고 등급 <b>${top.l}</b> (${SHORT[it.top.w]}) · 소스 ${srcKinds}종 ${srcKinds>=2?"교차 확인 ✓":"단일 — 신뢰도 주의"} → 판정: <b>${it.status==="gap"?"경쟁사 보유 / 자사 미보유":it.status==="part"?"경쟁사 앞섬 / 자사 일부":"양측 보유"}</b>`;
+    : `최고 등급 <b>${top.l}</b> (${esc(SHORT[it.top.w]||it.top.w||"?")}) · 소스 ${srcKinds}종 ${srcKinds>=2?"교차 확인 ✓":"단일 — 신뢰도 주의"} → 판정: <b>${it.status==="gap"?"경쟁사 보유 / 자사 미보유":it.status==="part"?"경쟁사 앞섬 / 자사 일부":"양측 보유"}</b>`;
   return `<div class="ladder">${rows}</div><div class="rule-note">${rule}</div>`;
+}
+/* 근거 블록은 핵심 3줄까지만 보여 주고, 나머지는 팝업으로 넘긴다.
+   임원이 스크롤을 내리다 길을 잃는 게 가장 큰 문제였다. */
+const FOLD_TITLE = {ladder:"근거 사다리", lineage:"출처 계보", evidence:"수집 근거 원문"};
+let FOLD_HTML = {};
+function fold(key, html){
+  FOLD_HTML[key] = html;
+  return `<div class="fold clipped" data-fold="${key}">
+      <div class="fold-body">${html}</div>
+      <div class="fold-more"><button class="morebtn" data-foldopen="${key}">전체 보기 ↗</button></div>
+    </div>`;
+}
+function tclsCss(it){
+  const k = it.pos && it.pos.tech_class ? it.pos.tech_class : "";
+  if(k==="열위") return "tc-behind";
+  if(k==="우위") return "tc-ahead";
+  if(k.indexOf("동등")===0) return "tc-even";
+  return "tc-none";
 }
 function renderDetail(){
   const it=sel; if(!it){$("#detail").innerHTML="";return;}
@@ -897,23 +1016,25 @@ function renderDetail(){
   </div>
 
   <div class="verdict3">
-    <div class="v3 ${v1cls}"><div class="k">자사 위치</div>
-      <div class="m">${it.pos?esc(it.pos.display):esc(selfLabel)}</div>
+    <div class="v3 ${tclsCss(it).replace("tc-","lv-")}"><div class="k">기술 구분<button class="whybtn" data-why="class" title="구분 기준">?</button></div>
+      <div class="m"><span class="tclass ${tclsCss(it)}">${it.pos?esc(it.pos.tech_name||it.pos.display):esc(selfLabel)}</span></div>
+      <div class="tclass-d">${it.pos&&it.pos.tech_desc?esc(it.pos.tech_desc):""}</div>
       <div class="n">${it.pos?esc(it.pos.basis):""}${it.pos&&it.pos.caveat?`<br>${esc(it.pos.caveat)}`:""}</div></div>
-    <div class="v3"><div class="k">최고 수준 경쟁사<button class="whybtn" data-why="trl" title="TRL 기준">?</button></div>
+    <div class="v3"><div class="k">최고 수준 경쟁사 · 도달 단계(TRL)<button class="whybtn" data-why="trl" title="TRL 이 무엇인가">?</button></div>
       <div class="m">${best?SHORT[best.c]:"—"}</div>
       <div class="n">${best?`${GRADE[best.g].l} · 추정 TRL ${it.trl||"–"}<br>${esc(it.trlWhy||GRADE[best.g].d)}`:"확인된 경쟁사 신호 없음"}</div></div>
-    <div class="v3 ${it.lag?"bad":""}"><div class="k">따라잡는 데 걸리는 시간<button class="whybtn" data-why="lag" title="산정 방식">?</button></div>
+    <div class="v3 ${it.lag?"lv-gap":""}"><div class="k">기술 격차<button class="whybtn" data-why="lag" title="산정 방식">?</button></div>
       <div class="m">${it.lag?`<button class="linkbtn" id="lagBtn">${it.lag.t}</button>`:"—"}</div>
       <div class="n">${it.lag?`${esc(it.lag.r)}<br>자사: ${esc(it.lag.m)}`:"격차 산정 대상 아님"}</div></div>
   </div>
 
-  <div class="sec-t">보유 현황 매트릭스<span>각 칸 아래는 판정 근거의 최고 등급</span></div>
+  <div class="trlhint">각 칸의 <b>TRL</b> 은 기술 성숙도(1~9단계)입니다. 9는 양산, 7은 파일럿, 4는 출원 단계입니다.<button class="whybtn" data-why="trl" title="TRL 이 무엇이고 어떻게 정했는가">?</button></div>
+  <div class="sec-t">보유 현황 매트릭스<span>칸 아래는 최고 근거 등급과 건수 — 눌러서 목록을 봅니다</span></div>
   <div class="matrix">${statusCell("LGES",it.own,true,it)}
-    ${RIVALS.map(r=>statusCell(SHORT[r],it.r.includes(r)?"have":it.p.includes(r)?"part":"none",false,it)).join("")}</div>
+    ${RIVALS.map(r=>statusCell(r,it.r.includes(r)?"have":it.p.includes(r)?"part":"none",false,it)).join("")}</div>
 
   <div class="sec-t">근거 사다리<span>어느 강도의 증거가 있어서 이렇게 판정했는가</span></div>
-  ${ladder(it)}
+  ${fold("ladder", ladder(it))}
 
   <div class="sec-t">자사 측 확인<span>같은 4개 채널로 대칭 확인</span></div>
   <div class="selfgrid">${ch.map(([k,v])=>{
@@ -923,14 +1044,14 @@ function renderDetail(){
   ${it.s.note?`<div class="selfnote"><b>판정 근거 —</b> ${esc(it.s.note)}</div>`:""}
 
   <div class="sec-t">출처 계보<span>이 판정이 어느 원천에서 어떤 경로로 만들어졌는가</span></div>
-  ${lineage(it)}
+  ${fold("lineage", lineage(it))}
 
-  <div class="sec-t">수집 근거 원문 (${it.ev.length})</div>
-  ${it.ev.length?it.ev.map(e=>`<div class="ev">
+  <div class="sec-t">수집 근거 원문<span class="cnt">${it.ev.length}건</span></div>
+  ${fold("evidence", it.ev.length?it.ev.map(e=>`<div class="ev">
       <span class="gbadge" style="background:${GRADE[e.g].c}">${GRADE[e.g].l}</span>
       <span class="tag ${e.t==="patent"?"t-pat":e.t==="capex"?"t-cap":"t-conf"}">${e.t==="patent"?"특허":e.t==="capex"?"설비투자":"컨퍼런스"}</span>
       <div class="body"><div class="ttl">${e.url?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.x)} ↗</a>`:esc(e.x)}</div><div class="meta">${SHORT[e.w]||esc(e.w)} · ${esc(e.s)} · ${e.d} · ${esc(e.src||originOf(e).n)}</div></div></div>`).join("")
-    :`<div style="font-size:12px;color:var(--muted);padding:10px 0">개별 수집 근거 없음 — 보유 판정은 기존 등록 특허군과 내부 확인 기준.</div>`}
+    :`<div style="font-size:12px;color:var(--muted);padding:10px 0">개별 수집 근거 없음 — 보유 판정은 기존 등록 특허군과 내부 확인 기준.</div>`)}
 
   ${it.conflict?`<div class="conflict">
     <b>자사 보유 여부를 다시 확인해야 합니다.</b>
@@ -952,6 +1073,10 @@ function renderDetail(){
       ${new Set(it.ev.map(e=>e.t)).size<2&&it.ev.length?`<li>단일 소스 근거입니다. 다른 소스에서 교차 확인되기 전까지 TRL 추정은 상한 7로 봅니다.</li>`:""}
     </ul>
   </div>`;
+  $("#detail").querySelectorAll("[data-foldopen]").forEach(b=>{
+    b.onclick=()=>{const k=b.dataset.foldopen;
+      modalOpen(`${FOLD_TITLE[k]} — ${it.n}`, FOLD_HTML[k]||"");};
+  });
   const sb=$("#searchThis"); if(sb) sb.onclick=()=>seedPatentSearch(it);
   const lb=$("#lagBtn"); if(lb) lb.onclick=()=>openLagDetail(it);
   $("#detail").querySelectorAll(".mcol.clickable").forEach(c=>{
@@ -1058,20 +1183,29 @@ const CRITERIA_FALLBACK = {
           {level:4,name:"출원 단계",rule:"공개특허만 관측"},
           {level:3,name:"미관측",rule:"근거 없음"}],
     note:"TRL 8 이상은 특허·설비투자·발표 중 서로 다른 2종이 교차 확인될 때만 부여합니다."},
-  lag:{title:"따라잡는 데 걸리는 시간",
-    intro:"경쟁사가 도달한 TRL 에서 자사 TRL 을 뺀 뒤 구간별 소요기간을 더합니다. 뒤 단계일수록 오래 걸립니다.",
-    rows:[{level:"TRL 4 → 5",name:"0.5년",rule:""},{level:"TRL 5 → 6",name:"0.75년",rule:""},
-          {level:"TRL 6 → 7",name:"1년",rule:""},{level:"TRL 7 → 8",name:"1.25년",rule:""},
-          {level:"TRL 8 → 9",name:"1.5년",rule:""}],
-    note:"자사 TRL 은 보유=9, 일부=7, 출원만 있음=4, 미착수=3 으로 봅니다."},
-  urgency:{title:"시급도 점수 산정",
-    intro:"100점 만점. 다섯 항목의 합이며 각 항목은 관측값에서 바로 계산됩니다.",
-    rows:[{level:"35점",name:"격차 크기",rule:"TRL 차이. 5단계 이상이면 만점"},
-          {level:"25점",name:"경쟁사 확산",rule:"몇 개사가 보유했는가"},
-          {level:"20점",name:"근거 강도",rule:"최고 근거 등급"},
-          {level:"10점",name:"최근 움직임",rule:"최근 12개월 신호 수"},
-          {level:"10점",name:"자사 공백",rule:"특허·라인·발표·과제 4채널 중 빈 개수"}],
-    note:"순위를 매기기 위한 점수이지 절대적 위험도가 아닙니다."},
+  lag:{title:"기술 격차를 어떻게 계산했는가",
+    intro:"경쟁사가 도달한 단계까지 자사가 올라가는 데 걸리는 기간입니다. 단계마다 해야 할 일이 달라서 기간도 다릅니다.",
+    rows:[{level:"0.5년",name:"요소기술 확보 → 실증",rule:"랩에서 공정조건을 찾아 재현한다. 장비를 새로 사지 않아 가장 빠르다."},
+          {level:"0.75년",name:"실증 → 검증 완료",rule:"파일럿 장비를 빌리거나 개조해 조건을 재현한다."},
+          {level:"1.0년",name:"검증 → 파일럿 가동",rule:"전용 장비를 발주한다. 코터·프레스 납기가 6~12개월이다."},
+          {level:"1.25년",name:"파일럿 → 양산 준비",rule:"양산 라인을 개조하고 수율을 올린다. 라인을 세워야 한다."},
+          {level:"1.5년",name:"양산 준비 → 전 라인 양산",rule:"전 공장으로 넓히고 고객 품질 승인을 받는다."}],
+    note:"자사 단계는 라인 적용=9, 파일럿=7, 출원만 있음=4, 미착수=3 으로 봅니다."},
+  urgency:{title:"시급도를 어떻게 매겼는가",
+    intro:"세 가지를 곱합니다. 얼마나 뒤졌나 × 몇 개사가 가졌나 × 근거가 단단한가. 각 1~5점이라 최대 125점입니다.",
+    rows:[{level:"1~5점",name:"얼마나 뒤졌나",rule:"TRL 단계 차이. 차이 없음 1점 → 4단계 이상 5점"},
+          {level:"1~5점",name:"몇 개사가 가졌나",rule:"보유가 확인된 경쟁사 수. 0개사 1점 → 5개사 이상 5점"},
+          {level:"1~5점",name:"근거가 단단한가",rule:"미관측 1점 · 공개특허 2점 · 등록특허 3점 · 착공 4점 · 양산확인 5점"}],
+    note:"더하지 않고 곱합니다. 셋 중 하나라도 약하면 지금 손댈 일이 아니기 때문입니다."},
+  class:{title:"기술 구분을 어떻게 나눴는가",
+    intro:"자사가 가졌는지를 먼저 보고, 그다음 경쟁사보다 앞서는지를 봅니다.",
+    rows:[{level:"열위 기술",name:"자사에는 없고 경쟁사는 가진 기술",rule:""},
+          {level:"동등 기술(열위)",name:"자사도 일부 가졌지만, 경쟁사가 더 앞선 기술",rule:""},
+          {level:"동등 기술",name:"자사도 일부 가졌고, 경쟁사와 같은 수준인 기술",rule:""},
+          {level:"동등 기술(우위)",name:"자사도 일부 가졌고, 경쟁사보다 앞선 기술",rule:""},
+          {level:"우위 기술",name:"자사가 라인에 적용했고 경쟁사보다 앞선 기술",rule:""},
+          {level:"판정 불가",name:"경쟁사 근거가 없어 비교할 수 없는 기술",rule:""}],
+    note:"'일부 보유'는 좋은 건지 나쁜 건지 알 수 없어 쓰지 않습니다. 이름 안에 수준을 담았습니다."},
   hold:{title:"'보유' 판정 기준",
     intro:"STRONG 1건, MEDIUM 2건, WEAK 3건 이상이면 보유로 봅니다.",
     rows:[{level:"VERIFIED",name:"양산 가동 확인",rule:"공시 등 1차 출처로 확인"},
@@ -1089,23 +1223,48 @@ function openCriteria(key){
     +'<table class="crit"><thead><tr><th>구분</th><th>뜻</th><th>부여 조건</th></tr></thead><tbody>'
     +rows+'</tbody></table>'+(c.note?'<div class="modal-note">'+esc(c.note)+'</div>':''));
 }
+/* 시급도 = 얼마나 뒤졌나 × 몇 개사가 가졌나 × 근거가 단단한가.
+   세 칸과 곱셈 기호를 그대로 그려 준다. 한 번에 읽히는 게 목적이다. */
 function openUrgencyDetail(it){
   const b = it.urg && it.urg.breakdown;
-  if(!b){ openCriteria("urgency"); return; }
-  const rows = b.map(r=>'<div class="mine"><span class="lbl">'+esc(r.label)
-    +'</span><span class="mb"><i style="width:'+Math.round(r.got/r.max*100)+'%"></i></span>'
-    +'<span class="sc">'+r.got+'/'+r.max+'</span><span class="wy">'+esc(r.why)+'</span></div>').join("");
+  if(!b || !b.length){ openCriteria("urgency"); return; }
+  const max = (it.urg && it.urg.max) || 125;
+  const cells = b.map(r=>'<div class="f"><div class="fl">'+esc(r.label)+'</div>'
+    +'<div class="fv">'+r.got+'</div><div class="fw">'+esc(r.why)+'</div></div>').join('<div class="op">×</div>');
   modalOpen("시급도 "+it.score+"점 — "+it.n,
-    '<p class="modal-intro">이 기술의 점수가 어떻게 나왔는지 항목별로 보여드립니다. 100점 만점입니다.</p>'
-    +rows+'<div class="modal-note">항목 정의는 표 머리의 ? 버튼에서 볼 수 있습니다.</div>');
+    '<p class="modal-intro">세 가지를 <b>곱합니다</b>. 각 1~5점이므로 최대 '+max+'점입니다.</p>'
+    +'<div class="ueq">'+cells+'<div class="op">=</div>'
+    +'<div class="tot"><div class="fl">시급도</div><div class="fv">'+it.score+'</div>'
+    +'<div class="fw">'+max+'점 만점</div></div></div>'
+    +'<div class="modal-note">더하지 않고 곱하는 이유는, 셋 중 하나라도 약하면 지금 손댈 일이 '
+    +'아니기 때문입니다. 아무리 뒤져 있어도 경쟁사 한 곳만 갖고 있고 근거가 공개특허뿐이면 '
+    +'급하지 않습니다. 더하기로는 그런 건도 중간 점수가 나와 순위가 흐려집니다.</div>');
 }
+/* 기술 격차 — 'N년'만 보여 주면 체감이 오지 않는다.
+   그 기간에 실제로 무슨 일을 해야 하는지를 단계별로 적는다. */
 function openLagDetail(it){
   if(!it.lag){ openCriteria("lag"); return; }
-  modalOpen("따라잡는 시간 "+it.lag.t+" — "+it.n,
-    '<p class="modal-intro">'+esc(it.lag.basis||"TRL 차이를 구간별 소요기간으로 환산한 값입니다.")+'</p>'
+  const steps = it.lag.steps || [];
+  const rows = steps.map(x=>'<tr><td class="yy">'+x.years+'년</td>'
+    +'<td><b>'+esc(x.name||("TRL "+x.from+" → "+x.to))+'</b></td>'
+    +'<td class="wh">'+esc(x.why||"")+'</td></tr>').join("");
+  const table = rows
+    ? '<table class="gsteps"><thead><tr><th>걸리는 기간</th><th>이 단계에서 하는 일</th>'
+      +'<th>왜 그만큼 걸리는가</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    : "";
+  const sum = steps.length
+    ? '<div class="gsum">경쟁사는 이미 <b>'+esc(String(it.trl||"–"))+'단계</b>에 있고 자사는 <b>'
+      +esc(String(it.selfTrl||"–"))+'단계</b>입니다. 위 '+steps.length+'개 단계를 모두 밟아야 따라잡습니다. '
+      +'다 더하면 <b>'+esc(it.lag.t)+'</b>입니다.</div>'
+    : "";
+  modalOpen("기술 격차 "+it.lag.t+" — "+it.n,
+    '<p class="modal-intro">단계를 하나 올릴 때마다 해야 할 일이 다르고, 그래서 걸리는 기간도 '
+    +'다릅니다. 뒤 단계일수록 장비를 사고 라인을 세워야 해서 오래 걸립니다.</p>'
+    + table + sum
     +'<div class="mine"><span class="lbl">경쟁사</span><span class="wy">'+esc(it.lag.r||"")+'</span></div>'
     +'<div class="mine"><span class="lbl">자사</span><span class="wy">'+esc(it.lag.m||"")+'</span></div>'
-    +'<div class="modal-note">단계별 소요기간은 배터리 공정기술 통상치이며 사내 실적으로 보정할 수 있습니다.</div>');
+    +'<div class="modal-note">기간은 배터리 공정기술 통상치입니다. 사내 실제 소요기간이 있으면 '
+    +'그 값으로 바꿔야 더 정확해집니다.</div>');
 }
 function openEvidenceList(it, company){
   const list = it.ev.filter(function(e){ return !company || e.w === company; });
@@ -1128,9 +1287,13 @@ function openEvidenceList(it, company){
       +(e.src?" · "+esc(e.src):"")+(e.rev?" · 확인 필요":"")+'</span></span>'
       +(e.url?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">원문 ↗</a>':'')
       +'</div>'; }).join("");
-  modalOpen(who+" 근거 "+list.length+"건 — "+it.n,
+  const total = (it.cnt && it.cnt[company]!=null) ? it.cnt[company] : list.length;
+  const more = total>list.length
+    ? ' 수집된 <b>'+total+'건</b> 중 근거가 센 것부터 <b>'+list.length+'건</b>을 실었습니다.'
+    : "";
+  modalOpen(who+" 근거 "+total+"건 — "+it.n,
     '<p class="modal-intro">'+esc(sum)+(list.length>60?" · 상위 60건만 표시":"")
-    +'. 오른쪽 <b>원문</b> 을 눌러 출처를 직접 확인할 수 있습니다.</p>'
+    +'. 오른쪽 <b>원문</b> 을 눌러 출처를 직접 확인할 수 있습니다.'+more+'</p>'
     +'<div class="plist">'+rows+'</div>');
 }
 function wireModal(){

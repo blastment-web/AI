@@ -226,7 +226,14 @@ def collect(client: Cninfo, bgn: str, end: str, keywords: list[str] = None,
             targets: list[dict] = None) -> list[dict]:
     """키워드별로 훑어 합치고 announcementId 로 중복 제거한다."""
     targets = targets or TARGETS
-    keywords = keywords or ["投资建设", "建设", "生产基地", "扩产"]
+    # 실측(2026-09-13): cninfo 는 제목만 검색하고, 키워드 없이 전체를 넘기면
+    # 페이지가 조용히 잘려 정작 설비투자 공고가 빠진다. 그래서 키워드를 넓게 쓴다.
+    # 아래 목록은 CATL 기준 16건 → 23건으로 늘린 조합이다.
+    keywords = keywords or [
+        "投资建设", "建设", "生产基地", "扩产", "产业基地", "制造基地",
+        "扩建", "新建", "产能", "投产", "产业园", "一体化", "对外投资",
+        "项目", "基地", "产线", "电池",
+    ]
     se = f"{bgn}~{end}"
     seen, out = set(), []
     for t in targets:
@@ -262,7 +269,7 @@ def write_jsonl(records: list[dict], path: Path) -> None:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="cninfo 중국 경쟁사 설비투자 공고 수집")
-    ap.add_argument("--from", dest="bgn", default="2022-01-01")
+    ap.add_argument("--from", dest="bgn", default="2018-01-01")
     ap.add_argument("--to", dest="end",
                     default=datetime.date.today().strftime("%Y-%m-%d"))
     ap.add_argument("--out", default="data/evidence_cninfo.jsonl")
