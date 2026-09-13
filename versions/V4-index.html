@@ -868,6 +868,8 @@ const visibleRivals=it=>it.r.filter(r=>activeRivals.has(r));
 /* 경쟁사 필터는 '경쟁사 보유' 표시를 좁히는 용도다.
    근거가 없는 기술까지 목록에서 지우면 판정 불가 7건이 화면에서 사라진다.
    필터가 켜져 있을 때만 좁히고, 전체 선택 상태에서는 전부 보여 준다. */
+const rivalsSeen=it=>visibleRivals(it).length
+  + (it.p||[]).filter(r=>activeRivals.has(r)).length;
 const isVisible=it=>activeRivals.size===RIVALS.length
   || levelOf(it).k!=="behind" || visibleRivals(it).length>0;
 
@@ -1552,9 +1554,9 @@ function renderSummary(){
     return `<div class="posrow" data-id="${i.id}">
       <span class="posbadge ${POS_CLASS[lv.k]}">${esc(lv.label)}</span>
       <span class="pn">${esc(i.n)}</span>
-      <span class="posn">${visibleRivals(i).length}사 보유 · 시급 ${i.score}</span>
+      <span class="posn">경쟁사 ${rivalsSeen(i)}사 · 시급 ${i.score}</span>
     </div>`;}).join("") + (list.length>show.length
-      ? `<div class="posmore">우위 기술 ${list.length-show.length}건은 하단 포트폴리오에서 확인 가능함.</div>`:"");
+      ? `<div class="posmore">나머지 ${list.length-show.length}건은 하단 기술 포트폴리오에서 확인 가능함.</div>`:"");
   $("#posList").querySelectorAll(".posrow").forEach(r=>{
     r.style.cursor="pointer";
     r.onclick=()=>{select(r.dataset.id);
