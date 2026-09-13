@@ -172,12 +172,15 @@ def company_of(ev: dict) -> str:
     return c if c in RIVALS else (ev.get("company") or "")
 
 
-def pick_evidence(evs: list[dict], per_company: int = 4, cap: int = 48) -> list[dict]:
+def pick_evidence(evs: list[dict], per_company: int = 8, cap: int = 72) -> list[dict]:
     """화면에 실을 근거를 고른다.
 
     그냥 최신순 40건으로 자르면, 근거가 오래된 회사는 매트릭스에 '보유'로 뜨는데
     근거 목록은 0건이 된다. 칸과 팝업이 어긋나 보이는 원인이 이것이었다.
     회사마다 가장 센 근거를 먼저 확보한 뒤, 남는 자리를 최신순으로 채운다.
+
+    회사당 4건은 너무 적었다. 282건을 수집한 회사를 눌러도 4줄만 떠서
+    '특허가 안 나온다'로 보였다. 8건으로 올린다(파일 크기와의 절충값).
     """
     def rank(e):
         return (judge.GRADE_RANK.get(e.get("grade", ""), 0), e.get("date", ""))

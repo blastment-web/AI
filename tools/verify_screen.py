@@ -225,6 +225,37 @@ with sync_playwright() as pw:
     }""")
     ck("부제 각 문장 한 줄(1200px 이상)", all(x == 1 for x in dl), str(dl))
 
+    print("-- V6 매트릭스 팝업: 특허가 위, 보조 근거가 아래 --")
+    pg.locator(".pc").first.click()
+    pg.wait_for_timeout(450)
+    cells = pg.locator(".matrix .mcol")
+    opened = False
+    for i in range(cells.count()):
+        cells.nth(i).click()
+        pg.wait_for_timeout(450)
+        if pg.locator(".modal .evsec").count() == 2:
+            opened = True
+            break
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(180)
+    ck("매트릭스 칸 클릭 시 근거 팝업", opened)
+    if opened:
+        secs = pg.locator(".modal .evsec-h b").all_inner_texts()
+        ck("두 구획으로 나뉜다", [x.strip() for x in secs] == ["특허", "보조 근거"], str(secs))
+        order = pg.evaluate(
+            """() => {const e=[...document.querySelectorAll('.modal .evsec')];
+                     return e[0].className.includes('ev-pat');}""")
+        ck("특허가 위에 온다", order)
+        mtxt = pg.locator(".modal").inner_text()
+        ck("특허가 핵심 기준임을 병기", "핵심 판정 기준" in mtxt)
+        ck("보조 근거의 범위 명시", "설비투자 공시" in mtxt and "학회" in mtxt)
+        ck("건수 구분 표기", "보조 근거" in mtxt and "특허" in mtxt)
+        npat = pg.locator(".modal .ev-pat .pitem").count()
+        ck("특허 행이 실제로 실린다", npat > 0, f"{npat}행")
+        ck("행마다 원문 링크", pg.locator(".modal .ev-pat .pitem a").count() > 0)
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(220)
+
     print("-- V6 최우선 검토 기술 필터: 다섯 구분 전량 조회 가능 --")
     want = {"behind": "열위 기술", "even": "동등 기술", "ahead": "우위 기술",
             "hold": "확인 필요", "none": "근거 부족"}
