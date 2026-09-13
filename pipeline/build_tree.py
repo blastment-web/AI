@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from pipeline import classifier, judge  # noqa: E402
+from pipeline import classifier, gap_model, judge  # noqa: E402
 
 # 판독기는 갈아 끼울 수 있다. V4 는 규칙만, V5 는 규칙 + LLM 재판독.
 # 나머지 파이프라인은 어느 쪽이든 똑같이 돈다.
@@ -244,8 +244,9 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
         self_info = it.get("self", {})
 
         # 자사 근거와 경쟁사 근거를 분리
-        rival_ev = [e for e in evs if company_of(e) in RIVALS]
-        self_ev = [e for e in evs if company_of(e) == "LGES"]
+        # 격차 모델이 회사별로 나눠 볼 수 있도록 정규화된 회사명을 실어 둔다.
+        rival_ev = [{**e, "_co": company_of(e)} for e in evs if company_of(e) in RIVALS]
+        self_ev = [{**e, "_co": "LGES"} for e in evs if company_of(e) == "LGES"]
 
         by_co = defaultdict(list)
         for e in rival_ev:
@@ -258,7 +259,12 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
 
         rival_trl, trl_why = judge.estimate_trl(rival_ev)
         our_trl, our_why = judge.self_trl(self_info)
-        gap_years, gap_why = judge.time_gap(rival_trl, our_trl)
+        # ① 실행 소요기간 — 자사가 수행해야 할 과업의 누적 기간
+        exec_years, gap_why = judge.execution_years(rival_trl, our_trl)
+        # ② 3축 관측 보정 — 특허·공시·발표에서 관측된 선행 정도로 ①을 조정
+        gm = gap_model.estimate(rival_ev, self_ev, exec_years,
+                                self_spec=it.get("spec"))
+        gap_years = gm["base_years"]
 
         top = max(rival_ev, key=lambda e: judge.GRADE_RANK.get(e.get("grade", ""), 0),
                   default=None)
@@ -267,7 +273,8 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             rival_trl, our_trl,
             sum(1 for v in rivals.values() if v["status"] == "have"),
             sum(1 for v in rivals.values() if v["status"] == "part"),
-            top.get("grade") if top else None, recent, self_info, len(RIVALS))
+            top.get("grade") if top else None, recent, self_info, len(RIVALS),
+            gap_years=gap_years, conf=gm["conf"])
 
         nodes.append({
             "l1": st["n"], "l1_en": st.get("en", ""), "l2": g["n"],
@@ -284,21 +291,38 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
                      "trl": our_trl, "trl_basis": our_why,
                      "evidence_count": len(self_ev)},
             "rivals": rivals,
-            "lag": ({"gap": judge.fmt_gap(gap_years),
+            "lag": ({"gap": judge.fmt_band(gm["base_years"], gm["cons_years"]),
                      "gap_years": gap_years,
+                     "base_years": gm["base_years"],
+                     "cons_years": gm["cons_years"],
+                     "exec_years": exec_years,
                      "basis": gap_why,
-                     # 단계마다 실제로 무엇을 해야 해서 그만큼 걸리는지
+                     # 단계마다 무엇을 수행해야 해서 그만큼 소요되는지
                      "steps": judge.gap_breakdown(rival_trl, our_trl),
+                     # 3축 대리 지표 내역 — 임원 팝업이 그대로 읽는다
+                     "axes": gm["axis_rows"],
+                     "adj_base": gm["adj_base"], "adj_cons": gm["adj_cons"],
+                     "band": gm["band"], "conf": gm["conf"],
+                     "conf_label": gap_model.CONF_LABEL[gm["conf"]],
+                     "conf_score": gm["conf_score"],
+                     "live_axes": gm["live_axes"],
+                     "vapor_exposure": gm["vapor_exposure"],
+                     "model_note": gm["note"],
                      "rival_milestone": f"경쟁사 TRL {rival_trl} — {trl_why}",
                      "self_state": f"자사 TRL {our_trl} — {our_why}"}
-                    if gap_years > 0 else None),
+                    if exec_years > 0 else None),
+            # 격차가 0 인 기술도 신뢰도는 표기해야 한다. 화면 배지가 이것을 읽는다.
+            "model": {"conf": gm["conf"], "conf_label": gap_model.CONF_LABEL[gm["conf"]],
+                      "conf_score": gm["conf_score"], "live_axes": gm["live_axes"],
+                      "axes": gm["axis_rows"], "note": gm["note"]},
             "urgency": {"score": score, "breakdown": breakdown,
                         "formula": judge.urgency_formula(breakdown),
                         "max": judge.URGENCY_MAX},
             "position": judge.position(
                 our_trl, rival_trl, self_info.get("status", "none"), len(self_ev),
                 rival_source_kinds=len({e.get("type") for e in rival_ev if e.get("type")}),
-                rival_evidence=len(rival_ev)),
+                rival_evidence=len(rival_ev), conf=gm["conf"],
+                conf_score=gm["conf_score"]),
             # 판정에 쓰지 않은 '관련 가능성' 건수. 화면에서 별도로 표기한다.
             "related_count": len(rel),
             "related_self": sum(1 for e in rel if company_of(e) == "LGES"),
@@ -316,6 +340,11 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
                          for e in pick_evidence(evs)],
             "limit": it.get("limit", ""),
         })
+
+    # 패밀리 병합 실적 — '건수'와 '발명 수'는 다르다. 화면에 양쪽을 다 보여 준다.
+    all_pat = [e for e in evidence if e.get("type") == "patent"]
+    pat_records = len(all_pat)
+    pat_families = len(gap_model.merge_families(all_pat))
 
     src_counts = defaultdict(int)
     co_counts = defaultdict(lambda: {"total": 0, "patent": 0, "capex": 0, "judged": 0})
@@ -350,6 +379,12 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             "nodes_total": len(nodes),
             "self_conflicts": sum(1 for n in nodes if n.get("self_conflict")),
             "method": ENGINE.stats_header(),
+            "urgency_max": judge.URGENCY_MAX,
+            "model_conf": {c: sum(1 for n in nodes if n["model"]["conf"] == c)
+                           for c in ("high", "mid", "low")},
+            # 패밀리 병합 효과 — 중복 계상이 얼마나 제거되었는지 화면에 표기한다
+            "patent_records": pat_records,
+            "patent_families": pat_families,
             "engine": getattr(ENGINE, "__name__", "").rsplit(".", 1)[-1],
         },
         "by_company": by_company,

@@ -115,6 +115,79 @@ two = [{"grade": "verified", "type": "patent"}, {"grade": "medium", "type": "cap
 ck("소스 2종이면 9", J.estimate_trl(two)[0] == 9, str(J.estimate_trl(two)[0]))
 ck("근거 없으면 3(미관측)", J.estimate_trl([])[0] == 3)
 
+print("-- V6 ①: 특허 뒷받침 없는 발표는 TRL 7 이상을 받지 못한다 --")
+talk_only = [{"grade": "strong", "type": "capex", "date": "2026-06"}]
+t1, w1 = J.estimate_trl(talk_only, today=2026.7)
+ck("공시 단독 STRONG 1건 → TRL 6 상한", t1 == 6, f"{t1} / {w1}")
+ck("상한 사유를 근거 문구에 남긴다", "특허 미관측" in w1, w1)
+backed = talk_only + [{"grade": "weak", "type": "patent", "family_id": "F1",
+                       "country": "CN", "date": "2026-01"}]
+ck("특허가 붙으면 TRL 7 부여", J.estimate_trl(backed, today=2026.7)[0] == 7,
+   str(J.estimate_trl(backed, today=2026.7)[0]))
+
+print("-- V6 ②: 후속 관측 없이 오래된 발표는 등급이 내려간다 --")
+stale = [{"grade": "strong", "type": "capex", "date": "2019-01"},
+         {"grade": "weak", "type": "patent", "family_id": "F1", "country": "CN",
+          "date": "2026-01"}]
+t2, w2 = J.estimate_trl(stale, today=2026.7)
+ck("2019년 STRONG 은 MEDIUM 으로 하향", "신호 소멸" in w2, w2)
+ck("하향 결과 TRL 7 미만", t2 < 7, str(t2))
+
+print("-- V6 ③: 보유 판정에 패밀리 병합과 품질 요건이 적용된다 --")
+one_family = [{"grade": "weak", "type": "patent", "family_id": "F1",
+               "country": c, "date": "2026-01"} for c in ("CN", "US", "EP")]
+ck("같은 발명 3개국 출원은 '보유' 아님", not J.rival_holds(one_family, today=2026.7))
+three_single = [{"grade": "weak", "type": "patent", "family_id": f"F{i}",
+                 "country": "CN", "date": "2026-01"} for i in range(3)]
+ck("단일국 공개출원 3건도 '보유' 아님(품질 요건 미충족)",
+   not J.rival_holds(three_single, today=2026.7))
+three_quality = three_single + [{"grade": "weak", "type": "patent",
+                                 "family_id": "F9", "country": "CN",
+                                 "date": "2026-01", "granted": True}]
+ck("등록 특허가 섞이면 '보유'", J.rival_holds(three_quality, today=2026.7))
+ck("STRONG 1건이면 즉시 '보유'",
+   J.rival_holds([{"grade": "strong", "type": "capex", "date": "2026-06"}],
+                 today=2026.7))
+ck("근거 0건은 '보유' 아님", not J.rival_holds([]))
+
+print("-- V6 ④: 시급도 입력값이 3축 보정분으로 바뀐다 --")
+s_hi, r_hi = J.urgency(9, 4, 5, 1, "verified", 3, {}, gap_years=4.0, conf="high")
+s_lo, r_lo = J.urgency(9, 4, 5, 1, "verified", 3, {}, gap_years=4.0, conf="low")
+ck("신뢰도 '하'는 근거 확실성에 상한 적용", r_lo[2]["got"] <= J.CONF_PROOF_CAP["low"],
+   str(r_lo[2]["got"]))
+ck("신뢰도가 낮으면 점수가 내려간다", s_lo < s_hi, f"{s_lo} vs {s_hi}")
+ck("격차 인자는 연수 기준", "3축 보정 기준 4년" in r_hi[0]["why"], r_hi[0]["why"])
+ck("상한 적용 사실을 문구로 남긴다", "상한" in r_lo[2]["why"], r_lo[2]["why"])
+s_short, _ = J.urgency(9, 4, 5, 1, "verified", 3, {}, gap_years=0.5, conf="high")
+ck("격차가 짧으면 점수도 낮다", s_short < s_hi, f"{s_short} vs {s_hi}")
+
+print("-- V6 ⑤: 듀얼 트랙 표기 --")
+ck("밴드 문구", J.fmt_band(2.5, 3.4) == "약 2.5~3.4년", J.fmt_band(2.5, 3.4))
+ck("차이 없으면 단일 표기", J.fmt_band(2.5, 2.5) == "약 2.5년", J.fmt_band(2.5, 2.5))
+ck("격차 없으면 —", J.fmt_band(0, 0) == "—")
+ck("time_gap 은 execution_years 의 별칭", J.time_gap is J.execution_years)
+
+print("-- V6 ⑥: 기준 문서에 모델과 방어 논리가 실린다 --")
+doc = J.criteria_doc()
+ck("모델 항목 추가", "model" in doc and len(doc["model"]["rows"]) == 4)
+ck("TRL 기준에 특허 뒷받침 규칙 명시", "TRL 6 상한" in doc["trl"]["note"],
+   doc["trl"]["note"][-60:])
+ck("격차 기준에 보정 계수 명시", "마케팅" in doc["lag"]["note"])
+ck("시급도 기준에 신뢰도 상한 명시", "신뢰도" in doc["urgency"]["note"])
+ck("보유 기준에 패밀리 병합 명시", "패밀리 병합" in doc["hold"]["note"])
+
+print("-- V6 ⑦: 신뢰도가 기술 구분에 병기된다 --")
+p = J.position(4, 9, "none", rival_source_kinds=2, rival_evidence=5, conf="low",
+               conf_score=0.2)
+ck("신뢰도 라벨", p["conf_label"] == "하", p["conf_label"])
+ck("신뢰도 '하'는 재검증 문구", "재검증" in p["caveat"], p["caveat"])
+ck("판정 근거에 신뢰도 포함", "신뢰도" in p["basis"], p["basis"])
+p2 = J.position(4, 9, "none", rival_source_kinds=1, rival_evidence=5, conf="high")
+ck("특허 단독 관측은 열위 판정을 유지", p2["tech_class"] == "열위")
+p3 = J.position(9, 4, "have", rival_source_kinds=1, rival_evidence=5, conf="high")
+ck("특허 단독 관측의 '우위'는 과대평가 가능성 병기",
+   "특허 기준" in p3["label_shown"], p3["label_shown"])
+
 print()
 print("실패 없음" if not fails else f"실패: {fails}")
 sys.exit(1 if fails else 0)

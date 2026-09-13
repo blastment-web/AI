@@ -46,7 +46,7 @@ with sync_playwright() as pw:
         print(f"     {l} = {v}")
     ck("열위/동등/우위/범위", lab == ["열위 기술", "동등 기술", "우위 기술", "경쟁사 범위"], str(lab))
     fs = pg.evaluate("()=>getComputedStyle(document.querySelector('.kpi .v')).fontSize")
-    ck("숫자 48px", fs == "48px", fs)
+    ck("KPI 숫자 48px 이상", float(fs.replace("px", "")) >= 48, fs)
     c1 = pg.evaluate("()=>getComputedStyle(document.querySelector('.kpi.k-behind .v')).color")
     c3 = pg.evaluate("()=>getComputedStyle(document.querySelector('.kpi.k-ahead .v')).color")
     ck("열위=빨강", c1 == "rgb(192, 57, 43)", c1)
@@ -140,6 +140,70 @@ with sync_playwright() as pw:
     import re as _re
     polite = sorted(set(_re.findall(r"[가-힣][^\n]{0,28}?(?:습니다|합니다|입니다|됩니다|십시오)", body)))
     ck("경어체 문장 없음", not polite, "; ".join(polite[:3]))
+
+    print("-- V6 시인성: 작은 글씨가 없어야 한다 --")
+    tiny = pg.evaluate("""() => {
+      const bad = [];
+      document.querySelectorAll('body *').forEach(el => {
+        if (!el.offsetParent && el.tagName !== 'BODY') return;
+        const t = (el.textContent || '').trim();
+        if (!t || el.children.length) return;
+        const px = parseFloat(getComputedStyle(el).fontSize);
+        if (px < 11.5) bad.push(px + 'px: ' + t.slice(0, 24));
+      });
+      return bad.slice(0, 6);
+    }""")
+    ck("본문 글자 11.5px 미만 없음", not tiny, "; ".join(tiny))
+
+    gutter = pg.evaluate(
+        "() => getComputedStyle(document.querySelector('.wrap')).paddingLeft")
+    ck("좌우 여백 절반 축소(28px → 14px)", gutter == "14px", gutter)
+    maxw = pg.evaluate(
+        "() => getComputedStyle(document.querySelector('.wrap')).maxWidth")
+    ck("가로 확장", float(maxw.replace("px", "")) >= 1800, maxw)
+
+    print("-- V6 시인성: 타이틀에 회색을 쓰지 않는다 --")
+    # --muted 는 본문 보조 문구 전용. 영역 제목·표 머리글에는 쓰지 않는다.
+    grey = pg.evaluate("""() => {
+      const muted = getComputedStyle(document.documentElement)
+        .getPropertyValue('--muted').trim();
+      const bad = [];
+      document.querySelectorAll('h1,h2,h2 small,th,.sec-t,.eyebrow,.crumb,.sumpane-h')
+        .forEach(el => {
+          if (getComputedStyle(el).color === muted) bad.push(el.className || el.tagName);
+        });
+      return bad.slice(0, 5);
+    }""")
+    ck("제목·머리글에 --muted 미사용", not grey, "; ".join(grey))
+
+    print("-- V6 포트폴리오 범위 설명(57개인 이유) --")
+    ck("범위 설명 블록", pg.locator(".scope-note").count() == 1)
+    sn = pg.locator(".scope-note").inner_text()
+    ck("'전량이 아님' 명시", "전량이 아닌" in sn, sn[:46].replace("\n", " "))
+    for k in ("선정 기준", "제외 대상", "집계 단위"):
+        ck(f"{k} 제시", k in sn)
+    ck("기술당 자사 특허 규모 제시", "280" in sn or "281" in sn)
+
+    print("-- V6 3축 격차 모델 --")
+    gapbtn = pg.locator("[data-lag]").first
+    if gapbtn.count():
+        gapbtn.click()
+        pg.wait_for_timeout(500)
+        m = pg.locator(".modal").inner_text()
+        ck("듀얼 트랙 표기", "기준 시나리오" in m and "보수 시나리오" in m)
+        ck("3축 표", pg.locator(".axt").count() == 1)
+        ck("R&D 선행 격차 행", "R&D 선행 격차" in m)
+        ck("양산 진입 격차 행", "양산 진입 격차" in m)
+        ck("스펙 수준 격차 행", "스펙 수준 격차" in m)
+        ck("미산출 축을 숨기지 않는다", "미산출" in m, "")
+        ck("수율·원가 한계 명시", "수율" in m and "비공개" in m)
+        ck("신뢰도 배지", pg.locator(".modal .cfb").count() >= 1)
+        ck("실행 소요기간 분해 유지", "실행 소요기간" in m)
+        ck("보정 계수 명시", "보정 계수" in m)
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(250)
+    else:
+        ck("격차 팝업 진입", False, "data-lag 버튼 없음")
 
     print("-- 반응형 --")
     for w in (1600, 1180, 900, 420):

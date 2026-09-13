@@ -10,9 +10,10 @@ index.html                 화면 틀 (HTML + CSS + JS 단일 파일, 데이터 
 run.bat / run.sh           백엔드 실행 — 특허 원문 검색을 쓸 때만 필요
 collect.bat                수집 → 판정 → 화면 만들기 전 과정
 
-dist/V4-index.html         ★ 평소 여는 파일. 데이터가 박혀 있어 서버 없이 열립니다
+dist/V6-index.html         ★ 평소 여는 파일. 데이터가 박혀 있어 서버 없이 열립니다
+dist/V4-index.html         V5 까지의 판정 로직으로 만든 판
 dist/V5-index.html         V4 와 같고 LLM 판독 계층이 얹힌 판
-versions/                  되돌릴 수 있게 남겨 둔 과거 판 (V3·V4·V5)
+versions/                  되돌릴 수 있게 남겨 둔 과거 판 (V3·V4·V5·V6)
 
 server/                    FastAPI — 특허 원문 검색 · BigQuery 비용 가드
 adapters/                  창구별 수집기. 전부 같은 evidence 계약을 지킵니다
@@ -26,6 +27,7 @@ adapters/                  창구별 수집기. 전부 같은 evidence 계약을
 pipeline/
   classifier.py            판독 — CPC 국제분류 규칙 (V4)
   classifier_llm.py        판독 — 규칙 + LLM 재판독 (V5)
+  gap_model.py             격차 추정 — 특허·공시·발표 3축 대리 지표 (V6)
   judge.py                 판정 기준의 유일한 근거. 화면 팝업도 여기서 나옵니다
   build_tree.py            근거 → 기술트리 판정
   render_html.py           데이터를 화면에 박아 단일 파일로
@@ -33,10 +35,10 @@ pipeline/
 tools/make_ppt.py          임원 보고 1장 생성
 docs/SOURCES-REVIEW.md     ★ 창구 심층 검토 · 영향도 분석
 VERSIONS.md                판 관리 · 되돌리는 법
-tests/                     258개. 네트워크 없이 돕니다
+tests/                     338개. 네트워크 없이 돕니다
 ```
 
-`dist/V4-index.html` 은 데이터가 박혀 있어 **더블클릭만 하면 열립니다.**
+`dist/V6-index.html` 은 데이터가 박혀 있어 **더블클릭만 하면 열립니다.**
 서버가 필요한 것은 화면 아래쪽 **특허 원문 검색** 하나뿐입니다(`run.bat`).
 
 ## 화면 구성
