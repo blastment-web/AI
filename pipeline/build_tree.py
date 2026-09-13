@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from pipeline import judge  # noqa: E402
+from pipeline import classifier, judge  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -165,23 +165,26 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             for it in g["items"]:
                 flat.append((st, g, it, node_terms(it)))
 
-    buckets = defaultdict(list)          # 판정에 쓰는 근거
-    related = defaultdict(list)          # 관련 가능성만 있는 것
+    node_names = [it["n"] for (_, _, it, _) in flat]
+    idx_of = {n: i for i, n in enumerate(node_names)}
+
+    buckets = defaultdict(list)          # 확정·추정 — 판정에 쓴다
+    related = defaultdict(list)          # 관련 — 참고로만
+    conf_count = defaultdict(int)
     for ev in evidence:
-        text = evidence_text(ev)
-        best, best_score = None, 0.0
-        for idx, (_, _, _, terms) in enumerate(flat):
-            sc = match_score(terms, text)
-            if sc > best_score:
-                best, best_score = idx, sc
-        if best is None:
+        name, conf, sc, why = classifier.classify(ev, node_names)
+        conf_count[conf] += 1
+        if name is None:
             unassigned.append({**ev, "_score": 0})
-        elif best_score >= JUDGE_SCORE:
-            buckets[best].append(ev)
-        elif best_score >= RELATED_SCORE:
-            related[best].append(ev)
+            continue
+        ev = {**ev, "_conf": conf, "_why": why, "_score": sc}
+        i = idx_of[name]
+        if conf in ("확정", "추정"):
+            buckets[i].append(ev)
+        elif conf == "관련":
+            related[i].append(ev)
         else:
-            unassigned.append({**ev, "_score": round(best_score, 1)})
+            unassigned.append(ev)
 
     for idx, (st, g, it, _) in enumerate(flat):
         evs = buckets.get(idx, [])
@@ -236,6 +239,10 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
                      "self_state": f"자사 TRL {our_trl} — {our_why}"}
                     if gap_years > 0 else None),
             "urgency": {"score": score, "breakdown": breakdown},
+            "position": judge.position(
+                our_trl, rival_trl, self_info.get("status", "none"), len(self_ev),
+                rival_source_kinds=len({e.get("type") for e in rival_ev if e.get("type")}),
+                rival_evidence=len(rival_ev)),
             # 판정에 쓰지 않은 '관련 가능성' 건수. 화면에서 별도로 표기한다.
             "related_count": len(rel),
             "related_self": sum(1 for e in rel if company_of(e) == "LGES"),
@@ -256,8 +263,22 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
         })
 
     src_counts = defaultdict(int)
+    co_counts = defaultdict(lambda: {"total": 0, "patent": 0, "capex": 0, "judged": 0})
     for e in evidence:
         src_counts[e.get("source", "?")] += 1
+        co = company_of(e)
+        if co in RIVALS or co == "LGES":
+            c = co_counts[co]
+            c["total"] += 1
+            c["patent" if e.get("type") == "patent" else "capex"] += 1
+    for i, lst in buckets.items():
+        for e in lst:
+            co = company_of(e)
+            if co in RIVALS or co == "LGES":
+                co_counts[co]["judged"] += 1
+    by_company = [{"company": k, **v} for k, v in
+                  sorted(co_counts.items(), key=lambda kv: -kv[1]["total"])]
+    by_source = [{"name": k, "total": v} for k, v in sorted(src_counts.items())]
 
     return {
         "collected_at": datetime.now().strftime("%Y-%m-%d %H:%M KST"),
@@ -268,12 +289,15 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             "assigned": sum(len(v) for v in buckets.values()),
             "related": sum(len(v) for v in related.values()),
             "unassigned": len(unassigned),
+            "confident": conf_count.get("확정", 0),
+            "estimated": conf_count.get("추정", 0),
             "nodes_with_evidence": sum(1 for n in nodes if n["evidence"]),
             "nodes_total": len(nodes),
             "self_conflicts": sum(1 for n in nodes if n.get("self_conflict")),
-            "note": ("판정에 쓴 근거는 용어가 강하게 일치한 것만입니다. "
-                     "'관련'은 가능성만 있어 판정에 쓰지 않았습니다."),
+            "method": classifier.stats_header(),
         },
+        "by_company": by_company,
+        "by_source": by_source,
         "nodes": nodes,
         "unassigned_sample": unassigned[:20],
     }
@@ -297,8 +321,13 @@ def main(argv=None) -> int:
                            encoding="utf-8")
 
     c = tree["coverage"]
-    print(f"근거 {c['evidence_total']:,}건 → 판정에 사용 {c['assigned']:,}건 "
-          f"/ 관련만 {c['related']:,}건 / 미배정 {c['unassigned']:,}건")
+    print(f"근거 {c['evidence_total']:,}건 → 판정 사용 {c['assigned']:,}건 "
+          f"(확정 {c['confident']:,} · 추정 {c['estimated']:,}) "
+          f"/ 관련 {c['related']:,}건 / 미배정 {c['unassigned']:,}건")
+    pos = defaultdict(int)
+    for n in tree["nodes"]:
+        pos[n["position"]["label"]] += 1
+    print("기술 위치: " + " · ".join(f"{k} {v}건" for k, v in sorted(pos.items())))
     print(f"목업 '미보유'인데 자사 특허가 있는 기술: {c['self_conflicts']}건 (확인 필요)")
     print(f"근거가 붙은 노드 {c['nodes_with_evidence']} / {c['nodes_total']}")
     # 화면과 같은 정의 — 경쟁사 중 최소 1곳이 '보유'여야 미보유로 센다.

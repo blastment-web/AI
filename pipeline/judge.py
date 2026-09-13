@@ -197,3 +197,73 @@ def criteria_doc() -> dict:
             "note": "근거 0건은 '경쟁사가 없다'가 아니라 '관측되지 않았다'입니다. 둘을 구분해 표기합니다.",
         },
     }
+
+
+# ── 기술 위치 — 동등 / 경합 / 열위 ────────────────────────────────────
+# 임원 의사결정에 필요한 것은 "있다/없다"가 아니라 "경쟁사 대비 어디에 서 있나"다.
+POSITION_RULES = [
+    ("우위", "자사가 경쟁사보다 앞선다", "자사 TRL 이 더 높다"),
+    ("동등", "경쟁사와 같은 수준이다", "TRL 이 같다"),
+    ("경합", "한 단계 차이로 쫓기거나 쫓는다", "TRL 1단계 차이"),
+    ("열위", "뒤처져 있다", "TRL 2단계 이상 차이"),
+]
+
+
+def position(our_trl: int, rival_trl: int, self_status: str,
+             self_evidence: int = 0, rival_source_kinds: int = 0,
+             rival_evidence: int = 0) -> dict:
+    """(위치 라벨, 화면 표기, 근거).
+
+    비교의 비대칭에 주의한다. 자사는 라인 적용 여부를 알지만 경쟁사는
+    특허밖에 못 본다. 경쟁사 근거가 특허뿐이면 그 TRL 은 실제보다 낮게
+    잡히므로, '우위'라는 말을 그대로 쓰면 안 된다.
+    """
+    d = rival_trl - our_trl
+    patent_only = rival_source_kinds <= 1
+
+    if rival_evidence == 0:
+        return {
+            "label": "판정 불가", "label_shown": "판정 불가",
+            "caveat": "", "holding": _holding(self_status),
+            "display": f"{_holding(self_status)} (판정 불가)",
+            "trl_diff": 0, "patent_only": False,
+            "basis": "경쟁사 근거 0건 — 비교할 수 없다",
+        }
+
+    if d <= -1:
+        label = "우위"
+    elif d == 0:
+        label = "동등"
+    elif d == 1:
+        label = "경합"
+    else:
+        label = "열위"
+
+    # 경쟁사를 특허로만 봤다면 '우위·동등'은 과대평가일 수 있다.
+    # 열위는 특허만으로도 이미 뒤진 것이므로 그대로 둔다.
+    if patent_only and label in ("우위", "동등"):
+        label_shown = label + "(특허 기준)"
+        caveat = ("경쟁사는 특허만 관측됐다. 라인 적용 여부를 모르므로 "
+                  "실제로는 더 앞서 있을 수 있다.")
+    else:
+        label_shown = label
+        caveat = ""
+
+    return {
+        "label": label,
+        "label_shown": label_shown,
+        "holding": _holding(self_status),
+        "display": f"{_holding(self_status)} ({label_shown})",
+        "trl_diff": d,
+        "patent_only": patent_only,
+        "caveat": caveat,
+        "basis": f"자사 TRL {our_trl} · 경쟁사 TRL {rival_trl} · {abs(d)}단계 차이",
+    }
+
+
+def _holding(self_status: str) -> str:
+    if self_status == "have":
+        return "특허 보유"
+    if self_status == "part":
+        return "특허 일부 보유"
+    return "특허 미보유"
