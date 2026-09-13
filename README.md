@@ -6,28 +6,38 @@
 ## 파일 구성
 
 ```
-index.html                화면 전체 (HTML + CSS + JS 단일 파일)
-run.sh                    백엔드 실행 (가상환경 생성부터 기동까지)
-server/
-  main.py                 FastAPI 라우트 + 정적 화면 서빙
-  bq.py                   BigQuery 쿼리 조립 · dry-run 비용 가드
-  cache.py                결과 캐시 · 레이트리미터
-  config.py               환경변수 설정
-  .env.example            설정 템플릿 (복사해서 .env 로)
-adapters/capex_dart.py    DART 설비투자 공시 (한국 — 삼성SDI·SK온·LGES)
-adapters/capex_cninfo.py  cninfo 설비투자 공고 (중국 — CATL·BYD, 키 불필요)
-adapters/patent_kipris.py KIPRIS 국내 특허·실용신안
-data/tree.sample.json     /api/tree 응답 계약 예시
-tools/coverage_audit.py   수집 커버리지 실측 (근거 61건 → 어댑터 귀속)
-docs/COVERAGE.md          커버리지 진단 · 키 발급 체크리스트
-docs/REVIEW-V3.md         V3 수집 구조 검토 (빈틈·비용·완성도·일정)
-docs/경쟁기술_인텔리전스_구조_V3.pptx   임원 보고용 1장 요약
-tests/test_sql.py         SQL 조립 검증 (GCP 없이 실행 가능)
+index.html                 화면 틀 (HTML + CSS + JS 단일 파일, 데이터 없음)
+run.bat / run.sh           백엔드 실행 — 특허 원문 검색을 쓸 때만 필요
+collect.bat                수집 → 판정 → 화면 만들기 전 과정
+
+dist/V4-index.html         ★ 평소 여는 파일. 데이터가 박혀 있어 서버 없이 열립니다
+dist/V5-index.html         V4 와 같고 LLM 판독 계층이 얹힌 판
+versions/                  되돌릴 수 있게 남겨 둔 과거 판 (V3·V4·V5)
+
+server/                    FastAPI — 특허 원문 검색 · BigQuery 비용 가드
+adapters/                  창구별 수집기. 전부 같은 evidence 계약을 지킵니다
+  patent_bq.py             경쟁사 특허 전량 (BigQuery, 분기 1회·39GB)
+  patent_kipris.py         국내 특허·실용신안 (키 필요)
+  capex_dart.py            국내 공시 (키 필요)
+  capex_cninfo.py          중국 공시 (키 불필요)
+  capex_hkex.py            홍콩 공시 (키 불필요)
+  capex_sec.py             미국 공시 + 본문 전문검색 (키 불필요)
+  conf_openalex.py         학회·논문 (키 불필요)
+pipeline/
+  classifier.py            판독 — CPC 국제분류 규칙 (V4)
+  classifier_llm.py        판독 — 규칙 + LLM 재판독 (V5)
+  judge.py                 판정 기준의 유일한 근거. 화면 팝업도 여기서 나옵니다
+  build_tree.py            근거 → 기술트리 판정
+  render_html.py           데이터를 화면에 박아 단일 파일로
+  collect.py               증분 수집 (받은 것은 다시 받지 않습니다)
+tools/make_ppt.py          임원 보고 1장 생성
+docs/SOURCES-REVIEW.md     ★ 창구 심층 검토 · 영향도 분석
+VERSIONS.md                판 관리 · 되돌리는 법
+tests/                     258개. 네트워크 없이 돕니다
 ```
 
-`index.html` 은 백엔드 없이 그대로 열어도 동작합니다. `USE_API=false` 상태에서는
-내장 목업(`TREE_MOCK`)으로 렌더링되며 화면 우상단에 **MOCK** 배지가 표시됩니다.
-백엔드가 필요한 것은 특허 검색뿐입니다.
+`dist/V4-index.html` 은 데이터가 박혀 있어 **더블클릭만 하면 열립니다.**
+서버가 필요한 것은 화면 아래쪽 **특허 원문 검색** 하나뿐입니다(`run.bat`).
 
 ## 화면 구성
 
@@ -243,9 +253,38 @@ python -m adapters.patent_kipris --words "건식 전극,전극 코팅" --rows 50
 
 ### cninfo — 중국 설비투자 (구현됨, 키 불필요)
 
-`投资建设`(투자건설)이 설비투자 공고를 잡는 유일하게 정확한 키워드다. `投资`만 쓰면
-회사채·투자펀드가 섞이고 `产能`·`扩产`·`工厂` 는 0건이다.
-**BYD 는 모든 키워드에서 0건** — cninfo 상 orgId 가 홍콩(`gshk0001211`)이라 HKEX 로 빠진다.
+`投资建设`(투자건설)이 정확도가 가장 높다. `投资`만 쓰면 회사채·투자펀드가 섞인다.
+키워드 없이 전체를 훑으면 페이징이 조용히 잘려 정작 설비투자 공고가 빠진다
+(전체 1,470건을 받아도 그 안에 없다). **제목 검색만이 유효하다.**
+CATL 23건이 원천의 천장이다 — 이사회 의결급 투자라 원래 연 5건 안팎이다.
+
+### HKEX — 홍콩 공시 (구현됨, 키 불필요)
+
+요청 형식 세 곳이 어긋나면 **오류 없이 조용히 0건**이 온다.
+날짜 필드는 `from`/`to`(`YYYYMMDD`), 카테고리 코드 넷은 **빈 문자열**(`-1` 금지),
+`stockId` 는 종목코드가 아니라 내부 id 다.
+
+BYD 제목은 거의 전부 `海外監管公告`(포장지)라 `--deep` 으로 PDF 본문까지 연다.
+다만 BYD 2,824건(포장지 924건 열람) · CATL 566건을 전부 확인한 결과
+**설비투자 공시는 0건**이다. 수집 실패가 아니라 원천에 없는 것이다.
+
+### SEC — 미국 공시 (구현됨, 키 불필요)
+
+**국가 차단이 아니다. User-Agent 문제다.** 같은 IP에서 "회사명 이메일" 형식은 403,
+브라우저 문자열은 200이다. UA 는 브라우저 문자열을 쓰고 연락처는 `From:` 헤더에 담아
+SEC 의 신원 표기 요구를 지킨다.
+
+제출목록만 보면 거의 안 잡힌다. **본문 전문검색**(`efts.sec.gov`)을 함께 쓴다.
+그 결과 추적 대상 6사가 아니라 미국 배터리 50사가 드러났다 —
+QuantumScape·Solid Power·Enovix, 그리고 건식 전극 **장비 공급사** Matthews International.
+
+### OpenAlex — 학회·논문 (구현됨, 키 불필요)
+
+특허 말고 두 번째 근거원이라, 이게 붙어야 TRL 8 이상의 교차 확인이 가능해진다.
+기관 검색으로 회사를 찾으면 안 된다 — LG에너지솔루션·삼성SDI 는 기관 레코드가 없고
+`Tesla` 는 체코 동명 회사가 잡힌다. 저자 **소속 문자열**을 봐야 한다.
+소속만으로 거르면 `SK On` 이 본문의 "SK on ..."에 걸려 3,414건이 되므로
+반드시 기술어 검색과 교차한다.
 
 ### DART — 설비투자 공시 (구현됨)
 
