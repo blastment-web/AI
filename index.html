@@ -39,9 +39,11 @@ h1 .en{display:block;font-family:var(--mono);font-size:13px;font-weight:500;lett
 /* 부제는 제목·원천 카드 아래 한 줄을 통째로 쓴다. 좁은 칸에 가두면 문장이 잘린다. */
 .deck{flex:1 0 100%;max-width:none;color:var(--ink2);font-size:15px;margin:16px 0 0;
   display:grid;gap:5px;line-height:1.55}
-.deck span{display:block}
+/* 문장 단위 줄바꿈은 '직계' span 에만 건다. 후손 전체에 걸면 문장 안에 넣은
+   숫자 span(#deckN)까지 블록이 되어 '배터리 공정기술 / 73 / 개 전량'으로 끊긴다. */
+.deck > span{display:block}
 .deck b{color:var(--ink)}
-@media (min-width:1200px){.deck span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+@media (min-width:1200px){.deck > span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 .sources{display:flex;border:1px solid var(--rule);background:var(--panel);flex-wrap:wrap}
 .src{padding:9px 13px;border-right:1px solid var(--rule-soft);min-width:96px}
 .src:last-child{border-right:0}

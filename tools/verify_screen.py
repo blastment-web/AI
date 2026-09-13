@@ -214,6 +214,16 @@ with sync_playwright() as pw:
     ck("수준 5개 합 = 카드 수", kn["five"] == n_all, f"{kn['five']} / {n_all}")
     ck("부제 기술 수도 데이터 기준",
        pg.evaluate("()=>+document.querySelector('#deckN').textContent") == n_all)
+    # 문장 안에 넣은 숫자 span 이 블록이 되면 '배터리 공정기술 / 73 / 개 전량'으로 끊긴다.
+    ck("부제 숫자는 문장 안에 인라인",
+       pg.evaluate("()=>getComputedStyle(document.querySelector('#deckN')).display")
+       == "inline")
+    dl = pg.evaluate("""() => {
+      const el=[...document.querySelectorAll('.deck > span')];
+      const lh=parseFloat(getComputedStyle(el[0]).lineHeight);
+      return el.map(e=>Math.round(e.clientHeight/lh));
+    }""")
+    ck("부제 각 문장 한 줄(1200px 이상)", all(x == 1 for x in dl), str(dl))
 
     print("-- V6 '확인 필요' vs '근거 부족' — 뜻과 형태가 갈린다 --")
     ck("확인 필요 = 경쟁사 있음 · 자사 미확인",
