@@ -56,16 +56,28 @@ with sync_playwright() as pw:
     tog = pg.locator("#haveToggle").inner_text()
     ck("우위 기술 기본 펼침", "접기" in tog, tog)
     n_all = pg.locator(".pc").count()
-    ck("57개 기술 전량 표시", n_all == 57, f"{n_all}장")
+    # SEQ 는 window 에 노출되지 않는다. 판정 결과 파일과 직접 대조한다.
+    import json as _json
+    from pathlib import Path as _Path
+    _tree = _json.loads((_Path(__file__).resolve().parent.parent
+                         / "data" / "tree.json").read_text(encoding="utf-8"))
+    n_seq = len(_tree["nodes"])
+    ck("기술 전량 표시(판정 결과와 일치)", n_all == n_seq, f"카드 {n_all} / 데이터 {n_seq}")
     for cls, nm in ((".pc.lv-behind", "열위"), (".pc.lv-even", "동등"),
-                    (".pc.lv-ahead", "우위"), (".pc.lv-none", "근거부족")):
+                    (".pc.lv-ahead", "우위"), (".pc.lv-hold", "확인 필요"),
+                    (".pc.lv-none", "근거부족")):
         ck(f"{nm} 카드 존재", pg.locator(cls).count() > 0, f"{pg.locator(cls).count()}장")
+    # 수준 구분이 서로를 잡아먹지 않는지 — 합이 전체와 같아야 한다
+    parts = sum(pg.locator(c).count() for c in
+                (".pc.lv-behind", ".pc.lv-even", ".pc.lv-ahead",
+                 ".pc.lv-hold", ".pc.lv-none"))
+    ck("수준 구분 합 = 전체", parts == n_all, f"{parts} / {n_all}")
     ck("공정별 수준 분포 막대", pg.locator(".ps-mix").count() == 5)
     ck("근거 위계 명시(특허가 핵심)", "특허를 핵심 기준" in body)
     pipe_txt = pg.locator("#pipe").inner_text()
     ck("'미보유/일부/보유' 구분 미사용", "미보유" not in pipe_txt and "일부 " not in pipe_txt)
-    ck("수준 배지 표기", pg.locator(".pc-lv").count() == 57,
-       f"{pg.locator('.pc-lv').count()}개")
+    ck("수준 배지 표기", pg.locator(".pc-lv").count() == n_all,
+       f"{pg.locator('.pc-lv').count()} / {n_all}")
 
     print("-- 정렬(시급도 내림차순) --")
     sc = pg.evaluate("()=>SEQ.map(i=>i.score)")
@@ -188,6 +200,22 @@ with sync_playwright() as pw:
        bool(_re2.search(r"평균\s*[\d,]+여?\s*건", sn)),
        (_re2.search(r"평균[^.]{0,20}", sn) or [""])[0])
 
+    print("-- V6 조사 요약 · 근거 신뢰도 · 대응 기준선 --")
+    ps = pg.locator("#posList").inner_text()
+    ck("조사 요약이 목록이 아닌 요약", pg.locator("#posList .lvrow").count() >= 3,
+       f"{pg.locator('#posList .lvrow').count()}행")
+    ck("수준 분포 막대", pg.locator("#posList .lvbar i").count() >= 3)
+    ck("요약 결론 문장", "최우선 보완 대상" in ps)
+    ck("'근거 강도별 분포' 문구 제거", "근거 강도별" not in body)
+    ck("'근거 신뢰도' 사용", "근거 신뢰도" in body)
+    ck("'계보' 문구 제거", "계보" not in body)
+    ck("판정 기준 등급 배너", pg.locator(".tgb").count() >= 1)
+    ck("확인 주체 = 생산기술혁신센터",
+       "생산기술혁신센터" in body and "공정기술팀" not in body)
+    ck("격차 강조색이 마젠타가 아님", pg.evaluate(
+        """() => {const e=document.querySelector('.pc-lag');
+                 return !e || getComputedStyle(e).color !== 'rgb(229, 0, 125)';}"""))
+
     print("-- V6 3축 격차 모델 --")
     gapbtn = pg.locator("[data-lag]").first
     if gapbtn.count():
@@ -204,6 +232,15 @@ with sync_playwright() as pw:
         ck("신뢰도 배지", pg.locator(".modal .cfb").count() >= 1)
         ck("실행 소요기간 분해 유지", "실행 소요기간" in m)
         ck("보정 계수 명시", "보정 계수" in m)
+        pg.keyboard.press("Escape"); pg.wait_for_timeout(250)
+        pg.locator("[data-urg]").first.click(); pg.wait_for_timeout(500)
+        um = pg.locator(".modal").inner_text()
+        ck("시급도 대응 기준선 제시", "대응 기준선" in um)
+        for lab in ("즉시 착수", "계획 반영", "검토 착수", "관찰"):
+            ck(f"기준선 '{lab}'", lab in um)
+        ck("기준선 근거(27·64·125) 명시",
+           "27" in um and "64" in um and "125" in um)
+        ck("현재 위치 표기", "◀ 현재" in um)
         pg.keyboard.press("Escape")
         pg.wait_for_timeout(250)
     else:

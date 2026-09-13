@@ -51,10 +51,10 @@ def _lv(k: str) -> str:
     PPT 와 화면이 다른 숫자를 말하면 둘 중 하나는 거짓이 된다. 기준을 하나로 둔다.
     """
     return ("behind" if k == "열위" else "even" if k.startswith("동등")
-            else "ahead" if k == "우위" else "none")
+            else "ahead" if k == "우위" else "hold" if k == "확인 필요" else "none")
 
 
-LV = {"behind": 0, "even": 0, "ahead": 0, "none": 0}
+LV = {"behind": 0, "even": 0, "ahead": 0, "hold": 0, "none": 0}
 for _n in _tree["nodes"]:
     LV[_lv(_n["position"]["tech_class"])] += 1
 SELF_CONFLICT = c.get("self_conflicts", 0)
@@ -232,8 +232,8 @@ def main():
          [("의사결정 지원 항목", 12.5, INK, True)])
     helps = [
         f"공정기술 {c['nodes_total']}개 전량을 열위 {LV['behind']} · 동등 {LV['even']} · "
-        f"우위 {LV['ahead']} · 판정 불가 {LV['none']} 로 구분 제시함",
-        "시급도 = 기술 격차 × 경쟁사 확산도 × 근거 확실성 — 보완 우선순위 도출",
+        f"우위 {LV['ahead']} · 확인 필요 {LV['hold']} 로 구분 제시함",
+        "시급도 = 기술 격차 × 경쟁사 확산도 × 근거 확실성 — 27점 이상 검토 착수선 적용",
         "기술 격차를 특허·공시·발표 3축 대리 지표로 추정, 기준·보수 듀얼 트랙 제시함",
         "전 수치에 근거 목록 및 원문 링크 연결 — 원천까지 역추적 가능함",
     ]
@@ -250,7 +250,7 @@ def main():
          [("한계 및 후속 과제", 12.5, MARK, True)])
     limits = [
         "경쟁사 수율·제조원가 비공개 — 본 모델 산출 대상에서 명시적 제외함",
-        "기존 '미보유' 18건 전량에서 자사 특허 검색됨 — 공정기술팀 재검증 필요함",
+        f"기존 '미보유' {SELF_CONFLICT}건에서 자사 특허 검색됨 — 생산기술혁신센터 재검증 필요함",
         "설비투자 공시는 공장 단위 정보로 전사 근거로만 반영함 — 기술 단위 배정 불가함",
         "BYD 설비투자 원천 부재 확인 · 파나소닉은 EDINET 키 발급 필요함",
     ]
@@ -270,7 +270,8 @@ def main():
          f"관측 16년치·피인용 확보.\n"
          f"신뢰도 '상' {c['model_conf']['high']}건 도출.", "BQ 60.6GB(무료분)", GREEN),
         ("1단계", "자사 보유 현황 확정",
-         f"'미보유' {SELF_CONFLICT}건 재검증 추진.\n공정기술팀 확인 필요함.",
+         f"재검증 {SELF_CONFLICT}건 · 신규 편입 {LV['hold']}건.\n"
+         "생산기술혁신센터 확인 필요함.",
          "약 3일", AMBER),
         ("2단계", "EDINET·EPO 연결",
          "파나소닉 설비투자 및 청구항 원문.\n키 발급 후 즉시 적용 가능함.",

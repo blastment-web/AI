@@ -148,6 +148,10 @@ def self_trl(self_info: dict) -> tuple[int, str]:
     if st in SELF_TRL:
         return SELF_TRL[st]
     pat = int((self_info or {}).get("pat") or 0)
+    if st == "unknown":
+        # 신규 편입 기술 — 보유 현황 미확인. '미착수'로 단정하지 않는다.
+        # 단정하면 없는 격차가 생기고, 그 격차가 우선순위를 왜곡한다.
+        return 4, "자사 보유 현황 미확인 — 생산기술혁신센터 확인 필요"
     if pat > 0:
         return 4, f"관련 출원 {pat}건 — 착수 확인, 라인 적용 실적 없음"
     return 3, "4개 채널 전량 0건 — 미착수"
@@ -405,6 +409,19 @@ def criteria_doc() -> dict:
                     "해당 건에도 중간 점수를 부여하여 우선순위 변별력이 저하됨. "
                     "근거 확실성은 모델 신뢰도 등급으로 상한 적용함(신뢰도 '하' 2점 · "
                     "'중' 4점 상한).",
+            "bands": [
+                {"min": 100, "label": "즉시 착수",
+                 "rule": "3개 인자 전량 4점 이상 — 당기 즉시 대응 대상임"},
+                {"min": 64, "label": "계획 반영",
+                 "rule": "3개 인자 평균 4점 — 당기 투자 계획 반영 대상임"},
+                {"min": 27, "label": "검토 착수",
+                 "rule": "3개 인자 전량 3점 이상 — 검토 착수 기준선임"},
+                {"min": 0, "label": "관찰",
+                 "rule": "1개 이상 인자가 낮음 — 정기 관찰 대상임"},
+            ],
+            "band_note": "기준선은 인자 점수에서 직접 도출함 — 전량 3점 27점 · 전량 4점 "
+                         "64점 · 전량 5점 125점임. 27점 미만은 3개 인자 중 1개 이상이 "
+                         "낮다는 의미이므로 즉시 대응 대상에서 제외함.",
         },
         "class": {
             "title": "기술 구분 기준",
@@ -456,6 +473,7 @@ TECH_CLASS = {
     "동등": ("동등 기술", "자사 일부 보유 · 경쟁사 동일 수준 — 선점 경쟁 구간"),
     "동등-우위": ("동등 기술(우위)", "자사 일부 보유 · 경쟁사 대비 선행 — 격차 확대 추진"),
     "우위": ("우위 기술", "자사 라인 적용 · 경쟁사 대비 선행 — 우위 유지 관리"),
+    "확인 필요": ("확인 필요", "자사 보유 현황 미확인 — 생산기술혁신센터 확인 대상"),
     "판정 불가": ("판정 불가", "경쟁사 근거 미확보 — 비교 판정 불가"),
 }
 
@@ -466,6 +484,7 @@ TECH_CLASS_RULE = {
     "동등": "자사 일부 보유 ＋ 경쟁사 TRL 이 자사와 동일",
     "동등-우위": "자사 일부 보유 ＋ 경쟁사 TRL 이 자사보다 낮음",
     "우위": "자사 라인 적용 ＋ 경쟁사 TRL 이 자사 이하",
+    "확인 필요": "신규 편입 기술 — 자사 보유 현황 미입력 상태",
     "판정 불가": "경쟁사 근거 0건 — 보유·미보유 판별 자체가 성립하지 않음",
 }
 
@@ -475,7 +494,9 @@ def classify_tech(self_status: str, trl_diff: int) -> tuple[str, str, str]:
 
     trl_diff = 경쟁사 TRL − 자사 TRL. 양수면 자사 후행임.
     """
-    if self_status == "none":
+    if self_status == "unknown":
+        key = "확인 필요"
+    elif self_status == "none":
         key = "열위"
     elif self_status == "part":
         key = "동등-열위" if trl_diff > 0 else "동등-우위" if trl_diff < 0 else "동등"
@@ -533,6 +554,9 @@ def position(our_trl: int, rival_trl: int, self_status: str,
         caveat = "모델 신뢰도 '하' — 가용 축 부족으로 재검증 필요함."
 
     cls_key, cls_name, cls_desc = classify_tech(self_status, d)
+    if cls_key == "확인 필요" and not caveat:
+        caveat = ("자사 보유 현황 미확인 상태임. 격차 수치는 자사 미보유 가정하의 "
+                  "상한값이며, 생산기술혁신센터 확인 후 재산정 필요함.")
     return {
         "label": label,
         "label_shown": label_shown,
@@ -556,4 +580,6 @@ def _holding(self_status: str) -> str:
         return "특허 보유"
     if self_status == "part":
         return "특허 일부 보유"
+    if self_status == "unknown":
+        return "보유 현황 미확인"
     return "특허 미보유"

@@ -338,6 +338,8 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             "related_self": sum(1 for e in rel if company_of(e) == "LGES"),
             "related_rivals": sum(1 for e in rel if company_of(e) in RIVALS),
             # 목업의 자사 판정과 실제 특허가 어긋나는지 — 보고 전에 반드시 확인해야 한다
+            # 신규 편입분은 '미확인'이므로 conflict 대상이 아니다(모른다고 적어 뒀다).
+            "self_unknown": self_info.get("status") == "unknown",
             "self_conflict": (self_info.get("status") == "none"
                               and (len(self_ev) + sum(1 for e in rel
                                                       if company_of(e) == "LGES")) > 0),

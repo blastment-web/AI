@@ -35,7 +35,7 @@ pipeline/
 tools/make_ppt.py          임원 보고 1장 생성
 docs/SOURCES-REVIEW.md     ★ 창구 심층 검토 · 영향도 분석
 VERSIONS.md                판 관리 · 되돌리는 법
-tests/                     344개. 네트워크 없이 돕니다
+tests/                     346개. 네트워크 없이 돕니다
 ```
 
 `dist/V6-index.html` 은 데이터가 박혀 있어 **더블클릭만 하면 열립니다.**
@@ -337,7 +337,7 @@ python -m adapters.capex_dart --list-targets     # corp_code 해결 결과만 �
 그 외:
 
 - `/api/tree` 수집 파이프라인 구현 후 `USE_API=true` 전환 (특허 검색은 이미 연결됨)
-- 자사 4채널(특허·라인·발표·내부과제) 값의 사내 시스템 연동 — 현재는 공정기술팀 확인값 수기 입력
+- 자사 4채널(특허·라인·발표·내부과제) 값의 사내 시스템 연동 — 현재는 생산기술혁신센터 확인값 수기 입력
 - 스냅샷 도구(`APP_VERSION` 자동 치환) 및 `versions/` 보관본 체계
 - 판정 기준선 합의 — 예: 크랙 검사의 '검출만' vs '폐루프 보정 연동'을 어디서 가를 것인가
 
