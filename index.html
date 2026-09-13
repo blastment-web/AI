@@ -189,7 +189,14 @@ tbody tr:hover{background:#F6F7F8}
 .chip.p{background:var(--amber-soft);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
 .score{display:flex;align-items:center;gap:8px}
 .score-bar{width:64px;height:5px;background:#EDF0F1;position:relative;flex:0 0 64px}
-.score-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--mark)}
+.score-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--g1)}
+/* 시급도 막대 — 팝업 음영과 같은 5단계·같은 방향(진할수록 우선순위 높음) */
+.score-bar.u1 i{background:#E0C9C5} .score-bar.u2 i{background:#D3A79F}
+.score-bar.u3 i{background:#C6857A} .score-bar.u4 i{background:#B96355}
+.score-bar.u5 i{background:var(--behind)}
+.score .linkbtn{font-weight:700}
+.score.u4 .linkbtn,.score.u5 .linkbtn{color:var(--behind)}
+.score.u1 .linkbtn,.score.u2 .linkbtn{color:var(--ink2)}
 .score b{font-family:var(--mono);font-size:11px}
 
 .ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -465,6 +472,13 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .posrow .pn{flex:1;min-width:0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .posrow .posn{font-family:var(--mono);font-size:10px;color:var(--muted);flex:0 0 auto;white-space:nowrap}
 .posmore{padding:8px 15px;font-size:11px;color:var(--muted)}
+/* 표 안의 기술 구분 표기 */
+.tcell{display:inline-block;font-family:var(--mono);font-size:8.5px;font-weight:700;
+  padding:2px 5px;margin-top:4px;white-space:nowrap}
+.tcell.tc-behind{background:var(--behind);color:#fff}
+.tcell.tc-even{background:var(--even);color:#fff}
+.tcell.tc-ahead{background:var(--ahead);color:#fff}
+.tcell.tc-none{background:var(--g1);color:#fff}
 @media (max-width:900px){.sumgrid{grid-template-columns:minmax(0,1fr)}}
 /* -- 핵심만 3줄, 더 보려면 팝업 (V4) -- */
 .fold{position:relative}
@@ -618,8 +632,9 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
     <h2>최우선 검토 기술<small>Priority Backlog · 시급도 내림차순</small></h2>
     <div class="ctrl">
       <div class="seg" id="statusSeg">
-        <button aria-pressed="true" data-f="gap">열위</button>
-        <button aria-pressed="false" data-f="part">경합·동등</button>
+        <button aria-pressed="true" data-f="behind">열위</button>
+        <button aria-pressed="false" data-f="even">동등</button>
+        <button aria-pressed="false" data-f="ahead">우위</button>
         <button aria-pressed="false" data-f="all">전체</button>
       </div>
       <div class="rivalsel" id="rivalSel"></div>
@@ -729,7 +744,7 @@ const API_BASE = "";        // 같은 오리진이면 빈 문자열. 예: "http:
 const USE_API  = true;      // /api/tree 에서 실수집 데이터를 읽는다
 
 let TREE=[], SEQ=[], GAPS=[], PARTS=[], sel=null;
-let activeRivals=new Set(RIVALS), filter="gap", query="", showHave=true;
+let activeRivals=new Set(RIVALS), filter="behind", query="", showHave=true;
 let SRC={live:false, at:"예시 데이터", err:"", items:[]};
 
 /* API 응답(flat nodes) → 화면 내부 구조(nested tree) 변환 */
@@ -769,6 +784,8 @@ function adaptApi(j){
   const tree=[...byL1.values()].map(x=>{delete x._m; return x;});
   if(j.criteria) CRITERIA = j.criteria;
   if(j.coverage) COVERAGE = j.coverage;
+  const um = (j.nodes||[]).find(n=>n.urgency && n.urgency.max);
+  if(um) URG_MAX = um.urgency.max;
   if(j.by_company) BY_COMPANY = j.by_company;
   const items=(j.sources||[]).map(x=>({key:x.name, n:x.total||0}));
   return {tree, src:{live:true, at:j.collected_at||"", err:"", items:items}};
@@ -832,6 +849,11 @@ async function boot(){
   buildIndex(); renderAll();
 }
 const $=s=>document.querySelector(s);
+/* 시급도 만점 — 판정 로직(judge.py)이 정한 값을 그대로 쓴다.
+   막대 너비를 점수로 바로 쓰면 100을 넘는 순간 칸을 뚫고 나간다. */
+let URG_MAX = 125;
+/* 시급도를 5단계 음영으로 환산한다. 팝업 음영과 같은 눈금을 쓴다. */
+const urgLv = v => Math.max(1, Math.min(5, Math.ceil(v / (URG_MAX/5) )));
 /* 한국식 숫자 — 만 단위 이상은 '만·억'으로 읽는다 */
 function korNum(n){
   n = Number(n)||0;
@@ -843,7 +865,11 @@ function korNum(n){
 }
 const esc=s=>String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const visibleRivals=it=>it.r.filter(r=>activeRivals.has(r));
-const isVisible=it=>it.status!=="gap"||visibleRivals(it).length>0;
+/* 경쟁사 필터는 '경쟁사 보유' 표시를 좁히는 용도다.
+   근거가 없는 기술까지 목록에서 지우면 판정 불가 7건이 화면에서 사라진다.
+   필터가 켜져 있을 때만 좁히고, 전체 선택 상태에서는 전부 보여 준다. */
+const isVisible=it=>activeRivals.size===RIVALS.length
+  || levelOf(it).k!=="behind" || visibleRivals(it).length>0;
 
 /* ============ 렌더 ============ */
 /* 창구 8곳을 항상 같은 순서로, '이름(건수)' 형식으로 보여준다.
@@ -1196,17 +1222,19 @@ function renderDetail(){
   if(sev) sev.onclick=()=>openEvidenceList(it,"LGES");
 }
 function renderTable(){
-  let rows=filter==="gap"?GAPS:filter==="part"?PARTS:[...GAPS,...PARTS,...SEQ.filter(i=>i.status==="ok")];
-  rows=rows.filter(isVisible);
+  // 파이프라인과 같은 수준 기준으로 거른다. 예전에는 보유 여부(status)로 걸러
+  // 파이프라인의 '열위 16건'과 표의 건수가 어긋났다.
+  let rows = filter==="all" ? SEQ.slice() : SEQ.filter(i=>levelOf(i).k===filter);
+  rows = rows.filter(isVisible).sort((a,b)=>b.score-a.score);
   $("#tbody").innerHTML=rows.map((it,i)=>`<tr data-id="${it.id}">
     <td class="rank">${String(i+1).padStart(2,"0")}</td>
     <td>${it.stage} <span style="color:var(--muted)">/ ${it.grp}</span></td>
-    <td>${esc(it.n)}</td>
+    <td>${esc(it.n)}<br><span class="tcell ${tclsCss(it)}">${esc(levelOf(it).full)}</span></td>
     <td>${it.topGrade?`<span class="gbadge" style="background:${GRADE[it.topGrade].c}">${GRADE[it.topGrade].l}</span>`:`<span style="color:var(--muted);font-size:11px">미관측</span>`}</td>
     <td><div class="chips">${visibleRivals(it).map(r=>`<span class="chip">${SHORT[r]}</span>`).join("")}
       ${it.p.filter(r=>activeRivals.has(r)).map(r=>`<span class="chip p">${SHORT[r]}</span>`).join("")}</div></td>
-    <td style="font-family:var(--mono);font-size:11px;color:${it.lag?"var(--mark)":"var(--muted)"}">${it.lag?`<button class="linkbtn" data-lag="${it.id}">${it.lag.t}</button>`:"—"}</td>
-    <td><div class="score"><div class="score-bar"><i style="width:${it.score}%"></i></div><button class="linkbtn" data-urg="${it.id}">${it.score}</button></div></td>
+    <td style="font-family:var(--mono);font-size:11px;color:${it.lag?"var(--behind)":"var(--muted)"}">${it.lag?`<button class="linkbtn" data-lag="${it.id}">${it.lag.t}</button>`:"—"}</td>
+    <td><div class="score u${urgLv(it.score)}"><div class="score-bar u${urgLv(it.score)}"><i style="width:${Math.round(it.score/URG_MAX*100)}%"></i></div><button class="linkbtn" data-urg="${it.id}">${it.score}</button></div></td>
   </tr>`).join("")||`<tr><td colspan="7" style="padding:26px;text-align:center;color:var(--muted)">해당 조건 항목 없음.</td></tr>`;
   $("#tbody").querySelectorAll("tr[data-id]").forEach(tr=>tr.onclick=()=>{select(tr.dataset.id);window.scrollTo({top:0,behavior:"smooth"});});
   $("#tbody").querySelectorAll("[data-urg]").forEach(b=>b.onclick=e=>{
@@ -1550,12 +1578,23 @@ $("#statusSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{
 $("#prevBtn").onclick=()=>{const i=SEQ.indexOf(sel);select(SEQ[(i-1+SEQ.length)%SEQ.length].id);};
 $("#nextBtn").onclick=()=>{const i=SEQ.indexOf(sel);select(SEQ[(i+1)%SEQ.length].id);};
 $("#csv").onclick=()=>{
-  const rows=[["순위","공정","세부공정","세부기술","기술설명","자사","자사근거","경쟁사보유","최고근거등급","추정TRL","시간격차","시급도","판정한계"]];
-  GAPS.filter(isVisible).forEach((it,i)=>rows.push([i+1,it.stage,it.grp,it.n,it.d,"미보유",it.s.note,
-    visibleRivals(it).join("|"),it.topGrade?GRADE[it.topGrade].l:"미관측",it.trl||"",it.lag?it.lag.t:"",it.score,it.lim||""]));
+  // 화면에 보이는 것과 같은 범위를 내보낸다. 예전에는 필터와 무관하게
+  // '미보유'만 내보내고 자사 구분도 '미보유'로 박아 두어 표와 어긋났다.
+  const rows=[["순위","공정","세부공정","세부기술","기술구분","기술설명","자사보유",
+               "자사근거","경쟁사보유","최고근거등급","추정TRL","기술격차","시급도",
+               "시급도만점","판정한계"]];
+  const HOLD={none:"미보유",part:"일부 보유",have:"보유"};
+  const out = (filter==="all" ? SEQ.slice() : SEQ.filter(i=>levelOf(i).k===filter))
+    .filter(isVisible).sort((a,b)=>b.score-a.score);
+  out.forEach((it,i)=>rows.push([i+1,it.stage,it.grp,it.n,
+    (it.pos&&it.pos.tech_name)||levelOf(it).full, it.d, HOLD[it.own]||it.own, it.s.note,
+    visibleRivals(it).join("|"),it.topGrade?GRADE[it.topGrade].l:"미관측",it.trl||"",
+    it.lag?it.lag.t:"",it.score,URG_MAX,it.lim||""]));
   const csv="\uFEFF"+rows.map(r=>r.map(c=>`"${String(c==null?"":c).replace(/"/g,'""')}"`).join(",")).join("\n");
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download="tech_gap_backlog_20260813.csv";a.click();
+  const d=new Date(), p=n=>String(n).padStart(2,"0");
+  a.download=`기술수준진단_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
 };
 /* ============ 특허 원문 검색 (백엔드 /api/patents/*) =====================
    브라우저는 검색어만 보낸다. 서비스 계정 키와 SQL 은 서버 쪽에만 있다.
