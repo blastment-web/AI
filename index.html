@@ -42,6 +42,15 @@ h1 .en{display:block;font-family:var(--mono);font-size:13px;font-weight:500;lett
 /* 문장 단위 줄바꿈은 '직계' span 에만 건다. 후손 전체에 걸면 문장 안에 넣은
    숫자 span(#deckN)까지 블록이 되어 '배터리 공정기술 / 73 / 개 전량'으로 끊긴다. */
 .deck > span{display:block}
+/* 첫 화면은 두 문장이면 된다. 무엇을 기준으로 판정했는지, 73개가 무엇인지. */
+.lead{flex:1 0 100%;margin-top:18px;padding-top:16px;border-top:1px solid var(--rule)}
+.lead-1{margin:0;font-size:17px;line-height:1.5;color:var(--ink);letter-spacing:-.01em}
+.lead-2{margin:9px 0 0;font-size:17px;line-height:1.5;color:var(--ink);letter-spacing:-.01em}
+.lead-1 b,.lead-2 b{font-weight:800;box-shadow:inset 0 -8px 0 var(--foil)}
+.lead-3{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:12px}
+.lead-3 span{font-size:12.5px;color:var(--ink2);background:var(--panel);
+  border:1px solid var(--rule);padding:4px 10px}
+.lead-3 b{color:var(--ink);font-family:var(--mono)}
 /* 73개가 무엇인지 처음 화면에서 바로 답한다. 포트폴리오까지 내려가야 알 수 있으면 늦다. */
 .scope-head{flex:1 0 100%;display:flex;align-items:stretch;gap:0;margin-top:12px;
   border:1px solid var(--rule);background:var(--panel)}
@@ -427,6 +436,21 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .crit td{padding:8px 9px;border-bottom:1px solid var(--rule-soft);font-size:14px;vertical-align:top;line-height:1.5}
 .crit td.lv{font-family:var(--mono);font-weight:700;white-space:nowrap;color:var(--ink)}
 .crit td.nm{font-weight:600;white-space:nowrap}
+/* 기술 상세는 전체화면으로 연다. 좁은 상자에 넣으면 1→2→3 단계가 끊겨 읽힌다. */
+.modal.full{padding:0;align-items:stretch;justify-content:stretch}
+.modal.full .modal-box{max-width:none;width:100%;height:100%;max-height:none;
+  border-radius:0;display:flex;flex-direction:column}
+.modal.full .modal-head{position:sticky;top:0;z-index:2;background:var(--panel);
+  border-bottom:1px solid var(--ink);padding:16px 28px}
+.modal.full .modal-head h4,.modal.full #modalTitle{font-size:21px}
+.modal.full .modal-body{flex:1;overflow:auto;padding:22px 28px 48px;
+  background:var(--paper)}
+/* 상세 내용은 카드 안에 담는다 — 밖으로 흘러나온 느낌을 없앤다. */
+.modal.full .techmodal{max-width:1560px;margin:0 auto;background:var(--panel);
+  border:1px solid var(--rule);padding:26px 30px 32px}
+@media (max-width:760px){.modal.full .modal-head{padding:13px 16px}
+  .modal.full .modal-body{padding:14px 16px 36px}
+  .modal.full .techmodal{padding:16px 15px 22px}}
 /* 모달로 연 기술 상세 — 본문과 같은 컴포넌트를 쓰되 여백만 줄인다. */
 .techmodal .crumb{margin-bottom:2px}
 .techmodal h3{font-size:19px;margin:4px 0 2px}
@@ -582,6 +606,8 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
   color:var(--label);text-transform:uppercase}
 .tgb-d{font-size:13.5px;color:var(--ink2)}
 .tgb-d b{color:var(--ink)}
+.onemore{margin-top:8px}
+.onemore .morebtn{font-size:13px}
 /* 근거 출처 — 접어서 희미하게 두지 않는다. 한 덩어리로 또렷하게 보인다. */
 .srcline{border:1px solid var(--rule);background:var(--panel)}
 .srcline .lin{margin:0}
@@ -782,18 +808,15 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
     <div class="sources" id="sources"></div>
     <div class="stamp" id="stamp"></div>
   </div>
-  <p class="deck">
-    <span><b>특허를 핵심 기준</b>으로 경쟁사 기술 수준을 판정하고, 설비투자 공시·기술발표를 보조 근거로 교차 검증함.</span>
-  </p>
-  <div class="scope-head">
-    <div class="sh-n"><b id="deckN">73</b><em>개</em></div>
-    <div class="sh-b">
-      <div class="sh-t">이 <b id="deckN2">73</b>개는 자사 보유 기술의 전량이 아닌 <b>경쟁 판별 단위 기술</b>임</div>
-      <div class="sh-l">
-        <span><b>선정</b> 셀 제조 5대 공정에서 경쟁사와 수준 비교가 성립하는 단위</span>
-        <span><b>제외</b> 범용 요소기술 · 설비 운전조건 · 재료·셀 설계 등 공정 외 영역</span>
-        <span><b>집계</b> 1개 기술 = 자사 특허 평균 <b id="deckAvg">845</b>건을 포괄하는 상위 단위</span>
-      </div>
+  <div class="lead">
+    <p class="lead-1"><b>특허</b>를 핵심 기준으로 경쟁사 기술 수준을 판정하고,
+      설비투자 공시·기술발표를 보조 근거로 교차 검증함.</p>
+    <p class="lead-2"><b><span id="deckN">73</span>개</b>는 자사 기술 <b>전체가 아닌</b>,
+      경쟁사와 <b>수준 비교가 성립하는 단위</b>만 추린 것임.</p>
+    <div class="lead-3">
+      <span>셀 제조 5대 공정 기준</span>
+      <span>범용 요소기술 · 사내 노하우 제외</span>
+      <span>1개 기술 ≒ 자사 특허 <b id="deckAvg">659</b>건</span>
     </div>
   </div>
 </header>
@@ -939,10 +962,10 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 <script>
 /* ============ 근거 등급 정의 ============ */
 const GRADE={
- verified:{r:4,l:"VERIFIED",c:"var(--g4)",d:"양산 라인 가동이 1차 출처로 확인됨"},
- strong  :{r:3,l:"STRONG",  c:"var(--g3)",d:"파일럿 라인 신설·착공 또는 양산 일정 공식 언급"},
- medium  :{r:2,l:"MEDIUM",  c:"var(--g2)",d:"등록특허의 구체적 공정 조건 또는 기술세션 발표"},
- weak    :{r:1,l:"WEAK",    c:"var(--g1)",d:"공개특허(출원) 또는 포스터·패널 언급"}
+ verified:{r:4,l:"최상",c:"var(--g4)",d:"양산 라인 가동이 1차 출처로 확인됨"},
+ strong  :{r:3,l:"상",  c:"var(--g3)",d:"파일럿 라인 신설·착공 또는 양산 일정 공식 언급"},
+ medium  :{r:2,l:"중",  c:"var(--g2)",d:"등록특허의 구체적 공정 조건 또는 기술세션 발표"},
+ weak    :{r:1,l:"하",  c:"var(--g1)",d:"공개특허(출원) 또는 포스터·패널 언급"}
 };
 /* ============ 버전 ============ */
 const APP_VERSION = "v4";
@@ -997,7 +1020,8 @@ function adaptApi(j){
     cnt["LGES"]=self.evidence_count||0;
     st._m.get(nd.l2).items.push({
       n:nd.name, en:nd.name_en||"", d:nd.desc||"", w:nd.why||"",
-      own:self.status||nd.self_status||"none", r:r, p:p, trl:nd.est_trl||null,
+      own:self.status||nd.self_status||"none",
+      ownRec:self.status_recorded||"", selfBasis:self.status_basis||"", r:r, p:p, trl:nd.est_trl||null,
       s:{pat:self.patents!=null?self.patents:0, line:self.line!=null?self.line:0,
          talk:self.talks!=null?self.talks:0, prj:self.project||"—", note:self.note||""},
       lag: nd.lag?{t:nd.lag.gap, r:nd.lag.rival_milestone, m:nd.lag.self_state,
@@ -1416,6 +1440,19 @@ const FOLD_TITLE = {ladder:"근거 등급", lineage:"근거 출처", evidence:"�
 
 /* 이 기술의 판정이 어느 등급에 서 있는지 한 줄로 못박는다.
    등급 목록만 보여 주면 '그래서 이 기술은 어디냐'에 답하지 않는다. */
+/* 근거 출처도 핵심 1개만 선명하게. 나머지는 눌러서 본다. */
+function topSourceBanner(it){
+  const c = {};
+  (it.ev||[]).forEach(e=>{ const k=e.src||"기타"; c[k]=(c[k]||0)+1; });
+  const list = Object.entries(c).sort((a,b)=>b[1]-a[1]);
+  if(!list.length) return `<div class="tgb none">수집 근거 없음</div>`;
+  const [name, n] = list[0];
+  return `<div class="tgb">
+    <span class="tgb-k">주 출처</span>
+    <span class="gbadge" style="background:var(--graphite)">${esc(name)}</span>
+    <span class="tgb-d">표시 근거 <b>${n}건</b>${list.length>1?` · 그 외 ${list.length-1}개 출처`:""}</span>
+  </div>`;
+}
 function topGradeBanner(it){
   const g = it.topGrade;
   if(!g) return `<div class="tgb none">판정 근거 <b>미확보</b> — 경쟁사 보유 여부 판별 불가함.</div>`;
@@ -1431,6 +1468,8 @@ function topGradeBanner(it){
   </div>`;
 }
 let FOLD_HTML = {};
+/* 화면에는 안 싣고 '전체 보기'용으로만 보관한다. */
+function keepFold(key, html){ FOLD_HTML[key] = html; return ""; }
 function fold(key, html){
   FOLD_HTML[key] = html;
   return `<div class="fold clipped" data-fold="${key}">
@@ -1463,28 +1502,31 @@ function verdictSteps(it){
        <span class="vs-w">${note}</span></div>`;
 
   // 특허 수가 판정과 반대로 보이는 경우 — 숨기지 않고 결론으로 적는다.
-  const odd = it.own === "none" && mine > 0 && mine >= topN;
+  // 판정은 이제 근거를 따라간다. 그래도 사내 기록과 다르면 그 사실은 남긴다.
+  const odd = it.ownRec && it.ownRec !== it.own;
+  const REC = {have:"전 라인 적용", part:"일부 적용", none:"미적용", unknown:"미기록"};
   const flag = odd
-    ? `<div class="vs-flag"><b>확인 필요 —</b> 이 기술의 특허는 자사가
-        <b>${korNum(mine)}건</b>으로 최다 경쟁사(${SHORT[topCo]||topCo}
-        ${korNum(topN)}건)보다 많음. 그럼에도 '미적용'으로 기록되어 있어
-        <b>판정과 보유 실태가 어긋남</b>. 생산기술혁신센터 확인 대상임.</div>`
+    ? `<div class="vs-flag"><b>사내 기록 갱신 필요</b> — 기록 '${REC[it.ownRec]||it.ownRec}'
+        / 근거 판정 '${(OWN_STEP[it.own]||[""])[0]}'. 자사 특허 <b>${korNum(mine)}건</b> 확인분
+        반영 결과임.</div>`
     : (mine || topN
-       ? `<div class="vs-note">특허 보유량 — 자사 <b>${korNum(mine)}건</b> ·
-          최다 경쟁사 ${SHORT[topCo]||"—"} <b>${korNum(topN)}건</b>.
-          특허는 착수 여부를 보여줄 뿐 라인 적용을 뜻하지 않으므로 판정 기준이 아님.</div>`
+       ? `<div class="vs-note">특허 — 자사 <b>${korNum(mine)}건</b> ·
+          최다 경쟁사 ${SHORT[topCo]||"—"} <b>${korNum(topN)}건</b></div>`
        : "");
 
-  return `<div class="step-h"><span class="stn">1</span>이 기술을 왜 이렇게 판정했는가
-      <span class="sth-d">아래 2단계를 순서대로 확인한 결과임</span></div>
+  // 경쟁사는 '보유'뿐 아니라 '일부 보유'도 확보한 것이다. 둘 다 센다.
+  const rvAll = RIVALS.filter(r=>activeRivals.has(r)
+                 && ((it.r||[]).includes(r) || (it.p||[]).includes(r)));
+  return `<div class="step-h"><span class="stn">1</span>기술 판정 이유
+      <span class="sth-d">2단계 확인 결과</span></div>
     <div class="vsteps">
-      ${step(1, "자사가 라인에 적용했는가", own[0], own[1], "사내 기록 기준")}
-      ${step(2, "경쟁사가 확보했는가",
-             rv.length ? `${rv.length}개사 확인` : "확인 안 됨",
-             rv.length ? "no" : "hold",
-             rv.length ? rv.map(r=>SHORT[r]||r).join(" · ") : "근거 미확보")}
+      ${step(1, "자사 보유", own[0], own[1], esc(it.selfBasis||"수집 근거 기준"))}
+      ${step(2, "경쟁사 보유",
+             rvAll.length ? `${rvAll.length}개사` : "없음",
+             rvAll.length ? "no" : "ok",
+             rvAll.length ? rvAll.map(r=>SHORT[r]||r).join(" · ") : "근거 미확보")}
       <div class="vs-row vs-out"><span class="vs-n">=</span>
-        <span class="vs-q">그래서 이 기술의 구분은</span>
+        <span class="vs-q">기술 구분</span>
         <span class="vs-a"><span class="tclass ${tclsCss(it)}">${esc(cls)}</span></span>
         <span class="vs-w">${it.pos?esc(it.pos.tech_desc||""):""}</span></div>
     </div>${flag}`;
@@ -1540,8 +1582,8 @@ function renderDetail(){
     ${RIVALS.map(r=>statusCell(r,it.r.includes(r)?"have":it.p.includes(r)?"part":"none",false,it)).join("")}</div>
 
   <div class="sec-t">근거 등급<button class="whybtn" data-why="hold" title="등급 기준 보기">?</button></div>
-  ${topGradeBanner(it)}
-  ${fold("ladder", ladder(it))}
+  ${topGradeBanner(it)}${keepFold("ladder", ladder(it))}
+  <div class="onemore"><button class="morebtn" data-foldopen="ladder">등급별 전체 보기 ↗</button></div>
 
   <div class="sec-t">자사 보유 현황<span>사내 기록값 — 위 근거 건수와 다른 값임</span></div>
   <div class="selfgrid">${ch.map(([k,v,sub])=>{
@@ -1552,7 +1594,8 @@ function renderDetail(){
   ${it.s.note?`<div class="selfnote"><b>판정 근거 —</b> ${esc(it.s.note)}</div>`:""}
 
   <div class="sec-t">근거 출처<button class="whybtn" data-why="source" title="출처별 수집 방식 보기">?</button></div>
-  <div class="srcline">${lineage(it)}</div>
+  ${topSourceBanner(it)}${keepFold("lineage", lineage(it))}
+  <div class="onemore"><button class="morebtn" data-foldopen="lineage">출처별 전체 보기 ↗</button></div>
 
   <div class="step-h"><span class="stn">3</span>근거를 직접 확인한다
     <span class="sth-d">원문 링크로 출처까지 역추적 가능함</span></div>
@@ -1702,9 +1745,11 @@ function shadeLegend(what){
   return '<div class="shleg"><b>'+esc(what)+'</b> 낮음 <span class="bar">'+bars+'</span> 높음'
        + ' — 음영 진할수록 자사 대응 우선순위 높음</div>';
 }
-function modalOpen(title, html){
+function modalOpen(title, html, full){
   $("#modalTitle").textContent = title;
   $("#modalBody").innerHTML = html;
+  // 기술 상세는 전체화면으로 연다. 좁은 상자에 담으면 단계가 끊겨 읽힌다.
+  $("#modal").classList.toggle("full", !!full);
   $("#modal").classList.add("on");
 }
 function modalClose(){ $("#modal").classList.remove("on"); }
@@ -1744,7 +1789,7 @@ const CRITERIA_FALLBACK = {
           {level:"우위 기술",name:"자사 라인 적용 · 경쟁사 대비 선행 — 우위 유지 관리",rule:""},
           {level:"판정 불가",name:"경쟁사 근거 미확보 — 비교 판정 불가",rule:""}],
     note:"'일부 보유' 표현은 판단 방향성이 불명확하여 미사용함. 구분 명칭에 경쟁사 대비 수준을 직접 반영함."},
-  hold:{title:"'보유' 판정 기준",
+  hold:{title:"근거 등급",
     intro:"STRONG 1건 · MEDIUM 2건 · WEAK 3건 이상 충족 시 보유로 판정함.",
     rows:[{level:"VERIFIED",name:"양산 가동 확인",rule:"공시 등 1차 출처로 확인"},
           {level:"STRONG",name:"착공·양산일정",rule:"파일럿 신설 또는 일정 공표"},
@@ -1904,7 +1949,7 @@ function openTechModal(id){
   if(!it) return;
   const src = $("#detail");
   if(!src) return;
-  modalOpen(it.n, `<div class="techmodal">${src.innerHTML}</div>`);
+  modalOpen(it.n, `<div class="techmodal">${src.innerHTML}</div>`, true);
   // 모달 안에서도 팝업·접힘이 동작해야 한다. 상세와 같은 배선을 다시 건다.
   const box = document.querySelector(".modal .techmodal");
   if(!box) return;
@@ -2030,10 +2075,8 @@ function renderSummary(){
         const colSum = rows.reduce((a,r)=>a+(r.judged||0),0);
         const all = COVERAGE ? COVERAGE.assigned : colSum;
         const etc = all - colSum;
-        return `<div class="cofoot">위 표의 <b>판정 사용</b> 합 ${korNum(colSum)}건.
-          전체 판정 사용 ${korNum(all)}건과의 차 ${korNum(etc)}건은 경쟁사 6사·자사가 아닌
-          출원인(소재·장비사, 연구기관 등)에 귀속된 근거이며, 기술 판정에는 반영하되
-          회사별 비교에서는 제외함.</div>`;
+        return `<div class="cofoot">나머지 <b>${korNum(etc)}건</b>은 소재·장비사, 연구기관 등
+          <b>7개사 외 출원인</b> 몫임.</div>`;
       })()}` : `<div class="posmore">집계 없음</div>`;
 
   // 이 칸은 '요약'이다. 열위만 12줄 나열하면 요약이 아니라 목록이 된다.
@@ -2062,9 +2105,9 @@ function renderSummary(){
   $("#posList").innerHTML =
     `<div class="lvbar">${bar}</div>
      <div class="lvlist">${lvRows}</div>
-     <div class="lvfoot">전 ${tot}개 기술 중 <b class="g-behind">열위 ${gapN}건</b>이 최우선 보완 대상임.`
-    + (holdN ? ` 신규 편입 <b>${holdN}건</b>은 자사 보유 현황 확인 후 재판정 예정임.` : "")
-    + ` 기술별 상세는 하단 포트폴리오에서 조회 가능함.</div>`;
+     <div class="lvfoot"><b class="g-behind">열위 ${gapN}건</b>부터 보완함.`
+    + (holdN ? ` 확인 필요 <b>${holdN}건</b>은 사내 확인 후 재판정함.` : "")
+    + `</div>`;
   $("#posList").querySelectorAll(".lvrow").forEach(r=>{
     r.style.cursor="pointer";
     r.onclick=()=>{select(r.dataset.id);

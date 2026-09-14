@@ -277,8 +277,13 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
                           "evidence_count": len(lst),
                           "judged": split_types(lst)}
 
+        # 자사 보유 여부를 수집 근거로 다시 판정한다. 사내 기록은 근거의 하나로 쓴다.
+        own_obs, own_why = judge.self_status_observed(self_info, self_ev)
+        self_eff = {**self_info, "status": own_obs}
         rival_trl, trl_why = judge.estimate_trl(rival_ev)
-        our_trl, our_why = judge.self_trl(self_info)
+        our_trl, our_why = judge.self_trl(self_eff)
+        if own_obs != self_info.get("status", "none"):
+            our_why = own_why
         # ① 실행 소요기간 — 자사가 수행해야 할 과업의 누적 기간
         exec_years, gap_why = judge.execution_years(rival_trl, our_trl)
         # ② 3축 관측 보정 — 특허·공시·발표에서 관측된 선행 정도로 ①을 조정
@@ -306,7 +311,9 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             "desc": it.get("d", ""), "why": it.get("w", ""),
             "est_trl": rival_trl,
             "trl_basis": trl_why,
-            "self": {"status": self_info.get("status", "none"),
+            "self": {"status": own_obs,
+                     "status_recorded": self_info.get("status", "none"),
+                     "status_basis": own_why,
                      "patents": self_info.get("pat", 0),
                      "line": self_info.get("line", 0),
                      "talks": self_info.get("talk", 0),
@@ -344,7 +351,7 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
                         "formula": judge.urgency_formula(breakdown),
                         "max": judge.URGENCY_MAX},
             "position": judge.position(
-                our_trl, rival_trl, self_info.get("status", "none"), len(self_ev),
+                our_trl, rival_trl, own_obs, len(self_ev),
                 rival_source_kinds=len({e.get("type") for e in rival_ev if e.get("type")}),
                 rival_evidence=len(rival_ev), conf=gm["conf"],
                 conf_score=gm["conf_score"]),
@@ -354,7 +361,7 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             "related_rivals": sum(1 for e in rel if company_of(e) in RIVALS),
             # 목업의 자사 판정과 실제 특허가 어긋나는지 — 보고 전에 반드시 확인해야 한다
             # 신규 편입분은 '미확인'이므로 conflict 대상이 아니다(모른다고 적어 뒀다).
-            "self_unknown": self_info.get("status") == "unknown",
+            "self_unknown": own_obs == "unknown",
             "self_conflict": (self_info.get("status") == "none"
                               and (len(self_ev) + sum(1 for e in rel
                                                       if company_of(e) == "LGES")) > 0),

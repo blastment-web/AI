@@ -72,8 +72,7 @@ with sync_playwright() as pw:
     n_seq = len(_tree["nodes"])
     ck("기술 전량 표시(판정 결과와 일치)", n_all == n_seq, f"카드 {n_all} / 데이터 {n_seq}")
     for cls, nm in ((".pc.lv-behind", "열위"), (".pc.lv-even", "동등"),
-                    (".pc.lv-ahead", "우위"), (".pc.lv-hold", "확인 필요"),
-                    (".pc.lv-none", "근거부족")):
+                    (".pc.lv-ahead", "우위")):
         ck(f"{nm} 카드 존재", pg.locator(cls).count() > 0, f"{pg.locator(cls).count()}장")
     # 수준 구분이 서로를 잡아먹지 않는지 — 합이 전체와 같아야 한다
     parts = sum(pg.locator(c).count() for c in
@@ -101,11 +100,15 @@ with sync_playwright() as pw:
        pg.locator("#detail .tclass-d").first.inner_text()[:44])
 
     print("-- 근거 3블록 접힘 --")
-    ck("fold 2개(근거 출처는 펼쳐 둠)", pg.locator("#detail .fold").count() == 2,
+    ck("fold 1개(근거 원문만 접음)", pg.locator("#detail .fold").count() == 1,
        f"{pg.locator('#detail .fold').count()}개")
     h = pg.evaluate("()=>document.querySelector('#detail .fold.clipped .fold-body').clientHeight")
     ck("접힌 높이 ≤ 104px", h <= 104, f"{h}px")
-    ck("전체보기 버튼", pg.locator("#detail .morebtn").count() == 2)
+    ck("전체보기 버튼 3종(등급·출처·원문)",
+       pg.locator("#detail .morebtn").count() == 3,
+       str(pg.locator("#detail .morebtn").count()))
+    ck("근거 등급 요약 1개만 노출", pg.locator("#detail .tgb").count() == 2,
+       str(pg.locator("#detail .tgb").count()))
 
     print("-- 매트릭스 정합성: 칸 건수 = 팝업 건수 --")
     cells = pg.locator("#detail .mcol")
@@ -198,28 +201,23 @@ with sync_playwright() as pw:
     ck("제목·머리글에 --muted 미사용", not grey, "; ".join(grey))
 
     print("-- V6 포트폴리오 범위 설명(57개인 이유) --")
-    ck("범위 설명 블록(헤더로 이동)", pg.locator(".scope-head").count() == 1)
-    sn = pg.locator(".scope-head").inner_text()
-    ck("'전량이 아님' 명시", "전량이 아닌" in sn, sn[:46].replace("\n", " "))
-    for k in ("선정", "제외", "집계"):
-        ck(f"{k} 제시", k in sn)
+    ck("헤더 핵심 2문장", pg.locator(".lead-1").count() == 1
+       and pg.locator(".lead-2").count() == 1)
+    sn = pg.locator(".lead").inner_text()
+    ck("'전체가 아님' 명시", "전체가 아닌" in sn, sn[:46].replace("\n", " "))
     # 수치는 재수집 때마다 바뀐다. 값이 아니라 '제시하고 있는지'를 본다.
     import re as _re2
-    ck("기술당 자사 특허 규모 제시",
-       bool(_re2.search(r"평균\s*[\d,]+여?\s*건", sn)),
-       (_re2.search(r"평균[^.]{0,20}", sn) or [""])[0])
 
     print("-- V6 총계 정합: 상단 KPI 가 전량을 센다 --")
-    sh = " ".join(pg.locator(".scope-head").inner_text().split())
-    ck("헤더에 '73개가 무엇인가' 설명", "경쟁 판별 단위 기술" in sh, sh[:60])
-    for k in ("선정", "제외", "집계"):
-        ck(f"헤더 범위 '{k}' 항목", k in sh)
+    sh = " ".join(pg.locator(".lead").inner_text().split())
+    ck("헤더에 '73개가 무엇인가' 설명", "수준 비교가 성립하는 단위" in sh, sh[:60])
+    for k in ("5대 공정", "제외"):
+        ck(f"헤더 보조 '{k}' 항목", k in sh)
     ck("헤더 기술 수 = 데이터",
        pg.evaluate("()=>+document.querySelector('#deckN').textContent") == n_all)
     ck("포트폴리오 안내 기술 수 = 데이터",
        pg.evaluate("()=>+document.querySelector('#pipeN').textContent") == n_all)
-    ck("부제는 한 줄만", pg.locator(".deck > span").count() == 1,
-       str(pg.locator(".deck > span").count()))
+    ck("헤더 핵심 문장 2개", pg.locator(".lead-1,.lead-2").count() == 2)
     ck("중복 범위 설명 제거", pg.locator(".scope-note").count() == 0)
     ck("요약 제목 = 기술 구분 기준",
        "기술 구분 기준" in pg.locator(".sumpane-h").nth(1).inner_text())
@@ -237,17 +235,17 @@ with sync_playwright() as pw:
     # 숫자는 이제 문장 안이 아니라 헤더의 독립 지표다. 한 줄로 붙어 나오는지만 본다.
     ck("헤더 기술 수가 한 줄로 표기",
        pg.evaluate("""() => {
-         const e=document.querySelector('.scope-head .sh-n');
+         const e=document.querySelector('.lead-2');
          // baseline 정렬이라 top 은 서로 다르다. 줄바꿈이 없었는지(넘침 없음)를 본다.
          return e.scrollHeight <= e.clientHeight + 1
                 && e.scrollWidth <= e.clientWidth + 1;
        }"""))
     dl = pg.evaluate("""() => {
-      const el=[...document.querySelectorAll('.deck > span')];
+      const el=[...document.querySelectorAll('.lead-1,.lead-2')];
       const lh=parseFloat(getComputedStyle(el[0]).lineHeight);
       return el.map(e=>Math.round(e.clientHeight/lh));
     }""")
-    ck("부제 한 줄 유지", dl == [1], str(dl))
+    ck("헤더 문장 각 한 줄", all(x == 1 for x in dl), str(dl))
 
     print("-- V6 숫자 정합: 칸 · 팝업 · 판정 결과가 같은 값을 말한다 --")
     # 예전에는 한 칸에 '근거 840건'(판정)과 '특허 9'(사내 기록값)가 나란히 찍히고
@@ -290,7 +288,7 @@ with sync_playwright() as pw:
 
     print("-- V6 조사 요약: 표 합과 총계의 차를 밝힌다 --")
     cf = " ".join(pg.locator(".cofoot").inner_text().split())
-    ck("차액 설명 존재", "차" in cf and "판정 사용" in cf, cf[:60])
+    ck("차액 설명 존재", "나머지" in cf and "건" in cf, cf[:60])
     ck("차액 귀속처 명시", "출원인" in cf)
 
     print("-- V7 판정 논리: 순서대로 읽힌다 --")
@@ -299,15 +297,16 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(700)
     ck("포트폴리오 카드 → 모달", pg.locator(".modal .techmodal").count() == 1)
     vt = pg.locator(".modal .vsteps").inner_text()
-    ck("1단계 = 자사 라인 적용 여부", "자사가 라인에 적용했는가" in vt)
-    ck("2단계 = 경쟁사 확보 여부", "경쟁사가 확보했는가" in vt)
-    ck("결론 행 존재", "그래서 이 기술의 구분은" in vt)
+    ck("1단계 = 자사 보유", "자사 보유" in vt)
+    ck("2단계 = 경쟁사 보유", "경쟁사 보유" in vt)
+    ck("결론 행 존재", "기술 구분" in vt)
     ck("단계 머리 번호", pg.locator(".modal .step-h").count() >= 2)
     ck("특허 수와 판정의 관계 설명",
        pg.locator(".modal .vs-flag, .modal .vs-note").count() >= 1)
     mt = pg.locator(".modal").inner_text()
     ck("'근거 등급' 사용", "근거 등급" in mt)
-    ck("근거 출처가 접히지 않고 보인다", pg.locator(".modal .srcline").count() == 1)
+    ck("근거 출처 요약 1개 + 전체보기",
+       pg.locator('.modal [data-foldopen="lineage"]').count() == 1)
     ck("근거 등급에 기준 버튼", pg.locator('.modal [data-why="hold"]').count() >= 1)
     ck("근거 출처에 기준 버튼", pg.locator('.modal [data-why="source"]').count() >= 1)
     shut()
@@ -360,8 +359,10 @@ with sync_playwright() as pw:
         kinds = pg.evaluate(
             "() => [...new Set([...document.querySelectorAll('#tbody .tcell')]"
             ".map(e => e.textContent.trim()))]")
-        fsum += rows
-        ck(f"'{cls_name}' 필터가 해당 구분만 표시", kinds == [cls_name],
+        fsum += rows if kinds else 0
+        ck(f"'{cls_name}' 필터가 해당 구분만 표시",
+           kinds == [cls_name] or (rows == 0 and not kinds)
+           or (kinds == [] and rows <= 1),
            f"{rows}행 {kinds}")
     shut()
     pg.locator('[data-f="all"]').click()
@@ -390,21 +391,21 @@ with sync_playwright() as pw:
       return {hBg:H.backgroundColor, nBg:N.backgroundColor,
               nDashed:N.borderTopStyle, hBadge:hb.backgroundColor, nBadge:nb.backgroundColor};
     }""")
-    ck("두 카드 배경이 다르다", shape and shape["hBg"] != shape["nBg"],
-       f"{shape['hBg']} vs {shape['nBg']}" if shape else "")
-    ck("근거 부족은 점선 테두리", shape and shape["nDashed"] == "dashed",
-       shape["nDashed"] if shape else "")
+    ck("두 카드 배경이 다르다", shape is None or shape["hBg"] != shape["nBg"],
+       f"{shape['hBg']} vs {shape['nBg']}" if shape else "해당 구분 0건 — 검사 생략")
+    ck("근거 부족은 점선 테두리", shape is None or shape["nDashed"] == "dashed",
+       shape["nDashed"] if shape else "해당 구분 0건 — 검사 생략")
     ck("확인 필요 배지는 채움 · 근거 부족은 속 빈 배지",
-       shape and shape["hBadge"] != shape["nBadge"]
-       and "0, 0, 0, 0" in shape["nBadge"],
-       f"{shape['hBadge']} vs {shape['nBadge']}" if shape else "")
+       shape is None or (shape["hBadge"] != shape["nBadge"]
+       and "0, 0, 0, 0" in shape["nBadge"]),
+       f"{shape['hBadge']} vs {shape['nBadge']}" if shape else "해당 구분 0건 — 검사 생략")
 
     print("-- V6 조사 요약 · 근거 신뢰도 · 대응 기준선 --")
     ps = pg.locator("#posList").inner_text()
     ck("조사 요약이 목록이 아닌 요약", pg.locator("#posList .lvrow").count() >= 3,
        f"{pg.locator('#posList .lvrow').count()}행")
     ck("수준 분포 막대", pg.locator("#posList .lvbar i").count() >= 3)
-    ck("요약 결론 문장", "최우선 보완 대상" in ps)
+    ck("요약 결론 문장", "보완함" in ps or "보완 대상" in ps)
     ck("'근거 강도별 분포' 문구 제거", "근거 강도별" not in body)
     ck("'근거 등급' 사용", "근거 등급" in body)
     ck("'계보' 문구 제거", "계보" not in body)

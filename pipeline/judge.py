@@ -28,8 +28,10 @@ from __future__ import annotations
 from pipeline import gap_model
 
 GRADE_RANK = {"verified": 4, "strong": 3, "medium": 2, "weak": 1}
-GRADE_LABEL = {"verified": "VERIFIED", "strong": "STRONG",
-               "medium": "MEDIUM", "weak": "WEAK"}
+# 등급 표기는 한글 4단계로 통일한다. VERIFIED/STRONG 같은 영문 약어는
+# 처음 보는 사람에게 아무 정보도 주지 않는다.
+GRADE_LABEL = {"verified": "최상", "strong": "상",
+               "medium": "중", "weak": "하"}
 
 PATENT_TYPES = ("patent",)
 TALK_TYPES = ("paper", "talk", "conference")
@@ -141,6 +143,42 @@ SELF_TRL = {
     "have": (9, "전 라인 양산 적용"),
     "part": (7, "파일럿·일부 라인 적용"),
 }
+
+
+def self_status_observed(self_info: dict, self_evidence: list[dict],
+                         today: float | None = None) -> tuple[str, str]:
+    """(판정에 쓸 자사 보유 상태, 근거 1줄).
+
+    경쟁사에 쓰는 잣대를 자사에도 그대로 적용한다. 사내 기록만 보면
+    자사 특허가 쌓여 있는 기술도 '미보유 → 열위'로 판정되어,
+    화면이 자기 데이터와 모순되는 말을 하게 된다.
+    """
+    rec = (self_info or {}).get("status", "none")
+    # 라인 적용 여부는 사내 기록으로만 알 수 있다. 기록이 '적용'이면 그대로 둔다.
+    if rec == "have":
+        return "have", "사내 기록 — 전 라인 적용"
+    if not self_evidence:
+        if rec == "part":
+            return "part", "사내 기록 — 일부 라인 적용"
+        if rec == "unknown":
+            return "unknown", "사내 기록 없음 · 자사 근거 미검출"
+        return "none", "사내 기록 없음 · 자사 근거 미검출"
+
+    eff = effective_evidence(self_evidence, today)
+    holds = rival_holds(self_evidence, today)
+    n = eff["families"]
+    if holds:
+        # 경쟁사를 '보유'로 인정하는 근거량이면 자사도 보유로 인정한다.
+        why = (f"자사 특허 {n}건 확인 — 경쟁사와 동일 기준 적용"
+               + (f" · 사내 기록은 '{HOLD_REC[rec]}'" if rec in HOLD_REC else ""))
+        return "have" if rec == "part" else "part", why
+    if rec == "part":
+        return "part", f"사내 기록 일부 적용 · 자사 특허 {n}건"
+    return ("unknown" if rec == "unknown" else "none",
+            f"자사 특허 {n}건 — 보유 판정 기준 미달")
+
+
+HOLD_REC = {"none": "미적용", "part": "일부 적용", "unknown": "미확인"}
 
 
 def self_trl(self_info: dict) -> tuple[int, str]:
