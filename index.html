@@ -427,6 +427,11 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .crit td{padding:8px 9px;border-bottom:1px solid var(--rule-soft);font-size:14px;vertical-align:top;line-height:1.5}
 .crit td.lv{font-family:var(--mono);font-weight:700;white-space:nowrap;color:var(--ink)}
 .crit td.nm{font-weight:600;white-space:nowrap}
+/* 모달로 연 기술 상세 — 본문과 같은 컴포넌트를 쓰되 여백만 줄인다. */
+.techmodal .crumb{margin-bottom:2px}
+.techmodal h3{font-size:19px;margin:4px 0 2px}
+.techmodal .detact{display:none}
+.techmodal .step-h{margin-top:20px}
 .modal-note{margin-top:13px;padding:10px 12px;background:#F7F8F9;border-left:3px solid var(--graphite);
   font-size:14px;line-height:1.6;color:var(--ink2)}
 .mine{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--rule-soft);font-size:14px}
@@ -577,6 +582,41 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
   color:var(--label);text-transform:uppercase}
 .tgb-d{font-size:13.5px;color:var(--ink2)}
 .tgb-d b{color:var(--ink)}
+/* 근거 출처 — 접어서 희미하게 두지 않는다. 한 덩어리로 또렷하게 보인다. */
+.srcline{border:1px solid var(--rule);background:var(--panel)}
+.srcline .lin{margin:0}
+.srcline table{width:100%}
+/* 단계 머리 — 처음 보는 사람이 순서대로 읽도록 번호를 앞에 세운다. */
+.step-h{display:flex;align-items:baseline;gap:10px;margin:26px 0 10px;
+  font-size:16px;font-weight:700;color:var(--ink)}
+.step-h .stn{flex:0 0 auto;width:24px;height:24px;border-radius:50%;
+  background:var(--graphite);color:#fff;font-family:var(--mono);font-size:13px;
+  display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.step-h .sth-d{font-size:13px;font-weight:500;color:var(--ink2);margin-left:auto}
+/* 판정 단계 */
+.vsteps{border:1px solid var(--rule);background:var(--panel)}
+.vs-row{display:grid;grid-template-columns:30px 1fr 150px 1.1fr;align-items:center;
+  gap:12px;padding:12px 15px;border-top:1px solid var(--rule-soft)}
+.vs-row:first-child{border-top:0}
+.vs-n{font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;
+  background:var(--g1);width:22px;height:22px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center}
+.vs-q{font-size:14.5px;color:var(--ink)}
+.vs-a{font-size:15px;font-weight:700;color:var(--ink)}
+.vs-a.t-ok{color:var(--ahead)} .vs-a.t-mid{color:var(--even)}
+.vs-a.t-no{color:var(--behind)} .vs-a.t-hold{color:#44515E}
+.vs-w{font-size:13px;color:var(--ink2);line-height:1.45}
+.vs-out{background:#F4F6F7;border-top:1px solid var(--rule)}
+.vs-out .vs-n{background:var(--graphite)}
+.vs-out .vs-q{font-weight:700}
+.vs-flag{margin-top:10px;padding:12px 15px;background:var(--behind-bg);
+  border-left:4px solid var(--behind);font-size:13.5px;line-height:1.65;color:var(--ink)}
+.vs-flag b{color:var(--behind)}
+.vs-note{margin-top:10px;padding:11px 15px;background:#F7F8F9;
+  border-left:3px solid var(--rule);font-size:13px;line-height:1.6;color:var(--ink2)}
+.vs-note b{color:var(--ink)}
+@media (max-width:900px){.vs-row{grid-template-columns:30px 1fr;row-gap:6px}
+  .vs-a,.vs-w{grid-column:2}}
 /* 근거 목록 — 특허와 보조 근거를 눈으로 갈라 놓는다. */
 .evsec{margin-top:14px}
 .evsec-h{display:flex;align-items:baseline;gap:9px;padding:9px 12px;
@@ -775,16 +815,16 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 
   <section class="sum-block">
   <div class="block-head">
-    <h2>조사 요약<small>Survey Summary · 조사 범위 및 규모</small></h2>
+    <h2>조사 요약</h2>
     <div class="ctrl"><span class="pipe-tally" id="sumTotal"></span></div>
   </div>
   <div class="sumgrid">
     <div class="sumpane">
-      <div class="sumpane-h">경쟁사별 조사 건수<small>Patents &amp; Filings</small></div>
+      <div class="sumpane-h">경쟁사별 조사 건수</div>
       <div id="coTable"></div>
     </div>
     <div class="sumpane">
-      <div class="sumpane-h">기술 구분 기준<button class="whybtn" data-why="class" title="기술 구분 기준">?</button><small>Level</small></div>
+      <div class="sumpane-h">기술 구분 기준<button class="whybtn" data-why="class" title="기술 구분 기준">?</button></div>
       <button class="trlbar" data-why="trl">
         <span class="tb-k">TRL</span>
         <span class="tb-d">수준 비교 기준 — 기술 성숙도 1~9단계. 9=양산 적용 · 7=파일럿 가동 · 4=출원 단계</span>
@@ -797,7 +837,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 
 <section class="pipe-block">
   <div class="block-head">
-    <h2>자사 기술 포트폴리오<small>Process Portfolio · 전극 → 조립 → 활성화 → Pack → 인프라</small></h2>
+    <h2>자사 기술 포트폴리오</h2>
     <div class="ctrl">
       <span class="pipe-tally"><i class="sw-gap"></i>열위 <b id="tallyGap">0</b></span>
       <span class="pipe-tally"><i class="sw-part"></i>동등 <b id="tallyPart">0</b></span>
@@ -1266,7 +1306,9 @@ function renderPipeline(){
     </div>`;
   }).join("");
 
-  $("#pipe").querySelectorAll(".pc").forEach(b=>b.onclick=()=>select(b.dataset.id));
+  // 카드를 누르면 아래로 스크롤시키지 않고 그 자리에서 모달로 연다.
+  // 임원 보고에서 화면이 튀면 맥락을 잃는다.
+  $("#pipe").querySelectorAll(".pc").forEach(b=>b.onclick=()=>openTechModal(b.dataset.id));
   const N = k => SEQ.filter(i=>levelOf(i).k===k).length;
   if($("#tallyGap"))  $("#tallyGap").textContent  = N("behind");
   if($("#tallyPart")) $("#tallyPart").textContent = N("even");
@@ -1370,7 +1412,7 @@ function ladder(it){
 }
 /* 근거 블록은 핵심 3줄까지만 보여 주고, 나머지는 팝업으로 넘긴다.
    임원이 스크롤을 내리다 길을 잃는 게 가장 큰 문제였다. */
-const FOLD_TITLE = {ladder:"근거 신뢰도", lineage:"근거 출처", evidence:"근거 원문"};
+const FOLD_TITLE = {ladder:"근거 등급", lineage:"근거 출처", evidence:"근거 원문"};
 
 /* 이 기술의 판정이 어느 등급에 서 있는지 한 줄로 못박는다.
    등급 목록만 보여 주면 '그래서 이 기술은 어디냐'에 답하지 않는다. */
@@ -1395,6 +1437,57 @@ function fold(key, html){
       <div class="fold-body">${html}</div>
       <div class="fold-more"><button class="morebtn" data-foldopen="${key}">전체 보기 ↗</button></div>
     </div>`;
+}
+/* '열위인데 자사 특허가 더 많다'를 말로 설명하면 읽히지 않는다.
+   판정이 내려진 순서를 그대로 단계로 보여 주고, 특허 수가 그 판정과
+   어긋나는 경우에는 어긋난다는 사실 자체를 결론으로 적는다. */
+const OWN_STEP = {
+  have:    ["전 라인 적용",   "ok"],
+  part:    ["일부 라인 적용", "mid"],
+  none:    ["미적용",         "no"],
+  unknown: ["확인 안 됨",     "hold"],
+};
+function verdictSteps(it){
+  const own = OWN_STEP[it.own] || OWN_STEP.none;
+  const rv  = visibleRivals(it);
+  const J   = it.judged || {};
+  const mine = (J.LGES && J.LGES.patent) || 0;
+  let topCo = "", topN = 0;
+  RIVALS.forEach(r=>{ const n=(J[r]&&J[r].patent)||0; if(n>topN){topN=n; topCo=r;} });
+  const cls = it.pos ? (it.pos.tech_name || it.pos.display) : "—";
+
+  const step = (no, q, a, tone, note) =>
+    `<div class="vs-row"><span class="vs-n">${no}</span>
+       <span class="vs-q">${q}</span>
+       <span class="vs-a t-${tone}">${a}</span>
+       <span class="vs-w">${note}</span></div>`;
+
+  // 특허 수가 판정과 반대로 보이는 경우 — 숨기지 않고 결론으로 적는다.
+  const odd = it.own === "none" && mine > 0 && mine >= topN;
+  const flag = odd
+    ? `<div class="vs-flag"><b>확인 필요 —</b> 이 기술의 특허는 자사가
+        <b>${korNum(mine)}건</b>으로 최다 경쟁사(${SHORT[topCo]||topCo}
+        ${korNum(topN)}건)보다 많음. 그럼에도 '미적용'으로 기록되어 있어
+        <b>판정과 보유 실태가 어긋남</b>. 생산기술혁신센터 확인 대상임.</div>`
+    : (mine || topN
+       ? `<div class="vs-note">특허 보유량 — 자사 <b>${korNum(mine)}건</b> ·
+          최다 경쟁사 ${SHORT[topCo]||"—"} <b>${korNum(topN)}건</b>.
+          특허는 착수 여부를 보여줄 뿐 라인 적용을 뜻하지 않으므로 판정 기준이 아님.</div>`
+       : "");
+
+  return `<div class="step-h"><span class="stn">1</span>이 기술을 왜 이렇게 판정했는가
+      <span class="sth-d">아래 2단계를 순서대로 확인한 결과임</span></div>
+    <div class="vsteps">
+      ${step(1, "자사가 라인에 적용했는가", own[0], own[1], "사내 기록 기준")}
+      ${step(2, "경쟁사가 확보했는가",
+             rv.length ? `${rv.length}개사 확인` : "확인 안 됨",
+             rv.length ? "no" : "hold",
+             rv.length ? rv.map(r=>SHORT[r]||r).join(" · ") : "근거 미확보")}
+      <div class="vs-row vs-out"><span class="vs-n">=</span>
+        <span class="vs-q">그래서 이 기술의 구분은</span>
+        <span class="vs-a"><span class="tclass ${tclsCss(it)}">${esc(cls)}</span></span>
+        <span class="vs-w">${it.pos?esc(it.pos.tech_desc||""):""}</span></div>
+    </div>${flag}`;
 }
 function tclsCss(it){
   const k = it.pos && it.pos.tech_class ? it.pos.tech_class : "";
@@ -1427,28 +1520,30 @@ function renderDetail(){
   </div>
 
   <div class="verdict3">
-    <div class="v3 ${tclsCss(it).replace("tc-","lv-")}"><div class="k">기술 구분<button class="whybtn" data-why="class" title="구분 기준">?</button></div>
+    <div class="v3 ${tclsCss(it).replace("tc-","lv-")}"><div class="k">기술 구분<button class="whybtn" data-why="class" title="구분 기준 보기">?</button></div>
       <div class="m"><span class="tclass ${tclsCss(it)}">${it.pos?esc(it.pos.tech_name||it.pos.display):esc(selfLabel)}</span></div>
-      <div class="tclass-d">${it.pos&&it.pos.tech_desc?esc(it.pos.tech_desc):""}</div>
-      <div class="n">${it.pos?esc(it.pos.basis):""}${it.pos&&it.pos.caveat?`<br>${esc(it.pos.caveat)}`:""}</div></div>
-    <div class="v3"><div class="k">최고 수준 경쟁사 · 도달 단계(TRL)<button class="whybtn" data-why="trl" title="TRL 이 무엇인가">?</button></div>
+      <div class="tclass-d">${it.pos&&it.pos.tech_desc?esc(it.pos.tech_desc):""}</div></div>
+    <div class="v3"><div class="k">가장 앞선 경쟁사<button class="whybtn" data-why="trl" title="성숙도 산정 기준 보기">?</button></div>
       <div class="m">${best?SHORT[best.c]:"—"}</div>
-      <div class="n">${best?`${GRADE[best.g].l} · 추정 TRL ${it.trl||"–"}<br>${esc(it.trlWhy||GRADE[best.g].d)}`:"확인된 경쟁사 신호 없음"}</div></div>
-    <div class="v3 ${it.lag?"lv-gap":""}"><div class="k">기술 격차<button class="whybtn" data-why="lag" title="산정 방식">?</button>${it.lag&&it.lag.conf?` <span class="cfb c-${it.lag.conf}">신뢰도 ${esc(it.lag.confL)}</span>`:""}</div>
+      <div class="tclass-d">${best?`성숙도 ${it.trl||"–"}단계 / 9단계`:"확인된 경쟁사 없음"}</div></div>
+    <div class="v3 ${it.lag?"lv-gap":""}"><div class="k">기술 격차<button class="whybtn" data-why="lag" title="산정 방식 보기">?</button></div>
       <div class="m">${it.lag?`<button class="linkbtn" id="lagBtn">${it.lag.t}</button>`:"—"}</div>
-      <div class="n">${it.lag?`${esc(it.lag.r)}<br>자사: ${esc(it.lag.m)}`:"격차 산정 대상 아님"}</div></div>
+      <div class="tclass-d">${it.lag?"자사 소요 기간":"격차 산정 대상 아님"}</div></div>
   </div>
 
-  <div class="trlhint">각 칸의 <b>TRL</b> 은 기술 성숙도(1~9단계)임. 9=양산 적용 · 7=파일럿 가동 · 4=출원 단계.<button class="whybtn" data-why="trl" title="TRL 이 무엇이고 어떻게 정했는가">?</button></div>
-  <div class="sec-t">보유 현황 매트릭스<span>칸 하단은 최상위 근거 등급 · <b>판정에 쓴 건수</b> — 클릭 시 목록 조회</span></div>
+  ${verdictSteps(it)}
+
+  <div class="step-h"><span class="stn">2</span>이 판정의 근거는 무엇인가
+    <span class="sth-d">회사별 근거 — 칸을 누르면 특허 목록이 열림</span></div>
+  <div class="sec-t">회사별 근거 현황</div>
   <div class="matrix">${statusCell("LGES",it.own,true,it)}
     ${RIVALS.map(r=>statusCell(r,it.r.includes(r)?"have":it.p.includes(r)?"part":"none",false,it)).join("")}</div>
 
-  <div class="sec-t">근거 신뢰도<span>등급별 구성 — 판정은 최상위 등급 기준</span></div>
+  <div class="sec-t">근거 등급<button class="whybtn" data-why="hold" title="등급 기준 보기">?</button></div>
   ${topGradeBanner(it)}
   ${fold("ladder", ladder(it))}
 
-  <div class="sec-t">자사 보유 현황<span>사내 기록 4개 채널 — 위 매트릭스의 근거 건수와 다른 값임</span></div>
+  <div class="sec-t">자사 보유 현황<span>사내 기록값 — 위 근거 건수와 다른 값임</span></div>
   <div class="selfgrid">${ch.map(([k,v,sub])=>{
     const zero=(v===0||v==="없음");
     const clk = k==="특허" ? ' clickable" data-selfev="1' : '';
@@ -1456,9 +1551,11 @@ function renderDetail(){
     return `<div class="sg ${zero?"zero":""}${clk}" ${tip?`title="${esc(tip)}"`:""}><div class="k">${k}${k==="특허"?'<span class="sgk2">판정 기준</span>':""}</div><div class="v">${v===0?"0":esc(v)}</div>${sub?`<div class="sgs">${esc(sub)}</div>`:""}</div>`;}).join("")}</div>
   ${it.s.note?`<div class="selfnote"><b>판정 근거 —</b> ${esc(it.s.note)}</div>`:""}
 
-  <div class="sec-t">근거 출처<span>원천 → 수집 → 정제 → 등급 부여 경로</span></div>
-  ${fold("lineage", lineage(it))}
+  <div class="sec-t">근거 출처<button class="whybtn" data-why="source" title="출처별 수집 방식 보기">?</button></div>
+  <div class="srcline">${lineage(it)}</div>
 
+  <div class="step-h"><span class="stn">3</span>근거를 직접 확인한다
+    <span class="sth-d">원문 링크로 출처까지 역추적 가능함</span></div>
   <div class="sec-t">근거 원문<span class="cnt">${it.ev.length}건</span></div>
   ${fold("evidence", it.ev.length?it.ev.map(e=>`<div class="ev">
       <span class="gbadge" style="background:${GRADE[e.g].c}">${GRADE[e.g].l}</span>
@@ -1713,7 +1810,7 @@ function urgBandTable(score){
       +'<td class="ub-l">'+esc(b.l)+'</td><td class="ub-d">'+esc(b.d)+'</td>'
       +'<td class="ub-m">'+(on?"◀ 현재":"")+'</td></tr>';
   }).join("");
-  return '<div class="sec-t">대응 기준선<span>Action Threshold</span></div>'
+  return '<div class="sec-t">대응 기준선</div>'
     +'<table class="ubt"><tbody>'+rows+'</tbody></table>'
     +'<p class="ubnote">기준선은 인자 점수에서 직접 도출함 — 3개 인자 전량 3점이면 27점, '
     +'전량 4점이면 64점, 전량 5점이면 125점임. <b>27점 미만</b>은 3개 인자 중 1개 이상이 '
@@ -1776,7 +1873,7 @@ function openLagDetail(it){
     +'<td class="ax-m">'+(a.available?('+'+a.months+'개월'):'미산출')+'</td>'
     +'<td>'+esc(a.basis||"")+'</td></tr>').join("");
   const axTable = ax
-    ? '<div class="sec-t">3축 대리 지표 산출 내역<span>Proxy Metrics</span></div>'
+    ? '<div class="sec-t">3축 대리 지표 산출 내역</div>'
       +'<table class="axt"><colgroup><col class="c1"><col class="c2"><col class="c3">'
       +'</colgroup><thead><tr><th>축 · 출처</th><th style="text-align:right">격차</th>'
       +'<th>산출 근거</th></tr></thead><tbody>'+ax+'</tbody></table>'
@@ -1787,7 +1884,7 @@ function openLagDetail(it){
     +'특허·설비투자 공시·대외 기술발표 3축을 대리 지표로 환산하여 추정함. '
     +esc(L.mnote||"")+'</p>'
     + dual + axTable
-    +'<div class="sec-t">실행 소요기간 분해<span>Execution Steps</span></div>'
+    +'<div class="sec-t">실행 소요기간 분해</div>'
     + table + sum
     +'<div class="mine"><span class="lbl">경쟁사</span><span class="wy">'+esc(it.lag.r||"")+'</span></div>'
     +'<div class="mine"><span class="lbl">자사</span><span class="wy">'+esc(it.lag.m||"")+'</span></div>'
@@ -1798,6 +1895,30 @@ function openLagDetail(it){
     +(L.band!=null?Math.round(L.band*100)+'%':'—')+'를 적용하여 산출함. '
     +'소요기간 원단위는 배터리 공정기술 통상치이며, 사내 실적 데이터 확보 시 '
     +'해당 값으로 대체 적용 예정임.</div>');
+}
+/* 기술 상세를 모달로 연다. 상세 패널을 그대로 재사용하므로
+   본문과 모달이 서로 다른 내용을 보일 수 없다. */
+function openTechModal(id){
+  select(id);
+  const it = sel;
+  if(!it) return;
+  const src = $("#detail");
+  if(!src) return;
+  modalOpen(it.n, `<div class="techmodal">${src.innerHTML}</div>`);
+  // 모달 안에서도 팝업·접힘이 동작해야 한다. 상세와 같은 배선을 다시 건다.
+  const box = document.querySelector(".modal .techmodal");
+  if(!box) return;
+  box.querySelectorAll("[data-why]").forEach(b=>{
+    b.onclick = e => { e.stopPropagation(); openCriteria(b.dataset.why); }; });
+  box.querySelectorAll("[data-foldopen]").forEach(b=>{
+    b.onclick = e => { e.stopPropagation();
+      modalOpen(FOLD_TITLE[b.dataset.foldopen]||"", FOLD_HTML[b.dataset.foldopen]||""); }; });
+  box.querySelectorAll(".mcol[data-co]").forEach(c=>{
+    c.onclick = () => openEvidenceList(it, c.dataset.co); });
+  const lb = box.querySelector("#lagBtn");
+  if(lb) lb.onclick = () => openLagDetail(it);
+  const sv = box.querySelector(".sg[data-selfev]");
+  if(sv) sv.onclick = () => openEvidenceList(it, "LGES");
 }
 function openEvidenceList(it, company){
   const list = it.ev.filter(function(e){ return !company || e.w === company; });

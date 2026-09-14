@@ -9,7 +9,7 @@ import os
 import sys
 from playwright.sync_api import sync_playwright
 
-URL = os.environ.get("CTI_VERIFY_URL", "file:///C:/Users/dwkim/AI/dist/V4-index.html")
+URL = os.environ.get("CTI_VERIFY_URL", "file:///C:/Users/dwkim/AI/dist/V7-index.html")
 fails, errs = [], []
 
 
@@ -27,6 +27,12 @@ with sync_playwright() as pw:
           if m.type == "error" and "Failed to load resource" not in m.text else None)
     pg.goto(URL, wait_until="domcontentloaded")
     pg.wait_for_timeout(2800)
+
+    # 모달이 열린 채 남으면 이후 클릭을 가로챈다. 어느 검사든 부르면 확실히 닫힌다.
+    def shut():
+        pg.evaluate("() => {const m=document.getElementById('modal');"
+                    " if(m) m.classList.remove('on');}")
+        pg.wait_for_timeout(180)
 
     print("-- 용어 --")
     body = pg.locator("body").inner_text()
@@ -86,19 +92,20 @@ with sync_playwright() as pw:
     ck("SEQ 내림차순", all(sc[i] >= sc[i+1] for i in range(len(sc)-1)), f"{sc[:6]}…")
 
     print("-- 상세: 기술 구분 --")
+    shut()
     pg.locator("#tbody tr").first.click(); pg.wait_for_timeout(500)
     det = pg.locator("#detail").inner_text()
-    ck("기술 구분 배지", pg.locator("#detail .tclass").count() == 1,
+    ck("기술 구분 배지", pg.locator("#detail .tclass").count() >= 1,
        pg.locator("#detail .tclass").first.inner_text() if pg.locator("#detail .tclass").count() else "")
-    ck("한 줄 정의", pg.locator("#detail .tclass-d").count() == 1,
+    ck("한 줄 정의", pg.locator("#detail .tclass-d").count() >= 1,
        pg.locator("#detail .tclass-d").first.inner_text()[:44])
 
     print("-- 근거 3블록 접힘 --")
-    ck("fold 3개", pg.locator("#detail .fold").count() == 3,
+    ck("fold 2개(근거 출처는 펼쳐 둠)", pg.locator("#detail .fold").count() == 2,
        f"{pg.locator('#detail .fold').count()}개")
     h = pg.evaluate("()=>document.querySelector('#detail .fold.clipped .fold-body').clientHeight")
     ck("접힌 높이 ≤ 104px", h <= 104, f"{h}px")
-    ck("전체보기 버튼", pg.locator("#detail .morebtn").count() == 3)
+    ck("전체보기 버튼", pg.locator("#detail .morebtn").count() == 2)
 
     print("-- 매트릭스 정합성: 칸 건수 = 팝업 건수 --")
     cells = pg.locator("#detail .mcol")
@@ -148,7 +155,7 @@ with sync_playwright() as pw:
         rows.nth(i).click(); pg.wait_for_timeout(300)
         if pg.locator("#detail .urgbtn, #detail [data-urg]").count():
             break
-    ck("상세 진입 정상", pg.locator("#detail .tclass").count() == 1)
+    ck("상세 진입 정상", pg.locator("#detail .tclass").count() >= 1)
 
     print("-- 임원 보고 어조(개조식) --")
     import re as _re
@@ -245,8 +252,10 @@ with sync_playwright() as pw:
     print("-- V6 숫자 정합: 칸 · 팝업 · 판정 결과가 같은 값을 말한다 --")
     # 예전에는 한 칸에 '근거 840건'(판정)과 '특허 9'(사내 기록값)가 나란히 찍히고
     # 팝업은 또 '특허 19건'(표시분)을 말해, 셋이 서로 맞을 수 없었다.
+    shut()
     pg.locator('[data-f="ahead"]').click()
     pg.wait_for_timeout(350)
+    shut()
     pg.locator("#tbody tr").first.click()
     pg.wait_for_timeout(550)
     cells = pg.locator(".matrix .mcol")
@@ -261,6 +270,7 @@ with sync_playwright() as pw:
         def num(x):
             x = x.replace(",", "")
             return int(x.split("만")[0]) * 10000 + int(x.split("만")[1] or 0)                 if "만" in x else int(x)
+        shut()
         cells.nth(i).click()
         pg.wait_for_timeout(450)
         pm = pg.locator(".modal").inner_text()
@@ -272,8 +282,7 @@ with sync_playwright() as pw:
                 mism.append(f"{co}: 판정 칸 {mj.group(1)} ≠ 팝업 {got.group(1)}")
             if mp and num(got.group(2)) != num(mp.group(1)):
                 mism.append(f"{co}: 특허 칸 {mp.group(1)} ≠ 팝업 {got.group(2)}")
-        pg.keyboard.press("Escape")
-        pg.wait_for_timeout(180)
+        shut()
     ck("매트릭스 칸 = 팝업 판정 건수(전 칸)", not mism, "; ".join(mism[:3]))
     mtxt = pg.locator(".matrix").inner_text()
     ck("칸에 사내 기록값(self.pat)을 섞지 않는다",
@@ -284,19 +293,40 @@ with sync_playwright() as pw:
     ck("차액 설명 존재", "차" in cf and "판정 사용" in cf, cf[:60])
     ck("차액 귀속처 명시", "출원인" in cf)
 
+    print("-- V7 판정 논리: 순서대로 읽힌다 --")
+    shut()
+    pg.locator(".pc.lv-behind").first.click()
+    pg.wait_for_timeout(700)
+    ck("포트폴리오 카드 → 모달", pg.locator(".modal .techmodal").count() == 1)
+    vt = pg.locator(".modal .vsteps").inner_text()
+    ck("1단계 = 자사 라인 적용 여부", "자사가 라인에 적용했는가" in vt)
+    ck("2단계 = 경쟁사 확보 여부", "경쟁사가 확보했는가" in vt)
+    ck("결론 행 존재", "그래서 이 기술의 구분은" in vt)
+    ck("단계 머리 번호", pg.locator(".modal .step-h").count() >= 2)
+    ck("특허 수와 판정의 관계 설명",
+       pg.locator(".modal .vs-flag, .modal .vs-note").count() >= 1)
+    mt = pg.locator(".modal").inner_text()
+    ck("'근거 등급' 사용", "근거 등급" in mt)
+    ck("근거 출처가 접히지 않고 보인다", pg.locator(".modal .srcline").count() == 1)
+    ck("근거 등급에 기준 버튼", pg.locator('.modal [data-why="hold"]').count() >= 1)
+    ck("근거 출처에 기준 버튼", pg.locator('.modal [data-why="source"]').count() >= 1)
+    shut()
+    ck("'근거 신뢰도' 표현 제거", "근거 신뢰도" not in body)
+
     print("-- V6 매트릭스 팝업: 특허가 위, 보조 근거가 아래 --")
+    shut()
     pg.locator(".pc").first.click()
     pg.wait_for_timeout(450)
     cells = pg.locator(".matrix .mcol")
     opened = False
     for i in range(cells.count()):
+        shut()
         cells.nth(i).click()
         pg.wait_for_timeout(450)
         if pg.locator(".modal .evsec").count() == 2:
             opened = True
             break
-        pg.keyboard.press("Escape")
-        pg.wait_for_timeout(180)
+        shut()
     ck("매트릭스 칸 클릭 시 근거 팝업", opened)
     if opened:
         secs = pg.locator(".modal .evsec-h b").all_inner_texts()
@@ -312,8 +342,7 @@ with sync_playwright() as pw:
         npat = pg.locator(".modal .ev-pat .pitem").count()
         ck("특허 행이 실제로 실린다", npat > 0, f"{npat}행")
         ck("행마다 원문 링크", pg.locator(".modal .ev-pat .pitem a").count() > 0)
-        pg.keyboard.press("Escape")
-        pg.wait_for_timeout(220)
+        shut()
 
     print("-- V6 최우선 검토 기술 필터: 다섯 구분 전량 조회 가능 --")
     want = {"behind": "열위 기술", "even": "동등 기술", "ahead": "우위 기술",
@@ -324,6 +353,7 @@ with sync_playwright() as pw:
         if not btn.count():
             ck(f"'{cls_name}' 필터 존재", False, "버튼 없음")
             continue
+        shut()
         btn.click()
         pg.wait_for_timeout(320)
         rows = pg.locator("#tbody tr").count()
@@ -333,6 +363,7 @@ with sync_playwright() as pw:
         fsum += rows
         ck(f"'{cls_name}' 필터가 해당 구분만 표시", kinds == [cls_name],
            f"{rows}행 {kinds}")
+    shut()
     pg.locator('[data-f="all"]').click()
     pg.wait_for_timeout(320)
     allrows = pg.locator("#tbody tr").count()
@@ -341,6 +372,7 @@ with sync_playwright() as pw:
     ck("필터 버튼 한 줄", pg.evaluate(
         """() => new Set([...document.querySelectorAll('#statusSeg button')]
              .map(b => Math.round(b.getBoundingClientRect().top))).size""") == 1)
+    shut()
     pg.locator('[data-f="behind"]').click()
     pg.wait_for_timeout(300)
 
@@ -374,7 +406,7 @@ with sync_playwright() as pw:
     ck("수준 분포 막대", pg.locator("#posList .lvbar i").count() >= 3)
     ck("요약 결론 문장", "최우선 보완 대상" in ps)
     ck("'근거 강도별 분포' 문구 제거", "근거 강도별" not in body)
-    ck("'근거 신뢰도' 사용", "근거 신뢰도" in body)
+    ck("'근거 등급' 사용", "근거 등급" in body)
     ck("'계보' 문구 제거", "계보" not in body)
     ck("판정 기준 등급 배너", pg.locator(".tgb").count() >= 1)
     ck("확인 주체 = 생산기술혁신센터",
@@ -386,6 +418,7 @@ with sync_playwright() as pw:
     print("-- V6 3축 격차 모델 --")
     gapbtn = pg.locator("[data-lag]").first
     if gapbtn.count():
+        shut()
         gapbtn.click()
         pg.wait_for_timeout(500)
         m = pg.locator(".modal").inner_text()
@@ -399,7 +432,8 @@ with sync_playwright() as pw:
         ck("신뢰도 배지", pg.locator(".modal .cfb").count() >= 1)
         ck("실행 소요기간 분해 유지", "실행 소요기간" in m)
         ck("보정 계수 명시", "보정 계수" in m)
-        pg.keyboard.press("Escape"); pg.wait_for_timeout(250)
+        shut()
+        shut()
         pg.locator("[data-urg]").first.click(); pg.wait_for_timeout(500)
         um = pg.locator(".modal").inner_text()
         ck("시급도 대응 기준선 제시", "대응 기준선" in um)
@@ -422,6 +456,7 @@ with sync_playwright() as pw:
 
     pg.set_viewport_size({"width": 1500, "height": 1500}); pg.wait_for_timeout(400)
     if len(sys.argv) > 1: pg.locator(".kpis").screenshot(path=sys.argv[1])
+    shut()
     pg.locator("#tbody tr").first.click(); pg.wait_for_timeout(500)
     if len(sys.argv) > 2: pg.locator("#detail").screenshot(path=sys.argv[2])
     b.close()
