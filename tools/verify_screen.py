@@ -29,9 +29,15 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(2800)
 
     # 모달이 열린 채 남으면 이후 클릭을 가로챈다. 어느 검사든 부르면 확실히 닫힌다.
+    # 상세는 이제 전체화면 오버레이로만 노출된다. 렌더 검사는 원본 DOM 을 봐야
+    # 하므로 검사 동안만 보이게 한다(화면 동작에는 영향 없음).
+    pg.evaluate("() => {const d=document.getElementById('detail');"
+                " if(d) d.removeAttribute('hidden');}")
+
     def shut():
-        pg.evaluate("() => {const m=document.getElementById('modal');"
-                    " if(m) m.classList.remove('on');}")
+        pg.evaluate("() => {['modal','modal2'].forEach(id=>{"
+                    "const m=document.getElementById(id);"
+                    " if(m) m.classList.remove('on','full');});}")
         pg.wait_for_timeout(180)
 
     print("-- 용어 --")
@@ -79,7 +85,9 @@ with sync_playwright() as pw:
                 (".pc.lv-behind", ".pc.lv-even", ".pc.lv-ahead",
                  ".pc.lv-hold", ".pc.lv-none"))
     ck("수준 구분 합 = 전체", parts == n_all, f"{parts} / {n_all}")
-    ck("공정별 수준 분포 막대", pg.locator(".ps-mix").count() == 5)
+    ck("공정별 수준 분포 막대",
+       pg.locator(".ps-mix").count() == pg.locator(".pipe-stage").count(),
+       f"{pg.locator('.ps-mix').count()} / {pg.locator('.pipe-stage').count()}")
     ck("근거 위계 명시(특허가 핵심)", "특허를 핵심 기준" in body)
     pipe_txt = pg.locator("#pipe").inner_text()
     ck("'미보유/일부/보유' 구분 미사용", "미보유" not in pipe_txt and "일부 " not in pipe_txt)
@@ -210,7 +218,7 @@ with sync_playwright() as pw:
 
     print("-- V6 총계 정합: 상단 KPI 가 전량을 센다 --")
     sh = " ".join(pg.locator(".lead").inner_text().split())
-    ck("헤더에 '73개가 무엇인가' 설명", "수준 비교가 성립하는 단위" in sh, sh[:60])
+    ck("헤더에 범위 설명", "경쟁 판별 단위 기술" in sh, sh[:60])
     for k in ("5대 공정", "제외"):
         ck(f"헤더 보조 '{k}' 항목", k in sh)
     ck("헤더 기술 수 = 데이터",
@@ -283,8 +291,8 @@ with sync_playwright() as pw:
         shut()
     ck("매트릭스 칸 = 팝업 판정 건수(전 칸)", not mism, "; ".join(mism[:3]))
     mtxt = pg.locator(".matrix").inner_text()
-    ck("칸에 사내 기록값(self.pat)을 섞지 않는다",
-       "판정" in mtxt and mtxt.count("특허") >= 1)
+    ck("칸은 핵심 특허 기준 표기",
+       "핵심 특허" in mtxt and "발명" in mtxt)
 
     print("-- V6 조사 요약: 표 합과 총계의 차를 밝힌다 --")
     cf = " ".join(pg.locator(".cofoot").inner_text().split())

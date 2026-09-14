@@ -10,7 +10,7 @@ index.html                 화면 틀 (HTML + CSS + JS 단일 파일, 데이터 
 run.bat / run.sh           백엔드 실행 — 특허 원문 검색을 쓸 때만 필요
 collect.bat                수집 → 판정 → 화면 만들기 전 과정
 
-dist/V7-index.html         ★ 평소 여는 파일. 데이터가 박혀 있어 서버 없이 열립니다
+dist/V8-index.html         ★ 평소 여는 파일. 데이터가 박혀 있어 서버 없이 열립니다
 dist/V4-index.html         V5 까지의 판정 로직으로 만든 판
 dist/V5-index.html         V4 와 같고 LLM 판독 계층이 얹힌 판
 versions/                  되돌릴 수 있게 남겨 둔 과거 판 (V3·V4·V5·V6)
@@ -38,7 +38,7 @@ VERSIONS.md                판 관리 · 되돌리는 법
 tests/                     346개. 네트워크 없이 돕니다
 ```
 
-`dist/V7-index.html` 은 데이터가 박혀 있어 **더블클릭만 하면 열립니다.**
+`dist/V8-index.html` 은 데이터가 박혀 있어 **더블클릭만 하면 열립니다.**
 서버가 필요한 것은 화면 아래쪽 **특허 원문 검색** 하나뿐입니다(`run.bat`).
 
 ## 화면 구성

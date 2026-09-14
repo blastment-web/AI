@@ -269,7 +269,14 @@ def build(tax: dict, evidence: list[dict], recent_days: int = 365) -> dict:
             p = sum(1 for e in lst if e.get("type") == "patent")
             c = sum(1 for e in lst if e.get("type") == "capex")
             t = sum(1 for e in lst if e.get("type") in ("paper", "talk", "conference"))
-            return {"patent": p, "capex": c, "paper": t, "total": len(lst)}
+            # 건수는 방어용 출원까지 센다. 판단에 쓸 것은 '핵심 특허'다 —
+            # 패밀리 병합 후 다국 출원·등록·피인용 중 하나 이상을 충족한 건.
+            fam = gap_model.merge_families([e for e in lst if e.get("type") == "patent"])
+            core = sum(1 for f in fam
+                       if int(f.get("_countries") or 1) >= 2
+                       or f.get("granted") or (f.get("cited_by") or 0) > 0)
+            return {"patent": p, "capex": c, "paper": t, "total": len(lst),
+                    "families": len(fam), "core": core}
 
         rivals = {}
         for co, lst in by_co.items():

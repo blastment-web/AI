@@ -43,7 +43,7 @@ h1 .en{display:block;font-family:var(--mono);font-size:13px;font-weight:500;lett
    숫자 span(#deckN)까지 블록이 되어 '배터리 공정기술 / 73 / 개 전량'으로 끊긴다. */
 .deck > span{display:block}
 /* 첫 화면은 두 문장이면 된다. 무엇을 기준으로 판정했는지, 73개가 무엇인지. */
-.lead{flex:1 0 100%;margin-top:18px;padding-top:16px;border-top:1px solid var(--rule)}
+.lead{margin-top:14px;max-width:900px}
 .lead-1{margin:0;font-size:17px;line-height:1.5;color:var(--ink);letter-spacing:-.01em}
 .lead-2{margin:9px 0 0;font-size:17px;line-height:1.5;color:var(--ink);letter-spacing:-.01em}
 .lead-1 b,.lead-2 b{font-weight:800;box-shadow:inset 0 -8px 0 var(--foil)}
@@ -124,7 +124,9 @@ h2 small{font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing
 .sw-gap{background:var(--behind-bg);border:1.5px solid var(--behind)}
 .sw-ahead{background:var(--ahead-bg);border:1px solid var(--ahead)}
 
-.grid{border:1px solid var(--rule);background:var(--rule);margin-top:28px}
+.grid{border:0;background:none;margin:0}
+/* 상세는 전체화면 오버레이로만 본다. 본문 자리는 비워 둔다. */
+.grid:empty,.grid > #detail[hidden]{display:none}
 .pane{background:var(--panel);min-width:0}
 .pane-h{padding:13px 18px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;align-items:center;gap:12px}
 .badge{font-family:var(--mono);font-size:12px;font-weight:700;padding:2px 5px;white-space:nowrap}
@@ -437,17 +439,37 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .crit td.lv{font-family:var(--mono);font-weight:700;white-space:nowrap;color:var(--ink)}
 .crit td.nm{font-weight:600;white-space:nowrap}
 /* 기술 상세는 전체화면으로 연다. 좁은 상자에 넣으면 1→2→3 단계가 끊겨 읽힌다. */
+#modal2{z-index:120;background:rgba(20,24,28,.62)}
+#modal2 .modal-box{max-width:980px;width:100%;max-height:86vh;display:flex;
+  flex-direction:column;background:var(--panel)}
+#modal2 .modal-head{display:flex;align-items:center;justify-content:space-between;
+  gap:14px;padding:15px 20px;border-bottom:1px solid var(--ink);background:var(--panel)}
+#modal2 .modal-head h4{margin:0;font-size:17px;font-weight:700;color:var(--ink)}
+#modal2 .modal-x{border:1px solid var(--rule);background:#fff;width:30px;height:30px;
+  cursor:pointer;font-size:14px;color:var(--ink2);flex:0 0 auto}
+#modal2 .modal-x:hover{background:#F2F4F5}
+#modal2 .modal-body{overflow:auto;padding:18px 20px 24px}
 .modal.full{padding:0;align-items:stretch;justify-content:stretch}
 .modal.full .modal-box{max-width:none;width:100%;height:100%;max-height:none;
   border-radius:0;display:flex;flex-direction:column}
 .modal.full .modal-head{position:sticky;top:0;z-index:2;background:var(--panel);
-  border-bottom:1px solid var(--ink);padding:16px 28px}
+  border-bottom:1px solid var(--ink);padding:12px 16px}
 .modal.full .modal-head h4,.modal.full #modalTitle{font-size:21px}
-.modal.full .modal-body{flex:1;overflow:auto;padding:22px 28px 48px;
+.modal.full .modal-body{flex:1;overflow:auto;padding:14px 14px 36px;
   background:var(--paper)}
 /* 상세 내용은 카드 안에 담는다 — 밖으로 흘러나온 느낌을 없앤다. */
-.modal.full .techmodal{max-width:1560px;margin:0 auto;background:var(--panel);
-  border:1px solid var(--rule);padding:26px 30px 32px}
+.modal.full .techmodal{max-width:none;margin:0;background:var(--panel);
+  border:1px solid var(--rule);padding:18px 20px 24px}
+/* 한 화면에 더 담는다 — 상세는 스크롤이 아니라 훑어보는 판이어야 한다. */
+.modal.full .techmodal .explain{margin-top:10px}
+.modal.full .techmodal .explain p{font-size:14px;line-height:1.55}
+.modal.full .techmodal .step-h{margin:16px 0 8px;font-size:15px}
+.modal.full .techmodal .sec-t{margin:14px 0 7px}
+.modal.full .techmodal .vs-row{padding:9px 14px}
+.modal.full .techmodal .verdict3{margin-top:10px}
+.modal.full .techmodal .selfgrid .sg{padding:10px 13px}
+.modal.full .techmodal .fold.clipped .fold-body{max-height:150px}
+}
 @media (max-width:760px){.modal.full .modal-head{padding:13px 16px}
   .modal.full .modal-body{padding:14px 16px 36px}
   .modal.full .techmodal{padding:16px 15px 22px}}
@@ -641,6 +663,7 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .vs-note{margin-top:10px;padding:11px 15px;background:#F7F8F9;
   border-left:3px solid var(--rule);font-size:13px;line-height:1.6;color:var(--ink2)}
 .vs-note b{color:var(--ink)}
+.vs-sub{display:block;margin-top:3px;font-size:12px;color:var(--muted)}
 @media (max-width:900px){.vs-row{grid-template-columns:30px 1fr;row-gap:6px}
   .vs-a,.vs-w{grid-column:2}}
 /* 근거 목록 — 특허와 보조 근거를 눈으로 갈라 놓는다. */
@@ -803,22 +826,23 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   <div>
     <div class="eyebrow">Competitive Technology Intelligence · Battery Manufacturing</div>
     <h1>AI 기반 경쟁기술 인텔리전스<span class="en">Patents · Capex · Conferences → Technology Gap Radar</span></h1>
+    <div class="lead">
+      <p class="lead-1"><b>특허</b>를 핵심 기준으로 경쟁사 기술 수준을 판정하고,
+        설비투자 공시·기술발표를 보조 근거로 교차 검증함.</p>
+      <p class="lead-2">본 <b><span id="deckN">84</span>개</b>는 자사 보유 기술의
+        <b>전체가 아닌 경쟁 판별 단위 기술</b>임.</p>
+      <div class="lead-3">
+        <span>셀 제조 5대 공정 · 차세대</span>
+        <span>범용 요소기술 · 사내 노하우 제외</span>
+        <span>1개 기술 ≒ 자사 특허 <b id="deckAvg">573</b>건</span>
+      </div>
+    </div>
   </div>
   <div>
     <div class="sources" id="sources"></div>
     <div class="stamp" id="stamp"></div>
   </div>
-  <div class="lead">
-    <p class="lead-1"><b>특허</b>를 핵심 기준으로 경쟁사 기술 수준을 판정하고,
-      설비투자 공시·기술발표를 보조 근거로 교차 검증함.</p>
-    <p class="lead-2"><b><span id="deckN">73</span>개</b>는 자사 기술 <b>전체가 아닌</b>,
-      경쟁사와 <b>수준 비교가 성립하는 단위</b>만 추린 것임.</p>
-    <div class="lead-3">
-      <span>셀 제조 5대 공정 기준</span>
-      <span>범용 요소기술 · 사내 노하우 제외</span>
-      <span>1개 기술 ≒ 자사 특허 <b id="deckAvg">659</b>건</span>
-    </div>
-  </div>
+
 </header>
 
 <nav class="tabs" role="tablist">
@@ -879,7 +903,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   <div class="pane">
     <div class="pane-h"><h2>기술 상세<small>기술 개요 · 전략적 중요성 · 판정 근거</small></h2>
       <div class="ctrl"><button class="btn ghost" id="prevBtn">◀ 이전</button><button class="btn ghost" id="nextBtn">다음 ▶</button></div></div>
-    <div id="detail" class="det"></div>
+    <div id="detail" class="det" hidden></div>
   </div>
 </section>
 
@@ -1353,17 +1377,17 @@ function statusCell(full,st,self,it){
   const n  = J ? J.total
                : ((it.cnt && it.cnt[full]!=null) ? it.cnt[full]
                                                  : it.ev.filter(e=>e.w===full).length);
-  const sub = J ? `특허 ${korNum(J.patent)} · 보조 ${korNum(J.capex + J.paper)}` : "";
+  // 앞에 세우는 값은 '핵심 특허'다. 전체 건수는 뒤에 괄호로 둔다.
+  const sub = J ? `핵심 ${korNum(J.core||0)} / 발명 ${korNum(J.families||0)}건` : "";
   const shown = (it.shown && it.shown[full] && it.shown[full].total) || 0;
   let note="";
   if(n===0){
     note = "판정 0건";
-  }else if(self){
-    note = `판정 ${korNum(n)}건<br><span class="gr2">${sub}</span>`;
   }else{
-    const g=gradeOf(it,full);
-    note = `${g?GRADE[g].l+" · ":""}판정 ${korNum(n)}건`
-         + `<br><span class="gr2">${sub}${g?` · TRL ${it.trl||"–"}`:""}</span>`;
+    const g = self ? "" : gradeOf(it,full);
+    note = `<b>핵심 특허 ${korNum((J&&J.core)||0)}</b>`
+         + `<br><span class="gr2">발명 ${korNum((J&&J.families)||0)} · 근거 ${korNum(n)}건`
+         + `${g?` · 등급 ${GRADE[g].l}`:""}</span>`;
   }
   const tip = n ? `${co} — 판정 ${n}건 중 화면 표시 ${shown}건. 클릭 시 목록 조회`
                 : `${co} — 판정 근거 0건`;
@@ -1490,9 +1514,9 @@ function verdictSteps(it){
   const own = OWN_STEP[it.own] || OWN_STEP.none;
   const rv  = visibleRivals(it);
   const J   = it.judged || {};
-  const mine = (J.LGES && J.LGES.patent) || 0;
+  const mine = (J.LGES && J.LGES.core) || 0;
   let topCo = "", topN = 0;
-  RIVALS.forEach(r=>{ const n=(J[r]&&J[r].patent)||0; if(n>topN){topN=n; topCo=r;} });
+  RIVALS.forEach(r=>{ const n=(J[r]&&J[r].core)||0; if(n>topN){topN=n; topCo=r;} });
   const cls = it.pos ? (it.pos.tech_name || it.pos.display) : "—";
 
   const step = (no, q, a, tone, note) =>
@@ -1507,18 +1531,19 @@ function verdictSteps(it){
   const REC = {have:"전 라인 적용", part:"일부 적용", none:"미적용", unknown:"미기록"};
   const flag = odd
     ? `<div class="vs-flag"><b>사내 기록 갱신 필요</b> — 기록 '${REC[it.ownRec]||it.ownRec}'
-        / 근거 판정 '${(OWN_STEP[it.own]||[""])[0]}'. 자사 특허 <b>${korNum(mine)}건</b> 확인분
-        반영 결과임.</div>`
+        / 근거 판정 '${(OWN_STEP[it.own]||[""])[0]}'. 자사 핵심 특허
+        <b>${korNum(mine)}건</b> 반영 결과임.</div>`
     : (mine || topN
-       ? `<div class="vs-note">특허 — 자사 <b>${korNum(mine)}건</b> ·
-          최다 경쟁사 ${SHORT[topCo]||"—"} <b>${korNum(topN)}건</b></div>`
+       ? `<div class="vs-note">핵심 특허 — 자사 <b>${korNum(mine)}건</b> ·
+          최다 경쟁사 ${SHORT[topCo]||"—"} <b>${korNum(topN)}건</b>
+          <span class="vs-sub">다국 출원 · 등록 · 피인용 중 1개 이상 충족분</span></div>`
        : "");
 
   // 경쟁사는 '보유'뿐 아니라 '일부 보유'도 확보한 것이다. 둘 다 센다.
   const rvAll = RIVALS.filter(r=>activeRivals.has(r)
                  && ((it.r||[]).includes(r) || (it.p||[]).includes(r)));
-  return `<div class="step-h"><span class="stn">1</span>기술 판정 이유
-      <span class="sth-d">2단계 확인 결과</span></div>
+  return `<div class="step-h"><span class="stn">1</span>판정 근거
+      <span class="sth-d">2단계 확인</span></div>
     <div class="vsteps">
       ${step(1, "자사 보유", own[0], own[1], esc(it.selfBasis||"수집 근거 기준"))}
       ${step(2, "경쟁사 보유",
@@ -1556,7 +1581,7 @@ function renderDetail(){
   <div class="detact"><button class="btn ghost" id="searchThis">이 기술로 특허 검색 ↓</button></div>
 
   <div class="explain">
-    <div class="lbl">기술 개요</div>
+    <div class="lbl">개요</div>
     <p>${esc(it.d)}</p>
     ${it.w?`<div class="why"><b>전략적 중요성 —</b> ${esc(it.w)}</div>`:""}
   </div>
@@ -1575,9 +1600,9 @@ function renderDetail(){
 
   ${verdictSteps(it)}
 
-  <div class="step-h"><span class="stn">2</span>이 판정의 근거는 무엇인가
-    <span class="sth-d">회사별 근거 — 칸을 누르면 특허 목록이 열림</span></div>
-  <div class="sec-t">회사별 근거 현황</div>
+  <div class="step-h"><span class="stn">2</span>회사별 보유 현황
+    <span class="sth-d">칸 클릭 시 특허 목록</span></div>
+  <div class="sec-t">회사별 근거 현황<span>핵심 특허 = 다국 출원 · 등록 · 피인용 중 1개 이상</span></div>
   <div class="matrix">${statusCell("LGES",it.own,true,it)}
     ${RIVALS.map(r=>statusCell(r,it.r.includes(r)?"have":it.p.includes(r)?"part":"none",false,it)).join("")}</div>
 
@@ -1597,8 +1622,8 @@ function renderDetail(){
   ${topSourceBanner(it)}${keepFold("lineage", lineage(it))}
   <div class="onemore"><button class="morebtn" data-foldopen="lineage">출처별 전체 보기 ↗</button></div>
 
-  <div class="step-h"><span class="stn">3</span>근거를 직접 확인한다
-    <span class="sth-d">원문 링크로 출처까지 역추적 가능함</span></div>
+  <div class="step-h"><span class="stn">3</span>근거 원문
+    <span class="sth-d">출처 직접 확인</span></div>
   <div class="sec-t">근거 원문<span class="cnt">${it.ev.length}건</span></div>
   ${fold("evidence", it.ev.length?it.ev.map(e=>`<div class="ev">
       <span class="gbadge" style="background:${GRADE[e.g].c}">${GRADE[e.g].l}</span>
@@ -1614,7 +1639,7 @@ function renderDetail(){
     <span>상단 매트릭스 <b>LGES</b> 칸 클릭 시 해당 특허 목록 조회 가능함.</span>
   </div>`:""}
 
-  <div class="sec-t">판정 한계 및 유의사항</div>
+  <div class="sec-t">판정 한계</div>
   <div class="limits">
     <ul>
       ${it.rel?`<li><b>관련 가능성 근거 ${it.rel.toLocaleString()}건 판정 제외함.</b>
@@ -1745,12 +1770,41 @@ function shadeLegend(what){
   return '<div class="shleg"><b>'+esc(what)+'</b> 낮음 <span class="bar">'+bars+'</span> 높음'
        + ' — 음영 진할수록 자사 대응 우선순위 높음</div>';
 }
+/* 전체화면 상세 위에서 '?'나 '전체 보기'를 누르면, 상세가 닫히고 팝업만
+   남아 맥락이 끊겼다. 상세는 그대로 두고 그 위에 두 번째 판을 얹는다. */
 function modalOpen(title, html, full){
+  const m = $("#modal");
+  if(m.classList.contains("full") && !full){ return modal2Open(title, html); }
   $("#modalTitle").textContent = title;
   $("#modalBody").innerHTML = html;
-  // 기술 상세는 전체화면으로 연다. 좁은 상자에 담으면 단계가 끊겨 읽힌다.
-  $("#modal").classList.toggle("full", !!full);
-  $("#modal").classList.add("on");
+  m.classList.toggle("full", !!full);
+  m.classList.add("on");
+}
+function modal2Open(title, html){
+  let m2 = document.getElementById("modal2");
+  if(!m2){
+    m2 = document.createElement("div");
+    m2.id = "modal2";
+    m2.className = "modal";
+    m2.innerHTML = `<div class="modal-box"><div class="modal-head">
+        <h4 id="modal2Title"></h4><button class="modal-x" id="modal2X">✕</button></div>
+      <div class="modal-body" id="modal2Body"></div></div>`;
+    document.body.appendChild(m2);
+    m2.addEventListener("click", e => { if(e.target === m2) modal2Close(); });
+    m2.querySelector("#modal2X").onclick = modal2Close;
+  }
+  m2.querySelector("#modal2Title").textContent = title;
+  m2.querySelector("#modal2Body").innerHTML = html;
+  m2.classList.add("on");
+}
+document.addEventListener("keydown", e => {
+  if(e.key !== "Escape") return;
+  const m2 = document.getElementById("modal2");
+  if(m2 && m2.classList.contains("on")){ e.stopPropagation(); modal2Close(); }
+}, true);
+function modal2Close(){
+  const m2 = document.getElementById("modal2");
+  if(m2) m2.classList.remove("on");
 }
 function modalClose(){ $("#modal").classList.remove("on"); }
 
