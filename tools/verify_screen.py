@@ -36,7 +36,7 @@ with sync_playwright() as pw:
     ck("'따라잡는' 없음", "따라잡" not in body)
     ck("'기술 격차' 있음", "기술 격차" in body)
     ck("'최우선 검토 기술'", "최우선 검토 기술" in body)
-    ck("'자사 수준' (위치 아님)", "자사 수준" in body)
+    ck("'자사 위치' 표현 미사용", "자사 위치" not in body and "우리 위치" not in body)
     ck("'일부 확보' 없음", "일부 확보" not in body)
 
     print("-- KPI --")
@@ -191,10 +191,10 @@ with sync_playwright() as pw:
     ck("제목·머리글에 --muted 미사용", not grey, "; ".join(grey))
 
     print("-- V6 포트폴리오 범위 설명(57개인 이유) --")
-    ck("범위 설명 블록", pg.locator(".scope-note").count() == 1)
-    sn = pg.locator(".scope-note").inner_text()
+    ck("범위 설명 블록(헤더로 이동)", pg.locator(".scope-head").count() == 1)
+    sn = pg.locator(".scope-head").inner_text()
     ck("'전량이 아님' 명시", "전량이 아닌" in sn, sn[:46].replace("\n", " "))
-    for k in ("선정 기준", "제외 대상", "집계 단위"):
+    for k in ("선정", "제외", "집계"):
         ck(f"{k} 제시", k in sn)
     # 수치는 재수집 때마다 바뀐다. 값이 아니라 '제시하고 있는지'를 본다.
     import re as _re2
@@ -203,9 +203,21 @@ with sync_playwright() as pw:
        (_re2.search(r"평균[^.]{0,20}", sn) or [""])[0])
 
     print("-- V6 총계 정합: 상단 KPI 가 전량을 센다 --")
-    ksum = " ".join(pg.locator(".kpi-sum").inner_text().split())
-    ck("합계 줄 존재", bool(ksum), ksum[:70])
-    ck("합계 불일치 표시 없음", "불일치" not in ksum, ksum[:70])
+    sh = " ".join(pg.locator(".scope-head").inner_text().split())
+    ck("헤더에 '73개가 무엇인가' 설명", "경쟁 판별 단위 기술" in sh, sh[:60])
+    for k in ("선정", "제외", "집계"):
+        ck(f"헤더 범위 '{k}' 항목", k in sh)
+    ck("헤더 기술 수 = 데이터",
+       pg.evaluate("()=>+document.querySelector('#deckN').textContent") == n_all)
+    ck("포트폴리오 안내 기술 수 = 데이터",
+       pg.evaluate("()=>+document.querySelector('#pipeN').textContent") == n_all)
+    ck("부제는 한 줄만", pg.locator(".deck > span").count() == 1,
+       str(pg.locator(".deck > span").count()))
+    ck("중복 범위 설명 제거", pg.locator(".scope-note").count() == 0)
+    ck("요약 제목 = 기술 구분 기준",
+       "기술 구분 기준" in pg.locator(".sumpane-h").nth(1).inner_text())
+    ck("TRL 이 눌러 보이는 줄", pg.locator(".trlbar").count() == 1)
+    ck("TRL 줄에 유도 문구", "산정 기준 보기" in pg.locator(".trlbar").inner_text())
     kn = pg.evaluate("""() => {
       const v=[...document.querySelectorAll('.kpi .v')].map(e=>+e.textContent);
       return {tiles:v.length, five:v.slice(0,5).reduce((a,b)=>a+b,0)};
@@ -215,15 +227,20 @@ with sync_playwright() as pw:
     ck("부제 기술 수도 데이터 기준",
        pg.evaluate("()=>+document.querySelector('#deckN').textContent") == n_all)
     # 문장 안에 넣은 숫자 span 이 블록이 되면 '배터리 공정기술 / 73 / 개 전량'으로 끊긴다.
-    ck("부제 숫자는 문장 안에 인라인",
-       pg.evaluate("()=>getComputedStyle(document.querySelector('#deckN')).display")
-       == "inline")
+    # 숫자는 이제 문장 안이 아니라 헤더의 독립 지표다. 한 줄로 붙어 나오는지만 본다.
+    ck("헤더 기술 수가 한 줄로 표기",
+       pg.evaluate("""() => {
+         const e=document.querySelector('.scope-head .sh-n');
+         // baseline 정렬이라 top 은 서로 다르다. 줄바꿈이 없었는지(넘침 없음)를 본다.
+         return e.scrollHeight <= e.clientHeight + 1
+                && e.scrollWidth <= e.clientWidth + 1;
+       }"""))
     dl = pg.evaluate("""() => {
       const el=[...document.querySelectorAll('.deck > span')];
       const lh=parseFloat(getComputedStyle(el[0]).lineHeight);
       return el.map(e=>Math.round(e.clientHeight/lh));
     }""")
-    ck("부제 각 문장 한 줄(1200px 이상)", all(x == 1 for x in dl), str(dl))
+    ck("부제 한 줄 유지", dl == [1], str(dl))
 
     print("-- V6 숫자 정합: 칸 · 팝업 · 판정 결과가 같은 값을 말한다 --")
     # 예전에는 한 칸에 '근거 840건'(판정)과 '특허 9'(사내 기록값)가 나란히 찍히고

@@ -42,6 +42,21 @@ h1 .en{display:block;font-family:var(--mono);font-size:13px;font-weight:500;lett
 /* 문장 단위 줄바꿈은 '직계' span 에만 건다. 후손 전체에 걸면 문장 안에 넣은
    숫자 span(#deckN)까지 블록이 되어 '배터리 공정기술 / 73 / 개 전량'으로 끊긴다. */
 .deck > span{display:block}
+/* 73개가 무엇인지 처음 화면에서 바로 답한다. 포트폴리오까지 내려가야 알 수 있으면 늦다. */
+.scope-head{flex:1 0 100%;display:flex;align-items:stretch;gap:0;margin-top:12px;
+  border:1px solid var(--rule);background:var(--panel)}
+.scope-head .sh-n{flex:0 0 auto;display:flex;align-items:baseline;justify-content:center;
+  gap:2px;padding:12px 18px;background:var(--graphite);color:#fff}
+.scope-head .sh-n b{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.03em}
+.scope-head .sh-n em{font-style:normal;font-size:13px}
+.scope-head .sh-b{padding:10px 16px;min-width:0}
+.scope-head .sh-t{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.45}
+.scope-head .sh-l{display:flex;flex-wrap:wrap;gap:4px 20px;margin-top:6px}
+.scope-head .sh-l span{font-size:13px;color:var(--ink2);line-height:1.5}
+.scope-head .sh-l b{color:var(--ink);font-family:var(--mono);font-size:12px;
+  letter-spacing:.04em;margin-right:4px}
+@media (max-width:820px){.scope-head{flex-direction:column}
+  .scope-head .sh-n{justify-content:flex-start}}
 .deck b{color:var(--ink)}
 @media (min-width:1200px){.deck > span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 .sources{display:flex;border:1px solid var(--rule);background:var(--panel);flex-wrap:wrap}
@@ -648,6 +663,17 @@ input[type=search]{border:1px solid var(--rule);background:#fff;padding:6px 10px
 .trlhint{font-size:13.5px;color:var(--ink2);background:#FAFBFB;border-top:1px solid var(--rule-soft);
   border-bottom:1px solid var(--rule-soft);padding:8px 15px;line-height:1.6}
 .trlhint b{color:var(--ink)}
+/* TRL 설명은 찾아서 눌러야 하는 물음표가 아니라, 눌러 달라고 보이는 줄이어야 한다. */
+.trlbar{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:10px 15px;background:#F2F4F5;border:0;border-top:1px solid var(--rule-soft);
+  border-bottom:1px solid var(--rule-soft);cursor:pointer;font:inherit}
+.trlbar:hover{background:#E9EDEF}
+.trlbar .tb-k{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.08em;
+  background:var(--graphite);color:#fff;padding:3px 8px;flex:0 0 auto}
+.trlbar .tb-d{font-size:13.5px;color:var(--ink2);line-height:1.45;min-width:0}
+.trlbar .tb-a{margin-left:auto;font-size:13px;font-weight:700;color:var(--ink);
+  white-space:nowrap;border-bottom:1px solid var(--ink)}
+@media (max-width:900px){.trlbar{flex-wrap:wrap}.trlbar .tb-a{margin-left:0}}
 #detail .trlhint{border:1px solid var(--rule-soft);padding:8px 12px;margin:16px 0 0}
 
 /* -- 기술 구분 배지 -- */
@@ -718,10 +744,18 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   </div>
   <p class="deck">
     <span><b>특허를 핵심 기준</b>으로 경쟁사 기술 수준을 판정하고, 설비투자 공시·기술발표를 보조 근거로 교차 검증함.</span>
-    <span><b>배터리 공정기술 <span id="deckN">57</span>개 전량</b>에 대한 자사 수준을 <b class="g-behind">열위</b>·<b class="g-even">동등</b>·<b class="g-ahead">우위</b>로 구분하여 보완 우선순위를 도출함.</span>
-    <span>경쟁사의 실제 수율·원가는 확보 불가하므로, <b>겉으로 드러나는 3가지</b> — 특허·설비투자 공시·기술발표 — 로 격차를 대신 추정함.</span>
-    <span>경쟁사 발표를 <b>그대로 믿은 값</b>과 <b>과장을 걷어낸 값</b>을 함께 제시하여, 판정이 흔들릴 수 있는 폭을 숨기지 않고 표기함.</span>
   </p>
+  <div class="scope-head">
+    <div class="sh-n"><b id="deckN">73</b><em>개</em></div>
+    <div class="sh-b">
+      <div class="sh-t">이 <b id="deckN2">73</b>개는 자사 보유 기술의 전량이 아닌 <b>경쟁 판별 단위 기술</b>임</div>
+      <div class="sh-l">
+        <span><b>선정</b> 셀 제조 5대 공정에서 경쟁사와 수준 비교가 성립하는 단위</span>
+        <span><b>제외</b> 범용 요소기술 · 설비 운전조건 · 재료·셀 설계 등 공정 외 영역</span>
+        <span><b>집계</b> 1개 기술 = 자사 특허 평균 <b id="deckAvg">845</b>건을 포괄하는 상위 단위</span>
+      </div>
+    </div>
+  </div>
 </header>
 
 <nav class="tabs" role="tablist">
@@ -750,8 +784,12 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
       <div id="coTable"></div>
     </div>
     <div class="sumpane">
-      <div class="sumpane-h">경쟁사 대비 자사 수준<button class="whybtn" data-why="class" title="기술 구분 기준">?</button><small>Level</small></div>
-      <div class="trlhint">수준 비교 기준은 <b>TRL</b>(기술 성숙도 1~9단계)임. 9=양산 적용 · 7=파일럿 가동 · 4=출원 단계.<button class="whybtn" data-why="trl" title="TRL 이 무엇이고 어떻게 정했는가">?</button></div>
+      <div class="sumpane-h">기술 구분 기준<button class="whybtn" data-why="class" title="기술 구분 기준">?</button><small>Level</small></div>
+      <button class="trlbar" data-why="trl">
+        <span class="tb-k">TRL</span>
+        <span class="tb-d">수준 비교 기준 — 기술 성숙도 1~9단계. 9=양산 적용 · 7=파일럿 가동 · 4=출원 단계</span>
+        <span class="tb-a">산정 기준 보기 →</span>
+      </button>
       <div id="posList"></div>
     </div>
   </div>
@@ -768,23 +806,9 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-fa
       <input type="search" id="q" placeholder="기술 검색" aria-label="기술 검색">
     </div>
   </div>
-  <div class="pipe-guide">전 공정 <b>57개 기술 전량</b>을 공정 순서로 배치하고, 경쟁사 대비
+  <div class="pipe-guide">전 공정 <b><span id="pipeN">73</span>개 기술 전량</b>을 공정 순서로 배치하고, 경쟁사 대비
     <b class="g-behind">열위</b> · <b class="g-even">동등</b> · <b class="g-ahead">우위</b>로 구분함.
     구간 내 정렬은 시급도 내림차순이며, 상단부터 보완 우선순위에 해당함.</div>
-  <div class="scope-note">
-    <div class="sn-h">본 57개는 자사 보유 기술의 전량이 아닌 <b>경쟁 판별 단위 기술</b>임</div>
-    <ol class="sn-l">
-      <li><b>선정 기준</b> — 셀 제조 5대 공정(전극·조립·활성화·Pack·인프라)에서
-        <b>경쟁사와 수준 비교가 성립하는 단위</b>로 한정함. 자사 등록·출원 특허
-        48,138건 및 사내 공정 표준의 상위 분류 단위에 해당함.</li>
-      <li><b>제외 대상</b> — 전 사가 동일 수준으로 보유한 범용 요소기술, 개별 설비
-        운전조건·레시피 등 사내 노하우 영역, 재료·셀 설계 등 공정 외 영역은
-        비교 판별 실익이 낮아 제외함.</li>
-      <li><b>집계 단위</b> — 1개 기술은 평균 <b>845여 건</b>의 자사 특허를 포괄하는
-        상위 단위임. 기술 수는 자사 기술 자산의 규모가 아닌 <b>의사결정 단위의 수</b>를
-        의미함.</li>
-    </ol>
-  </div>
   <div class="pipe-wrap"><div class="pipe" id="pipe"></div></div>
 </section>
 
@@ -1135,11 +1159,16 @@ function renderKpis(){
    {l:"근거 부족",v:none,c:"k-none",s:"자사 현황 확인 · 경쟁사 근거 미확보"},
    {l:"경쟁사 범위",v:RIVALS.length,c:"k-plain",s:RIVALS.map(r=>SHORT[r]).join(" · ")}
   ].map(k=>`<div class="kpi ${k.c}"><div class="eyebrow">${k.l}</div><div class="v">${k.v}</div><div class="sub">${esc(k.s)}</div></div>`).join("")
-  + `<div class="kpi-sum${sum===total?"":" bad"}">전 <b>${total}개</b> 기술 = 열위 ${behind}
-     + 동등 ${eq} + 우위 ${ahead} + 확인 필요 ${hold} + 근거 부족 ${none}
-     ${sum===total?"":` <b>(합계 ${sum} — 불일치)</b>`}</div>`;
+  ;
+
   // 부제의 기술 수도 데이터에서 채운다. 박아 두면 분류체계가 늘 때마다 거짓말이 된다.
-  const dn=$("#deckN"); if(dn) dn.textContent=total;
+  [["#deckN",total],["#deckN2",total],["#pipeN",total]].forEach(([sel,v])=>{
+    const el=$(sel); if(el) el.textContent=v; });
+  const av=$("#deckAvg");
+  if(av && BY_COMPANY){
+    const lg=(BY_COMPANY||[]).find(x=>x.company==="LGES");
+    if(lg && total) av.textContent=korNum(Math.round(lg.patent/total));
+  }
 }
 /* ============ 공정 파이프라인 (V2) =====================================
    기존 renderRail(추상 셀 맵) + renderTree(폴더 트리)를 하나로 합친 것.
@@ -1851,6 +1880,11 @@ const CO_LABEL = {"CATL":"CATL","BYD":"BYD","SAMSUNG SDI":"삼성SDI","SK ON":"S
 const POS_CLASS = {"behind":"pb-behind","even":"pb-even","ahead":"pb-ahead",
                    "hold":"pb-hold","none":"pb-none"};
 
+function wireTrlBar(){
+  document.querySelectorAll(".trlbar[data-why]").forEach(b=>{
+    b.onclick = e => { e.stopPropagation(); openCriteria(b.dataset.why); };
+  });
+}
 function renderSummary(){
   if(!$("#coTable")) return;
   const rows = (BY_COMPANY||[]).slice();
@@ -1918,7 +1952,7 @@ function renderSummary(){
 }
 
 function select(id){sel=SEQ.find(i=>i.id===id)||sel;renderPipeline();renderDetail();}
-function renderAll(){renderSources();renderKpis();renderSummary();renderPipeline();renderDetail();renderTable();renderRivalSel();renderSourceStatus();}
+function renderAll(){renderSources();renderKpis();renderSummary();wireTrlBar();renderPipeline();renderDetail();renderTable();renderRivalSel();renderSourceStatus();}
 wireModal();
 
 $("#q").oninput=e=>{query=e.target.value;renderPipeline();};
